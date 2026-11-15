@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Synthetic offline tests for reference-link integrity checker."""
+
 import tempfile
 import unittest
 from pathlib import Path
 from audit_reference_links import audit, markdown_urls
+
 
 class ReferenceLinksTests(unittest.TestCase):
     def setUp(self):
@@ -15,7 +17,9 @@ class ReferenceLinksTests(unittest.TestCase):
         (self.root / "category" / "README.md").write_text("Ready")
 
     def test_valid_local_and_remote(self):
-        (self.root / "README.md").write_text("[Doc](category/README.md) ![SVG](category/preview.svg) [Apple](https://developer.apple.com/design/resources/)")
+        (self.root / "README.md").write_text(
+            "[Doc](category/README.md) ![SVG](category/preview.svg) [Apple](https://developer.apple.com/design/resources/)"
+        )
         counts, errors = audit(self.root)
         self.assertEqual(errors, [])
         self.assertEqual(counts.local, 2)
@@ -29,13 +33,17 @@ class ReferenceLinksTests(unittest.TestCase):
 
     def test_encoded_space_and_query(self):
         (self.root / "file name.md").write_text("okay")
-        (self.root / "README.md").write_text("[target](file%20name.md?x=1#heading) [anchor](#heading)")
+        (self.root / "README.md").write_text(
+            "[target](file%20name.md?x=1#heading) [anchor](#heading)"
+        )
         counts, errors = audit(self.root)
         self.assertFalse(errors)
         self.assertEqual(counts.local, 1)
 
     def test_html_assets(self):
-        (self.root / "gallery.html").write_text('<img src="category/preview.svg"><a href="category/README.md">Open</a>')
+        (self.root / "gallery.html").write_text(
+            '<img src="category/preview.svg"><a href="category/README.md">Open</a>'
+        )
         counts, errors = audit(self.root)
         self.assertFalse(errors)
         self.assertEqual(counts.local, 2)
@@ -50,4 +58,6 @@ class ReferenceLinksTests(unittest.TestCase):
         self.assertFalse(errors)
         self.assertEqual(counts.outside_root, 1)
 
-if __name__ == "__main__": unittest.main()
+
+if __name__ == "__main__":
+    unittest.main()

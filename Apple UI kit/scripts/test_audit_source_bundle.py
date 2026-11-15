@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Offline synthetic fixtures for the structural Apple UI kit audit."""
+
 from __future__ import annotations
 
 import json
@@ -23,39 +24,51 @@ class AuditSourceBundleTests(unittest.TestCase):
             folder = self.root / f"{number:02d}-reference"
             folder.mkdir()
             (folder / "README.md").write_text("A source reference", encoding="utf-8")
-            (folder / "references.json").write_text(json.dumps({
-                "category_id": folder.name,
-                "kit_component_layers_inspected": False,
-                "reference_page": "https://developer.apple.com/design/resources/"
-            }), encoding="utf-8")
+            (folder / "references.json").write_text(
+                json.dumps(
+                    {
+                        "category_id": folder.name,
+                        "kit_component_layers_inspected": False,
+                        "reference_page": "https://developer.apple.com/design/resources/",
+                    }
+                ),
+                encoding="utf-8",
+            )
             (folder / "preview.svg").write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg"><desc>'
-                'NOT an Apple design kit export</desc></svg>', encoding="utf-8"
+                "NOT an Apple design kit export</desc></svg>",
+                encoding="utf-8",
             )
-        (self.root / "reference-manifest.json").write_text(json.dumps({
-            "meta": {
-                "official_design_kit_layers_inspected": False,
-                "archive_contains_licensed_apple_assets": False,
-                "category_folder_count": 13
+        (self.root / "reference-manifest.json").write_text(
+            json.dumps(
+                {
+                    "meta": {
+                        "official_design_kit_layers_inspected": False,
+                        "archive_contains_licensed_apple_assets": False,
+                        "category_folder_count": 13,
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        items = [
+            {
+                "id": f"AUI-{i:03d}",
+                "reference": {
+                    "actual_layer_inspected": False,
+                    "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+                },
+                "measurements": {"measured": False},
             }
-        }), encoding="utf-8")
-        items = [{
-            "id": f"AUI-{i:03d}",
-            "reference": {
-                "actual_layer_inspected": False,
-                "url": "https://developer.apple.com/design/human-interface-guidelines/materials"
-            },
-            "measurements": {"measured": False}
-        } for i in range(1, 68)]
+            for i in range(1, 68)
+        ]
         (self.root / "component-catalog.json").write_text(
             json.dumps({"total": 67, "components": items}), encoding="utf-8"
         )
         (self.root / "web-implementation/index.html").write_text(
             '<button id="menuBtn">Menu</button>', encoding="utf-8"
         )
-        (self.root / "web-implementation/app.js").write_text(
-            'el("menuBtn")', encoding="utf-8"
-        )
+        (self.root / "web-implementation/app.js").write_text('el("menuBtn")', encoding="utf-8")
 
     def test_valid_fixture_passes(self) -> None:
         self.assertEqual(audit(self.root), [])
@@ -77,7 +90,9 @@ class AuditSourceBundleTests(unittest.TestCase):
 
     def test_missing_category_svg_detected(self) -> None:
         (self.root / "01-reference/preview.svg").unlink()
-        self.assertTrue(any("missing 01-reference/preview.svg" in issue for issue in audit(self.root)))
+        self.assertTrue(
+            any("missing 01-reference/preview.svg" in issue for issue in audit(self.root))
+        )
 
 
 if __name__ == "__main__":
