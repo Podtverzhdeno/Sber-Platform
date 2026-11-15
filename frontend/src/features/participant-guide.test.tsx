@@ -36,6 +36,20 @@ describe("contextual participant guide", () => {
     expect(shouldAutomaticallySuggest({ ...prefs, autoDisabled: true }, "Задачи", now + GUIDE_COOLDOWN_MS, false)).toBe(false);
   });
 
+  it("keeps the approved minimal app free of automatic and floating hints, but retains help", () => {
+    vi.useFakeTimers();
+    render(<ParticipantGuide personId="silent-participant" section="Главная"
+      navigation={navigation} onNavigate={onNavigate}
+      autoSuggest={false} showFloatingTrigger={false} />);
+    expect(screen.queryByRole("button", { name: "Как здесь всё устроено?" })).not.toBeInTheDocument();
+    expect(document.querySelector(".participant-guide-trigger")).toBeNull();
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(screen.queryByRole("dialog", { name: /Добро пожаловать/ })).not.toBeInTheDocument();
+    expect(document.querySelector(".participant-guide-card")).toBeNull();
+    fireEvent(window, new Event("impulse:guide:library"));
+    expect(screen.getByRole("dialog", { name: "Центр помощи" })).toBeInTheDocument();
+  });
+
   it("opens a polished welcome screen and guided sidebar tour", () => {
     renderGuide();
     fireEvent.click(screen.getByRole("button", { name: "Как здесь всё устроено?" }));
