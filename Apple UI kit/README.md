@@ -1,64 +1,73 @@
-# Apple UI kit — source-backed UI reference library for Impulse
+# Apple UI kit — IMPULSE reference library
 
-> Checked 2026-11-15. Apple® is the source of the linked design references, **not** the author or sponsor of this repository. This folder is an original, independently maintained *web adaptation guide*, not an Apple-distributed kit.
+**Дата ревизии:** 2026-11-15  
+**Проект:** IMPULSE / Podtverzhdeno/Sber-Platform  
+**Статус:** verified source links + собственная техническая спецификация + web reference prototype. Не является официальным Apple UI Kit.
 
-## Purpose
+## Цель
 
-Make Apple design references **findable, measurable, and reproducible** in the React + TypeScript + Vite Impulse product without changing current routes, state, APIs, business semantics or six-role RBAC. All files under this directory are isolated reference/source material: importing them into the running app requires a separate integration task and review.
+Единая библиотека источников для точного воспроизведения *языка интерфейсов* Apple (iOS/iPadOS/macOS, Liquid Glass) в React/TypeScript-продукте IMPULSE. Источником истины служат официальные опубликованные Apple UI kits и Human Interface Guidelines. **Этот репозиторий не содержит экспортированные оригинальные Apple-компоненты, SF Symbols, изображения интерфейсов или файлы шрифтов:** лицензии Apple ограничивают их использование и распространение. Для визуальной сверки открывайте оригиналы по ссылкам из каталога.
 
-**Source hierarchy:** official downloadable Figma/Sketch UI kits → Apple Human Interface Guidelines → native implementation documentation → measured reference screenshot at a fixed viewport → this folder's web approximation. Never reverse that order or claim that a browser blur filter is Apple's actual rendering engine.
+## Быстрый старт
 
-## Visual-first: browse the references
+1. Откройте **01-sources/official-links.md** и исходные Apple Figma/Sketch UI kits (iOS/iPadOS 27, macOS 27).
+2. Сверьте **02-specifications/**: материал, цвета, типографика, структуры, компоненты, интеракции, состояния.
+3. Используйте **03-impulse/integration-map.md**, чтобы сопоставить каждый маршрут IMPULSE с паттерном Apple.
+4. Откройте локально **04-web-reference/casebook.html** (интерактивная галерея: nav, chat, forms, materials, dialog) и изучите **04-web-reference/impulse-apple-tokens.css**. Прежняя **reference-gallery.html** также сохранена.
+5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
+6. Пройдите **06-cases/README.md** для нужного сценария и выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
+7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
 
-- [**Visual gallery (local HTML)**](reference-gallery.html): 13 independently drawn SVG case studies + 5 remote Apple-hosted official thumbnails. Open the file from a checked-out repository to view the gallery.
-- [**Official Apple thumbnails (GitHub preview)**](OFFICIAL_VISUAL_GALLERY.md): actual preview imagery from Apple's iOS 27/macOS 27 kits and Messages/TipKit/Live Activities, linked to Apple servers, not redistributed.
-- [**13 categorized reference folders**](REFERENCE_GALLERY.md): per-case source and state checklist, web study SVG and machine-readable provenance.
-- [**Automatic consistency verifier**](scripts/verify_reference_pack.py): run `python "Apple UI kit/scripts/verify_reference_pack.py"` from the repository root.
+## Состав
 
-The Apple-hosted thumbnails are real Apple previews but **not editable layer measurements**; the local SVG boards are original illustrations, not screenshots of Apple's apps. Do not confuse them.
+| Путь | Содержание |
+|---|---|
+| 01-sources/official-links.md | Ссылки на оригиналы Apple, включая Figma, Sketch, HIG, видео, шрифты |
+| 01-sources/source-manifest.json | Машиночитаемый реестр прямых URL |
+| 01-sources/source-verification-20261115.md | Источник и степень подтверждения каждого Apple resource |
+| 02-specifications/liquid-glass.md | Material layers, regular/clear, правила эффекта и веб-ограничения |
+| 02-specifications/foundations.md | Семантика цвета, типографика, layout, motion, accessibility |
+| 02-specifications/component-catalog.md | Таблица элементов, состояний и Apple-референсов |
+| 02-specifications/patterns-and-states.md | App Shell, навигация, сообщения, таблицы, формы, уведомления |
+| 03-impulse/integration-map.md | Подробное сопоставление с фактическими модулями IMPULSE |
+| 03-impulse/visual-qa-checklist.md | Обязательные критерии качества визуального переноса |
+| 04-web-reference/ | Авторский CSS и автономная HTML-галерея без ассетов Apple |
+| 05-legal-and-sources/LICENSING.md | Разрешённые и запрещённые способы использования Apple-ассетов |
+| 06-cases/README.md | Каталог 12 реальных сценариев переноса, каждый в собственной папке |
+| 06-cases/VISUAL_GALLERY.md | 12 SVG-превью, отображаемых непосредственно в GitHub |
+| 06-cases/visual-gallery.html | **12 оригинальных SVG-референсов** в единой галерее |
+| 06-cases/visual-manifest.json | Источники, категории, статусы и ограничения для 12 SVG |
+| 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
+| 04-web-reference/verify-library.mjs | Проверка структуры, линковки, реальных путей IMPULSE и синтаксиса JavaScript без сети |
+| 04-web-reference/validate-svg-library.py | Строгая проверка XML, размеров, accessibility и источников 12 SVG |
+| 04-web-reference/compare-screenshots.py | Локальный pixel-overlay/MAE компаратор для **разрешённых** скриншотов |
 
-## Start here
+## Область применения и точность
 
-1. [Official source register](SOURCES.md): direct iOS/iPadOS 27, macOS 27, watchOS, visionOS design files and Apple component guidelines.
-2. [Provenance and license](PROVENANCE_AND_LICENSE.md): use the links to obtain originals under their licenses; *no proprietary font, SF Symbols export, Apple design archive or screenshot has been copied into this repo*.
-3. [Liquid Glass anatomy](LIQUID_GLASS.md): distinguish floating controls/navigation from standard content surfaces, light/dark and accessibility.
-4. [Component atlas](COMPONENT_ATLAS.md): controls, navigation, dialogs, tables, lists, messaging, forms, states and hierarchy.
-5. [Impulse mapping](IMPULSE_MAPPING.md): current frontend paths, role-specific screen families, migration boundaries.
-6. [Browser study sample](web-prototype/index.html): source-only, standalone interactive HTML/CSS/JS preview (no dependencies; **not** production app and not an Apple pixel reference).
-7. [Design token seed](design-tokens.json) and [component coverage matrix](component-coverage.csv): example values for web implementation, **not measured official Apple token values**.
-8. [Pixel-fidelity acceptance plan](PIXEL_PARITY_QA.md) and [integration handoff](AGENT_HANDOFF.md).
+- Цель «1 в 1» означает сверять **геометрию, иерархию, типографику, контраст, состояния, адаптивность и динамику** с конкретным оригинальным Apple-макетом, а не бездумно делать весь сайт полупрозрачным.
+- Веб-рендеринг CSS backdrop-filter **не воспроизводит нативный Liquid Glass оптически один в один**; для web используется помеченный как приближённый стиль. Нативные SwiftUI/UIKit/AppKit эффекты доступны только в экосистеме Apple.
+- Визуальные референсы **не интегрированы** напрямую в рабочий frontend. Этот раздел в `main` содержит документацию, исходные авторские примеры и инструменты QA; внедрение стилей выполняется отдельно.
+- Макеты Apple регулируются лицензией. Для коммерческого веб-сервиса IMPULSE используйте *самостоятельно реализованные* структуры и стили, а не экспортированные из фирменных UI kits файлы.
+- Не меняйте фирменный стиль/товарные знаки Apple на знаки IMPULSE и не создавайте впечатление, что сервис разработан/одобрен Apple.
 
-## What 1:1 means
+## Приоритет
 
-- For an **Apple source frame**, obtain and inspect the official editable kit, export the exact component variant/state at its design scale, measure all boxes/type/borders/shadows/colors and retain screenshot provenance. Verify in Figma/Sketch first.
-- For an **Impulse screen**, compare at the same viewport, device scale, font availability, theme, data fixtures and accessibility options. Attach before/after/overlay/diff images and interaction results.
-- Visual similarity does **not** imply identical behavior to UIKit, AppKit or SwiftUI; React/CSS cannot directly import the native Liquid Glass compositor, native navigation semantics or platform font/SF Symbol licenses.
-- The acceptance gate must cover **behavior and data** as well as pixels. Do not replace real API values, role restrictions, existing keyboard controls or accessibility with a static screenshot.
+**P0:** базовые слои, Sidebar, Topbar, Buttons, Inputs, Modal, Popover, Messages, light/dark.  
+**P1:** Tabs, Search, Menus, Tables, Cards, Loading, Toast, responsive.  
+**P2:** charts, advanced motion, keyboard/drag, sophisticated refraction.
 
-## Scope and existing integration
+**Главный источник:** https://developer.apple.com/design/resources/  
+**HIG:** https://developer.apple.com/design/human-interface-guidelines/  
+**Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
 
-Source repository: [Podtverzhdeno/Sber-Platform](https://github.com/Podtverzhdeno/Sber-Platform). Current Apple-inspired app CSS already exists at `frontend/src/app/apple-web-ui.scss`; related source and interface projects are in `openspec/changes/apple-web-design-system-20261114/` and `openspec/changes/impulse-apple-app-experience-20261114/`. Pixel reference in `docs/design/impulse-pixel-reference-20261114.md`. **Do not overwrite these or edit `frontend/src/App.tsx` without an exclusive integration claim.** Existing parallel agent scopes are active.
+## Интерактивный casebook (новый)
 
-The “reference preview” in this folder deliberately uses original generic labels and CSS primitives rather than redistributing Apple screenshots. The authoritative unmodified visual material remains at the links below. Figma pages may need Figma access; this environment did not inspect individual layers of the 27 kits.
+[Открыть casebook.html](04-web-reference/casebook.html) — в одной автономной web-странице показаны категории UI и реальные состояния. Отдельная [галерея 12 сценариев](06-cases/README.md) содержит конкретные правила для navigation, messaging, forms, dialogs, analytics, accessibility и других областей. Выделение в отдельные папки позволяет точечно переносить дизайн в IMPULSE без вмешательства в соседние подсистемы.
 
-## Completeness
+**Статус на 15 ноября 2026:** базовая библиотека (#182), визуальные референсы (#188) и исправление путей (#192) **объединены с `main`**. Другие параллельные библиотеки из PR #181/#183/#184/#186 требуют отдельного согласования. Здесь нет официальных Apple assets, только ссылки, самостоятельные спецификации и оригинальные примеры.
 
-Coverage includes foundations (color, material, layout, typography, symbols, motion, accessibility), navigation, controls, data display, overlays, messaging, authentication, native-platform variants and web adaption. It is an indexed *representative comprehensive set*—not a claim that every Apple component and every state has been exported, inspected or pixel-verified. Expand the matrix as official design files are inspected and measured.
+## 12 собственных визуальных референсов (новое)
 
+[Посмотреть 12 SVG прямо в GitHub](06-cases/VISUAL_GALLERY.md) · [Открыть HTML-галерею](06-cases/visual-gallery.html) · [Манифест 12 SVG](06-cases/visual-manifest.json) · [Каталог сценариев](06-cases/README.md).
 
-## Latest additions — functional reference lab and source catalog
-
-- [Web implementation lab](web-implementation/index.html): standalone original HTML/CSS/JS prototype (toolbar, collapsed role drawer, tabs, search, form validation, modal/popover, regular/clear glass, theme and demo data states). [Run/limitations](web-implementation/README.md) · [manual browser QA checklist](web-implementation/QA_CHECKLIST.md).
-- [67-component searchable study catalog](component-catalog.html) · [machine-readable JSON](component-catalog.json) · [instructions](COMPONENT_CATALOG_GUIDE.md). This is a curated capture backlog with HIG URLs, NOT inspected Apple Figma/Sketch frame IDs. It covers 13 categories.
-- [Frame capture record template](capture-record-template.json): record actual Apple design component variant, exact metrics and acceptance evidence after obtaining licensed assets.
-- [Pixel overlay/diff workflow](PIXEL_DIFF_WORKFLOW.md) · [Python helper](scripts/compare_reference_pixels.py) · [synthetic unit tests](scripts/test_compare_reference_pixels.py). Requires Pillow locally; no proprietary Apple images are downloaded or committed.
-- [Prioritized integration backlog](IMPLEMENTATION_BACKLOG.md) details what to measure and test for the first Impulse workstreams.
-- [Apple HIG behavior rules](HIG_BEHAVIOR_RULES.md): source-backed guardrails (tab bar vs toolbar, search layout, popovers, controls, materials).
-
-**Verification status:** structure/JS syntax/DOM wiring and catalog checks done via GitHub source; actual browser run and Pillow unit tests are pending, as are official editable frame measurements. Do not call this pixel-parity approved.
-
-## 2026 source updates and quality gate
-
-- [Current official Apple changes](CURRENT_OFFICIAL_UPDATES_2026.md): September 27-kit updates, November 6 Live Activities, October 28 macOS touch.
-- [macOS touch acceptance](11-motion-accessibility-responsive/MACOS_TOUCH_2026.md) and [new Live Activities](09-progress-feedback-states/LIVE_ACTIVITIES_2026.md) for six-role Impulse patterns.
-- [Offline reference source audit](SOURCE_QUALITY_GATE.md) checks structure, source provenance, component IDs and HTML/JS links without downloading Apple design assets. Run locally after checkout; the presence of a script is not a passed test.
+Это **наши векторные схемы 1600×900**, которые можно изучать/редактировать как SVG, но **они не являются скриншотами Apple и не дают гарантию совпадения 1:1**. Измерять настоящую геометрию необходимо по разрешённым оригинальным дизайн-файлам Apple (Figma/Sketch) на целевых состояниях. Если другие параллельные PR содержат альтернативные примеры, при слиянии сохраняйте каждую уникальную коллекцию и единственный согласованный README; [план согласования](07-integration/merge-handoff.md).

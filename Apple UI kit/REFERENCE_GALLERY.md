@@ -1,5 +1,8 @@
 # Organized Apple UI reference packets
 
+> [Введение в расширенную библиотеку Apple UI Kit](README_REFERENCE_LIBRARY.md) · [Общий README из main](README.md) · [Порядок согласования с основной коллекцией](07-integration/merge-handoff.md)
+
+
 > These are **original vector study previews** and source links, **not Apple Figma/Sketch screen exports**. True 1:1 pixel parity needs licensed source kit access, frame measurement, then exact compare. Apple screenshots are linked, not mirrored.
 
 Apple official source hub: https://developer.apple.com/design/resources/ .
