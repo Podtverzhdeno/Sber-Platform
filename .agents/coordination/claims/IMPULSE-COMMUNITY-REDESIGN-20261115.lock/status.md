@@ -13,6 +13,7 @@
   - frontend/src/features/participant-events.tsx (only local navigation and new CSS import)
   - frontend/src/features/collaboration.tsx (only participant-only local navigation)
   - frontend/e2e/participant-events.spec.ts (update first-fold visual expectations and Community tab E2E)
+  - frontend/e2e/messages-reference.spec.ts (update screenshot geometry acceptance for owner-requested local subsection navigation)
   - .agents/coordination/claims/IMPULSE-COMMUNITY-REDESIGN-20261115.lock/status.md
 - excluded:
   - frontend/src/App.tsx (Practice owner active)
@@ -23,5 +24,5 @@
   - events first fold Apple-like compact without hiding any functional content or evidence
   - new unit tests, typecheck, scoped ESLint/build, browser 320/390/1440 and original messages regression
   - merge to main only after verification; Railway source is main with automatic deployment
-- progress: CommunityNav, event calm visual skin, two route integrations committed on own branch; 5/5 focused Vitest passed; original banner E2E requires updated owner-approved first-fold expectations
+- progress: Events content-first UI and message compact tabs in branch; 8/8 Events E2E PASS; message mobile navigation PASS; dynamic old screenshot geometry needs reworked for new local tabs. No main merge yet.
 - blockers: independent screenshot visual review outstanding
