@@ -53,7 +53,7 @@ test("event catalog keeps cards and preserves filter/detail through URL, reload 
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
   await page.getByRole("button", { name: /Фильтры/ }).click();
   await page.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
-  await page.getByRole("button", { name: /Показать/ }).click();
+  await page.locator(".ev-v3-popover").getByRole("button", { name: /Показать/ }).click();
   await expect(page).not.toHaveURL(/view=/);
   await expect(page).toHaveURL(/focus=python/);
   await page.getByRole("button", { name: "Подробнее" }).focus(); await page.keyboard.press("Enter");
@@ -125,9 +125,9 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.screenshot({ path: "test-results/event-reference/about.png", animations: "disabled" });
   const bounds = await dialog.boundingBox();
   if (!bounds) throw new Error("Detail modal is missing");
-  const viewport = page.viewportSize();
-  if (!viewport) throw new Error("Missing browser viewport");
-  expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThan(4);
+  // Modal centers inside the scrollable document, excluding the scrollbar gutter.
+  const viewportClientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+  expect(Math.abs(bounds.x + bounds.width / 2 - viewportClientWidth / 2)).toBeLessThan(4);
   await page.setViewportSize({ width: 1667, height: 939 });
   const nav = dialog.getByRole("navigation", { name: "Разделы события" });
   await nav.getByRole("button", { name: "Программа" }).click();
