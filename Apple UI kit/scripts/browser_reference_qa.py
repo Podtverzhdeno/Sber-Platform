@@ -59,8 +59,13 @@ def exercise_desktop(page: object, out: Path | None) -> int:
     check(page.locator("#empty").is_visible(), "empty state not shown")
     page.locator('[data-state="error"]').click()
     check("Ошибка" in page.locator("#empty").inner_text(), "error state missing")
-    page.locator('[data-state="ready"]').click()
-    check(page.locator("#tasks li").count() == 3, "ready state not restored")
+    check(page.locator("#empty").get_attribute("role") == "alert", "error state must be announced urgently")
+    page.locator("#empty").get_by_role("button", name="Повторить пример").click()
+    check(page.locator("#tasks li").count() == 3, "error retry did not restore ready state")
+    page.locator("#search").fill("несуществующий-пример")
+    check(page.locator("#empty").get_by_role("button", name="Очистить поиск").is_visible(), "search clear recovery missing")
+    page.locator("#empty").get_by_role("button", name="Очистить поиск").click()
+    check(page.locator("#tasks li").count() == 3, "clear search did not restore rows")
     checks += 1
 
     page.locator('[data-glass-choice="clear"]').click()

@@ -23,7 +23,22 @@
     const matches=sample[role].filter(row=>row[0].toLocaleLowerCase("ru").includes(q));
     let visible=state==="ready"?matches:[];
     const empty=el("empty");empty.hidden=visible.length>0;
-    if(!visible.length){empty.textContent=state==="error"?"Ошибка загрузки (демо). Действия на сервере не выполнялись.":state==="empty"?"Пустой список (демо).":"Совпадений нет.";}
+    if(!visible.length){
+      const isError=state==="error", noResults=state==="ready"&&q.trim().length>0;
+      const message=isError?"Ошибка загрузки (демо). Действия на сервере не выполнялись.":state==="empty"?"Пустой список (демо).":"Совпадений нет.";
+      empty.replaceChildren();
+      empty.setAttribute("role",isError?"alert":"status");
+      const text=document.createElement("p");text.textContent=message;empty.append(text);
+      if(isError||noResults){
+        const action=document.createElement("button");action.className="btn";action.type="button";
+        action.textContent=isError?"Повторить пример":"Очистить поиск";
+        action.addEventListener("click",()=>{
+          if(isError)setState("ready");
+          else{el("search").value="";render();el("search").focus();}
+        });
+        empty.append(action);
+      }
+    }
     for(const [title,status] of visible){const li=document.createElement("li");const b=document.createElement("button");b.type="button";b.setAttribute("aria-label",title+" — "+status+", открыть");const copy=document.createElement("span");copy.textContent=title;const sub=document.createElement("small");sub.textContent="Синтетическая запись";copy.append(sub);const badge=document.createElement("em");badge.textContent=status;b.append(copy,badge);b.addEventListener("click",()=>{current=title;showDialog("Выбран пример: "+title+". Данные Impulse не изменены.");});li.append(b);list.append(li);}
   }
   function tab(next,focus=false){role=next;current=null;const selected=document.querySelector('[data-role="'+next+'"]');for(const b of document.querySelectorAll('[role="tab"]')){b.setAttribute("aria-selected",String(b===selected));b.tabIndex=b===selected?0:-1;}el("rolePanel").setAttribute("aria-labelledby",selected.id);if(focus)selected.focus();render();}
@@ -35,7 +50,12 @@
   el("themeBtn").addEventListener("click",()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==="dark"?"light":"dark";notify("Тема изменена в локальном примере");});
   el("search").addEventListener("input",render);
   document.querySelectorAll('[role="tab"]').forEach(b=>{b.addEventListener("click",()=>tab(b.dataset.role));b.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;e.preventDefault();const tabs=Array.from(document.querySelectorAll('[role="tab"]'));const index=tabs.indexOf(b);const next=e.key==="Home"?0:e.key==="End"?tabs.length-1:(index+(e.key==="ArrowRight"?1:tabs.length-1))%tabs.length;tab(tabs[next].dataset.role,true);});});
-  document.querySelectorAll("[data-state]").forEach(b=>b.addEventListener("click",()=>{state=b.dataset.state;document.querySelectorAll("[data-state]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));render();}));
+  function setState(next){
+    state=next;
+    document.querySelectorAll("[data-state]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.state===next)));
+    render();
+  }
+  document.querySelectorAll("[data-state]").forEach(b=>b.addEventListener("click",()=>setState(b.dataset.state)));
   document.querySelectorAll("[data-glass-choice]").forEach(b=>b.addEventListener("click",()=>{el("glassExample").dataset.glass=b.dataset.glassChoice;document.querySelectorAll("[data-glass-choice]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));}));
   el("newBtn").addEventListener("click",()=>showDialog("Создание демо-примера. Это не новая задача в Impulse."));el("glassBtn").addEventListener("click",()=>showDialog("Проверяйте контраст на насыщенном фоне."));
   el("inspectBtn").addEventListener("click",()=>showDialog(current?"Выбрана запись: "+current:"Сначала выберите задачу из списка."));
