@@ -82,7 +82,8 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(screen.getByTestId("achievement-card").first().locator(".ach-gallery-star")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   await page.goto(`/workspace/${String(actor.navigation.indexOf("Главная"))}`);
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const columns = await screen.locator(".ach-gallery-grid").evaluate(element =>
     getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean).length);
@@ -144,7 +145,8 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   // The global sidebar is intentionally hidden on mobile; the authorized route remains directly reachable.
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(0);
