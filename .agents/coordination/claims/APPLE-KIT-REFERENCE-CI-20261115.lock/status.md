@@ -2,7 +2,7 @@
 
 - task_id: APPLE-KIT-REFERENCE-CI-20261115
 - session_id: gpt6-owner-apple-reference-ci-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T18:23:00+03:00
 - heartbeat_at: 2026-11-15T18:23:00+03:00
 - base_ref: docs/apple-official-source-explorer-20261115
@@ -19,5 +19,11 @@
   - static Node verification of 26 scenario packs / 36 SVGs and 46 source targets
   - real Chromium e2e for local pixel diff and interactive source atlas, with screenshot artifact upload
 - status_note: scope is new workflow file; prior Apple kit claims REVIEW, so no edits to their paths
-- progress: claim created; new workflow pending
+- progress: created .github/workflows/apple-ui-reference-qa.yml, integrated Node 24/Chromium source inventory and screenshot checks, two artifact uploads, read-only permissions
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/196 (draft, targets docs/apple-official-source-explorer-20261115)
+- validation: GitHub compare showed precisely two new paths (this claim + workflow), static workflow semantics/permissions/required steps checked
+- ci: first workflow parser run 43734744836 failed before jobs due runner.temp in job-level env; fixed by moving to step env and upload step path in commit c64cd6da; GitHub recognized named workflow and queued run 43734987166
+- verification_limit: actual Node and Chromium tests have not completed on a runner; code should not be presented as CI-passing or Apple-1:1 validated
+- handoff: independent reviewer should inspect screenshots and test results on exact head SHA after queued GitHub Actions complete; source Figma/Sketch measurement, visual parity and legal licensing remain separate checks
+- merge_policy: no main merge or Railway deploy; wait for stacked parent PRs and independent review
 - blockers: GitHub runners may be queued; do not claim CI passed before actual run results
