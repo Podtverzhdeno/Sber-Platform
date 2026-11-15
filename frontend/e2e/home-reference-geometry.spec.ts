@@ -1,320 +1,95 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { overviewFixture } from "../src/features/participant-home-v2/fixture";
+import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
-const actor = {
-  person_id: "00000000-0000-0000-0000-000000000001",
-  display_name: "Алекс Речной",
-  active_role: "participant",
-  assigned_roles: ["participant"],
-  scopes: [],
-  consent_scopes: [],
-  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио"],
-  csrf_token: "reference-geometry",
-};
-
-async function openReferenceHome(page: Page, courseHero = false) {
-  let loggedIn = false;
-  await page.route("**/api/v1/config", (route) =>
-    route.fulfill({ json: { demo_mode: true } }),
-  );
-  await page.route("**/api/v1/auth/personas", (route) =>
-    route.fulfill({
-      json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }],
-    }),
-  );
-  await page.route("**/api/v1/me", (route) =>
-    loggedIn
-      ? route.fulfill({ json: actor })
-      : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }),
-  );
-  await page.route("**/api/v1/auth/demo-login", (route) => {
-    loggedIn = true;
-    return route.fulfill({ json: actor });
+/**
+ * 2026-11-15 reference migration.
+ *
+ * The superseded ZIP/card layout and its .home-v2-* coordinates no longer
+ * represent the approved main route. The first fold is now the source-backed
+ * Impulse Pixel HTML reference, mounted by OwnerPixelHome. Do not accidentally
+ * make the old page primary again to satisfy an obsolete screenshot test.
+ */
+async function openApprovedHome(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    localStorage.setItem("impulse-visual-mode", "blue");
+    localStorage.setItem("impulse-theme", "dark");
   });
-  await page.route("**/api/v1/participant/me/development-overview", (route) =>
-    route.fulfill({ json: courseHero ? { ...overviewFixture, active_tasks: [] } : overviewFixture }),
-  );
-  await page.route("**/api/v1/me/talent-passport", (route) =>
-    route.fulfill({ json: { verified_courses: [], cases: [], skills: [] } }),
-  );
+  await installBootcampReferenceApi(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/0");
-  await expect(page.locator(".home-v2-hero")).toBeVisible();
+  await expect(page.getByTestId("pixel-live-shell")).toBeVisible();
 }
 
-async function expectReferenceRect(
-  page: Page,
-  selector: string,
-  reference: { x: number; y: number; width: number; height: number },
-  tolerance = 10,
-) {
-  const actual = await page.locator(selector).boundingBox();
-  expect(actual, `Expected ${selector} to render`).not.toBeNull();
-  for (const field of ["x", "y", "width", "height"] as const) {
-    const measured = actual?.[field];
-    expect(
-      measured,
-      `${selector} ${field} must stay within ${String(tolerance)}px of the supplied ZIP screenshot`,
-    ).toBeGreaterThanOrEqual(reference[field] - tolerance);
-    expect(measured).toBeLessThanOrEqual(reference[field] + tolerance);
-  }
+async function noHorizontalScroll(page: Page): Promise<void> {
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 2))
+    .toBe(true);
 }
 
-test("desktop home tracks original ZIP card geometry at 1448px", async ({ page }) => {
+test("approved desktop home replaces the obsolete ZIP grid at 1448px", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1057 });
-  await openReferenceHome(page);
-  const portrait = page.locator(".home-reference-avatar");
-  await expect(portrait, "The original portrait should be visible for a demo participant").toHaveAttribute("src", "/home-reference/avatar.svg");
-  await expect.poll(async () => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 92)).toBe(true);
+  await openApprovedHome(page);
+
+  const brand = page.getByRole("button", { name: "Impulse — открыть разделы" });
+  await expect(brand).toBeVisible();
+  await expect(page.locator(".topbar")).toHaveCount(1);
+  await expect(page.locator(".home-v2-hero")).toHaveCount(0);
   await expect(page.getByPlaceholder("Поиск по задачам, навыкам, проектам...")).toBeVisible();
   await expect(page.locator(".home-search-shortcut")).toHaveText("⌘ K");
-  await expectReferenceRect(page, ".home-v2-hero", { x: 252, y: 111, width: 566, height: 310 });
-  await expectReferenceRect(page, ".home-v2-grade", { x: 829, y: 111, width: 264, height: 310 });
-  await expectReferenceRect(page, ".home-v2-weekly", { x: 1104, y: 111, width: 315, height: 310 });
-  await expectReferenceRect(page, ".home-v2-next-outcome", { x: 252, y: 437, width: 741, height: 172 });
-  await expectReferenceRect(page, ".home-v2-tasks", { x: 252, y: 625, width: 741, height: 305 });
-  await expectReferenceRect(page, ".home-v2-buddy", { x: 1009, y: 437, width: 410, height: 197 });
-  await expectReferenceRect(page, ".home-v2-passport", { x: 1009, y: 650, width: 410, height: 262 });
+
+  const toolbar = await page.locator(".topbar").boundingBox();
+  expect(toolbar?.height).toBe(62);
+  expect(toolbar?.width).toBeGreaterThan(1300);
+
+  const hero = await page.locator(".impulse-pixel__hero").boundingBox();
+  const trajectory = await page.locator(".impulse-pixel__trajectory").boundingBox();
+  expect(hero).not.toBeNull();
+  expect(trajectory).not.toBeNull();
+  expect(hero!.width).toBeGreaterThan(trajectory!.width * 2);
+  expect(Math.abs(hero!.y - trajectory!.y)).toBeLessThanOrEqual(2);
+  expect(hero!.height).toBe(252);
+  await expect(page.locator(".impulse-pixel__glass").first()).toHaveCSS("backdrop-filter", "none");
+  await noHorizontalScroll(page);
 });
 
-test("mobile home tracks original ZIP card ordering and artwork at 390px", async ({ page }) => {
+test("approved mobile home stacks real course and trajectory at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await openReferenceHome(page);
-  await expectReferenceRect(page, ".home-v2-hero", { x: 11, y: 76, width: 368, height: 367 }, 12);
-  await expectReferenceRect(page, ".home-v2-grade", { x: 11, y: 455, width: 368, height: 291 }, 12);
-  await expectReferenceRect(page, ".home-v2-weekly", { x: 11, y: 758, width: 368, height: 261 }, 14);
-  await expectReferenceRect(page, ".home-v2-next-outcome", { x: 11, y: 1032, width: 368, height: 208 }, 14);
-  const art = page.locator(".home-v2-hero-art");
-  await expect(art).toHaveAttribute("src", "/home-reference/mountain-path.svg");
-  await expect(page.locator(".home-v2-buddy-content img")).toHaveAttribute(
-    "src", "/home-reference/buddy.svg",
-  );
-  await expect
-    .poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
-    .toBe(true);
+  await openApprovedHome(page);
+  const hero = await page.locator(".impulse-pixel__hero").boundingBox();
+  const trajectory = await page.locator(".impulse-pixel__trajectory").boundingBox();
+  expect(hero).not.toBeNull();
+  expect(trajectory).not.toBeNull();
+  expect(trajectory!.y).toBeGreaterThan(hero!.y + hero!.height);
+  await expect(page.getByRole("button", { name: "Меню", exact: true })).toBeHidden();
+  await expect(page.locator(".participant-guide")).toHaveCount(0);
+  await noHorizontalScroll(page);
 });
 
-
-const intermediateViewports = [
-  {
-    name: "1280px desktop wrap",
-    width: 1280,
-    expected: [
-      [".home-v2-hero", 235, 111, 626, 310],
-      [".home-v2-grade", 872, 111, 379, 310],
-      [".home-v2-weekly", 235, 432, 1016, 160],
-      [".home-v2-next-outcome", 235, 608, 600, 187],
-      [".home-v2-tasks", 235, 811, 600, 305],
-      [".home-v2-buddy", 851, 608, 400, 197],
-    ],
-  },
-  {
-    name: "1024px tablet",
-    width: 1024,
-    expected: [
-      [".home-v2-hero", 219, 111, 459, 310],
-      [".home-v2-grade", 689, 111, 306, 310],
-      [".home-v2-weekly", 219, 432, 776, 173],
-      [".home-v2-next-outcome", 219, 621, 776, 172],
-      [".home-v2-tasks", 219, 809, 776, 305],
-      [".home-v2-buddy", 219, 1130, 380, 262],
-    ],
-  },
-  {
-    name: "768px tablet",
-    width: 768,
-    expected: [
-      [".home-v2-hero", 16, 84, 410, 300],
-      [".home-v2-grade", 437, 84, 315, 300],
-      [".home-v2-weekly", 16, 395, 736, 173],
-      [".home-v2-next-outcome", 16, 584, 736, 172],
-      [".home-v2-tasks", 16, 772, 736, 305],
-    ],
-  },
-  {
-    name: "360px narrow mobile",
-    width: 360,
-    expected: [
-      [".home-v2-hero", 11, 76, 338, 355],
-      [".home-v2-grade", 11, 443, 338, 291],
-      [".home-v2-weekly", 11, 746, 338, 261],
-      [".home-v2-next-outcome", 11, 1020, 338, 220],
-      [".home-v2-tasks", 11, 1252, 338, 334],
-    ],
-  },
-] as const;
-
-for (const scenario of intermediateViewports) {
-  test(`home geometry follows ZIP at ${scenario.name}`, async ({ page }) => {
-    await page.setViewportSize({ width: scenario.width, height: 920 });
-    await openReferenceHome(page);
-    if (scenario.width >= 1024) {
-      // Changing only the sidebar width necessarily shifts/shrinks the home grid.
-      // Validate the shared 244px shell and usable, non-overlapping cards instead
-      // of the obsolete screenshot coordinates from the home-specific sidebar.
-      await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
-      const sidebar = await page.locator(".sidebar").boundingBox();
-      if (!sidebar) throw new Error("Canonical sidebar must be visible");
-      for (const [selector] of scenario.expected) {
-        const box = await page.locator(selector).boundingBox();
-        if (!box) throw new Error(`${selector} must be visible`);
-        expect(box.x, `${selector} must clear the fixed sidebar`).toBeGreaterThanOrEqual(sidebar.x + sidebar.width + 10);
-        expect(box.x + box.width, `${selector} must fit inside viewport`).toBeLessThanOrEqual(scenario.width - 10);
-        expect(box.width, `${selector} must retain usable card width`).toBeGreaterThan(180);
-      }
-      const hero = await page.locator(".home-v2-hero").boundingBox();
-      const grade = await page.locator(".home-v2-grade").boundingBox();
-      if (!hero || !grade) throw new Error("Home hero and grade cards must be visible");
-      expect(hero.x + hero.width).toBeLessThan(grade.x);
-    } else {
-      for (const [selector, x, y, width, height] of scenario.expected) {
-        await expectReferenceRect(page, selector, { x, y, width, height }, 14);
-      }
-    }
-    await expect
-      .poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
-      .toBe(true);
+for (const width of [1280, 1024, 768, 560, 320]) {
+  test(`source-backed first fold never overflows at ${String(width)}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await openApprovedHome(page);
+    await expect(page.getByRole("heading", { name: "Моя траектория" })).toBeVisible();
+    await expect(page.locator(".impulse-pixel__hero")).toBeVisible();
+    await expect(page.getByRole("button", { name: "План перехода" })).toBeVisible();
+    await noHorizontalScroll(page);
   });
 }
 
-
-test("canonical desktop sidebar stays visually identical across Home and Trajectory", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 920 });
-  await openReferenceHome(page);
-  const sidebar = page.getByRole("complementary", { name: "Боковая панель" });
-  const snapshot = async () => sidebar.evaluate((element) => {
-    const style = getComputedStyle(element);
-    const brand = element.querySelector(".brand-mark");
-    const brandStyle = brand ? getComputedStyle(brand) : null;
-    return {
-      width: style.width,
-      left: style.left,
-      top: style.top,
-      padding: style.padding,
-      background: style.backgroundImage,
-      brandWidth: brandStyle?.width,
-      brandBackground: brandStyle?.backgroundImage,
-      homeGlyph: element.querySelector(".nav-icon")?.textContent,
-      hasStandardServiceCard: Boolean(element.querySelector(".sidebar-art")),
-      hasHomeOnlyNudge: Boolean(element.querySelector(".sidebar-nudge")),
-    };
-  });
-  const homeStyle = await snapshot();
-  expect(homeStyle.width).toBe("244px");
-  expect(homeStyle.hasStandardServiceCard).toBe(true);
-  expect(homeStyle.hasHomeOnlyNudge).toBe(false);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Моя траектория" }).click();
-  await expect(page).toHaveURL(/\/workspace\/1/);
-  expect(await snapshot()).toEqual(homeStyle);
+test("nonduplicated requirements navigate to the actual authorized trajectory", async ({ page }) => {
+  await openApprovedHome(page);
+  await expect(page.getByText(/Обязательные курсы:.*Практика:/)).toHaveCount(0);
+  await page.getByRole("button", { name: "План перехода" }).click();
+  await expect(page).toHaveURL(/\/workspace\/1(?:[?]|$)/);
 });
 
-
-test("home actions keep stable backgrounds and smoothly animate on hover and press", async ({ page }) => {
-  await page.setViewportSize({ width: 1448, height: 1057 });
-  await openReferenceHome(page);
-
-  const primary = page.locator(".home-v2-hero-actions .home-v2-primary");
-  const grade = page.locator(".home-v2-next-grade");
-  const primaryGradient = await primary.evaluate((el) => getComputedStyle(el).backgroundImage);
-  const gradeGradient = await grade.evaluate((el) => getComputedStyle(el).backgroundImage);
-  expect(primaryGradient).toContain("linear-gradient");
-  expect(gradeGradient).toContain("linear-gradient");
-
-  const transitions = await primary.evaluate((el) => getComputedStyle(el).transitionProperty);
-  expect(transitions).toContain("filter");
-  expect(transitions).toContain("transform");
-  expect(transitions).not.toContain("background-image");
-
-  await primary.hover();
-  await expect(primary).toHaveCSS("filter", "brightness(1.13)");
-  expect(await primary.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(primaryGradient);
-
-  await page.mouse.down();
-  expect(await primary.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(primaryGradient);
-  await page.mouse.move(1, 1);
-  await page.mouse.up();
-
-  await grade.hover();
-  await expect(grade).toHaveCSS("filter", "brightness(1.1)");
-  expect(await grade.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(gradeGradient);
-  await grade.click();
-  await expect(page.getByRole("dialog", { name: "Требования следующего грейда" })).toBeVisible();
-  await page.keyboard.press("Escape");
-
-  const day = page.locator(".home-v2-week-days .home-v2-day").nth(4);
-  await expect(day).toHaveAttribute("aria-pressed", "false");
-  await day.click();
-  await expect(day).toHaveAttribute("aria-pressed", "true");
-  expect(await day.evaluate((el) => getComputedStyle(el).transitionProperty)).toContain("background-color");
-});
-
-test("learning CTA has ambient glow, keyboard focus and restrained motion on desktop and mobile", async ({ page }) => {
-  await page.setViewportSize({ width: 1448, height: 920 });
-  await openReferenceHome(page, true);
-  const cta = page.getByRole("button", { name: "Продолжить обучение" });
-  await expect(cta).toHaveClass(/home-v2-primary--learning/);
-  await expect(cta).toBeVisible();
-  const motion = await cta.evaluate(el => ({
-    animation: getComputedStyle(el).animationName,
-    shine: getComputedStyle(el, "::before").animationName,
-    arrow: getComputedStyle(el.querySelector("svg") as SVGElement).animationName,
-  }));
-  expect(motion.animation).toContain("home-v2-learning-glow");
-  expect(motion.shine).toContain("home-v2-learning-shine");
-  expect(motion.arrow).toContain("home-v2-learning-arrow");
-
-  await cta.hover();
-  await expect(cta).toHaveCSS("filter", "brightness(1.07)");
-  await expect(cta).toHaveCSS("animation-name", "none");
-  await cta.focus();
-  await expect(cta).toBeFocused();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true);
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(cta).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(cta).toHaveCSS("animation-name", "none");
-  expect(await cta.evaluate(el => getComputedStyle(el, "::before").animationName)).toBe("none");
-  expect(await cta.locator("svg").evaluate(el => getComputedStyle(el).animationName)).toBe("none");
-});
-
-test("grade drawer matches the source 456px geometry and restores focus at desktop", async ({ page }) => {
-  await page.setViewportSize({ width: 1448, height: 1057 });
-  await openReferenceHome(page);
-  const trigger = page.getByRole("button", { name: /Все уровни/ });
-  await trigger.click();
-  const drawer = page.getByRole("dialog", { name: "Карта уровней" });
-  await expect(drawer).toBeVisible();
-  const box = await drawer.boundingBox();
-  expect(box).not.toBeNull();
-  expect(box?.width).toBe(456);
-  expect(box?.x).toBe(992);
-  await expect(drawer.locator(".home-v2-grade-timeline > button")).toHaveCount(4);
-  await expect(drawer.getByText("L0 · Стартовый цикл")).toBeVisible();
-  await expect(drawer).toContainText("Официальный карьерный грейд рассчитывается отдельно.");
-  await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
-  await page.keyboard.press("Escape");
-  await expect(drawer).toHaveCount(0);
-  await expect(trigger).toBeFocused();
-});
-
-test("grade drawer fills mobile without losing Escape or the approved mountain art", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await openReferenceHome(page);
-  await page.getByRole("button", { name: /Все уровни/ }).click();
-  const drawer = page.getByRole("dialog", { name: "Карта уровней" });
-  await expect(drawer).toBeVisible();
-  const box = await drawer.boundingBox();
-  expect(box?.width).toBe(390);
-  expect(box?.x).toBe(0);
-  await page.keyboard.press("Escape");
-  await expect(drawer).toHaveCount(0);
-  await page.getByRole("button", { name: /Следующий уровень/ }).click();
-  const gradeDetails = page.getByRole("dialog", { name: "Требования следующего грейда" });
-  await expect(gradeDetails).toBeVisible();
-  await expect(gradeDetails.locator(".home-v2-grade-detail-hero")).toHaveCSS("background-image", "none");
-  await expect(gradeDetails.locator(".home-v2-grade-detail-hero")).toBeVisible();
+test("source geometry is independent of numeric course and practice examples", async ({ page }) => {
+  await openApprovedHome(page);
+  await expect(page.locator(".impulse-pixel__metrics > div")).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Мой путь" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("background-image", "none");
+  await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
+  await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
 });
