@@ -20,8 +20,14 @@ async function setup(page: Page, empty = false) {
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
     json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }],
   }));
-  await page.route("**/api/v1/me", route => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", route => route.fulfill({ json: actor }));
+  let loggedIn = false;
+  await page.route("**/api/v1/me", route => loggedIn
+    ? route.fulfill({ json: actor })
+    : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", route => {
+    loggedIn = true;
+    return route.fulfill({ json: actor });
+  });
   await page.route("**/api/v1/me/portfolio", route => route.fulfill({
     json: {
       person_id: actor.person_id,
@@ -59,7 +65,8 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await setup(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   const screen = page.getByTestId("achievements-v2");
   await expect(screen).toBeVisible();
   await expect(screen.getByRole("heading", { name: /Твои результаты/ })).toBeVisible();
@@ -74,8 +81,9 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await firstStar.click();
   await expect(screen.getByTestId("achievement-card").first().locator(".ach-gallery-star")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("link", { name: "Главная" }).click();
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Главная"))}`);
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const columns = await screen.locator(".ach-gallery-grid").evaluate(element =>
     getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean).length);
@@ -136,8 +144,9 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: /Меню/ }).click();
-  await page.getByRole("link", { name: "Достижения" }).click();
+  // The global sidebar is intentionally hidden on mobile; the authorized route remains directly reachable.
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(0);

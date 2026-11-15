@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
@@ -64,8 +64,11 @@ describe("App", () => {
     await waitFor(() => expect(screen.getByRole("navigation")).toBeInTheDocument());
     expect(screen.getByRole("link", { name: "Главная" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Развитие/ })).toHaveAttribute("aria-expanded", "false");
-    fireEvent.click(screen.getByRole("button", { name: /Развитие/ }));
-    expect(screen.getByRole("link", { name: "Мой путь" })).toHaveAttribute("href", "/workspace/1");
+    const sidebar = screen.getByRole("complementary", { name: "Боковая панель" });
+    const developmentGroup = within(sidebar).getByRole("button", { name: /Развитие/ });
+    fireEvent.click(developmentGroup);
+    await waitFor(() => expect(developmentGroup).toHaveAttribute("aria-expanded", "true"));
+    expect(within(sidebar).getByRole("link", { name: "Мой путь" })).toHaveAttribute("href", "/workspace/1");
     expect(screen.queryByRole("link", { name: "Очередь ревью" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Тема: .*Сменить тему/ })).toBeInTheDocument();
   });
@@ -172,10 +175,12 @@ describe("App", () => {
     });
     expect(sidebar.querySelector(".calm-sidebar__home")?.getAttribute("href")).toBe(homeHref);
 
-    fireEvent.click(screen.getByRole("button", { name: /Развитие/ }));
-    fireEvent.click(screen.getByRole("link", { name: "Мой путь" }));
+    const group = within(sidebar).getByRole("button", { name: /Развитие/ });
+    fireEvent.click(group);
+    await waitFor(() => expect(group).toHaveAttribute("aria-expanded", "true"));
+    fireEvent.click(within(sidebar).getByRole("link", { name: "Мой путь" }));
     await waitFor(() => {
-      expect(screen.getByRole("link", { name: "Мой путь" })).toHaveAttribute("aria-current", "page");
+      expect(within(sidebar).getByRole("link", { name: "Мой путь" })).toHaveAttribute("aria-current", "page");
     });
     expect(sidebar.querySelector(".calm-sidebar__brand")?.textContent).toContain("Impulse");
     expect(sidebar.querySelector(".sidebar-message")).toBeNull();
@@ -231,10 +236,12 @@ describe("App", () => {
           expect(group).toHaveAttribute("aria-expanded", "true");
         });
       }
-      const routeLink = await screen.findByRole("link", { name: section });
+      // Each results/community page also has its own in-page tab with the
+      // same accessible name. Verify the shared sidebar, not a global first match.
+      const routeLink = await within(sidebar).findByRole("link", { name: section });
       fireEvent.click(routeLink);
       await waitFor(() => {
-        expect(screen.getByRole("link", { name: section })).toHaveAttribute("aria-current", "page");
+        expect(within(sidebar).getByRole("link", { name: section })).toHaveAttribute("aria-current", "page");
       });
       expect(signature()).toEqual(initial);
       expect(sidebar.querySelector(".calm-sidebar__brand")?.textContent).toContain("Impulse");
