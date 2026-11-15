@@ -13,9 +13,10 @@
 1. Откройте **01-sources/official-links.md** и исходные Apple Figma/Sketch UI kits (iOS/iPadOS 27, macOS 27).
 2. Сверьте **02-specifications/**: материал, цвета, типографика, структуры, компоненты, интеракции, состояния.
 3. Используйте **03-impulse/integration-map.md**, чтобы сопоставить каждый маршрут IMPULSE с паттерном Apple.
-4. Откройте локально **04-web-reference/reference-gallery.html** (самостоятельная демо-страница; не копия Apple) и изучите **04-web-reference/impulse-apple-tokens.css**.
+4. Откройте локально **04-web-reference/casebook.html** (интерактивная галерея: nav, chat, forms, materials, dialog) и изучите **04-web-reference/impulse-apple-tokens.css**. Прежняя **reference-gallery.html** также сохранена.
 5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
-6. Выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
+6. Пройдите **06-cases/README.md** для нужного сценария и выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
+7. Для локальной проверки структуры выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"`; для сравнения своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
 
 ## Состав
 
@@ -31,6 +32,10 @@
 | 03-impulse/visual-qa-checklist.md | Обязательные критерии качества визуального переноса |
 | 04-web-reference/ | Авторский CSS и автономная HTML-галерея без ассетов Apple |
 | 05-legal-and-sources/LICENSING.md | Разрешённые и запрещённые способы использования Apple-ассетов |
+| 06-cases/README.md | Каталог 12 реальных сценариев переноса, каждый в собственной папке |
+| 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
+| 04-web-reference/verify-library.mjs | Проверка структуры, линковки и синтаксиса JavaScript без сети |
+| 04-web-reference/compare-screenshots.py | Локальный pixel-overlay/MAE компаратор для **разрешённых** скриншотов |
 
 ## Область применения и точность
 
@@ -49,3 +54,9 @@
 **Главный источник:** https://developer.apple.com/design/resources/  
 **HIG:** https://developer.apple.com/design/human-interface-guidelines/  
 **Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
+
+## Интерактивный casebook (новый)
+
+[Открыть casebook.html](04-web-reference/casebook.html) — в одной автономной web-странице показаны категории UI и реальные состояния. Отдельная [галерея 12 сценариев](06-cases/README.md) содержит конкретные правила для navigation, messaging, forms, dialogs, analytics, accessibility и других областей. Выделение в отдельные папки позволяет точечно переносить дизайн в IMPULSE без вмешательства в соседние подсистемы.
+
+**Важно:** результат находится в ветке PR, а не в `main` до объединения. Внутри нет официальных Apple assets, только ссылки, независимые документация и код.
