@@ -660,14 +660,14 @@ test("participant settings and AI Buddy controls are interactive", async ({ page
 test("header notifications and rating indicators open real destinations", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await expect(page.getByRole("button", { name: "Открыть рейтинг участников" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Меню профиля" })).toBeVisible();
   await page.getByRole("button", { name: /Уведомления: 3 непрочитанных/ }).click();
   await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
   await expect(page.getByText("Новый комментарий ментора")).toBeVisible();
   await page.getByRole("button", { name: /Checkpoint принят/ }).click();
   await expect(page).toHaveURL(/\/workspace\/4$/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Открыть рейтинг участников" }).click();
+  await openAuthorizedRating(page);
   await expect(page).toHaveURL(/\/workspace\/6$/);
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });
