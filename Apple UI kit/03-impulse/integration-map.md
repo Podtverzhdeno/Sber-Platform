@@ -15,7 +15,7 @@ React 19 + TypeScript 5 + Vite 7 + react-router-dom 7 + lucide-react + SCSS (sas
 | P0 | `frontend/src/features/collaboration.tsx` → `MessagingWorkspace` | Messages | conversation split, thread, bubble, composer, search, alerts |
 | P0 | `frontend/src/app/theme.ts` | appearance | сохранить API `applyTheme`, `storedThemeChoice`, `subscribeSystemTheme` |
 | P0 | `frontend/src/components/ui.tsx` (физический файл; import разрешает без расширения) | buttons / fields / dialogs | проверить actual exports перед изменением, вводить tokens постепенно |
-| P1 | `frontend/src/features/participant.tsx-home-v2/page.tsx` | dashboard | grouped sections, functional glass topbar, solid data |
+| P1 | `frontend/src/features/participant-home-v2/page.tsx` | dashboard | grouped sections, functional glass topbar, solid data |
 | P1 | `frontend/src/features/trajectory-v2/page.tsx` | navigation / timeline | content hierarchy, progress visualization |
 | P1 | `frontend/src/features/bootcamp/route-v2.tsx` | course lists | cards, tabs, segmented controls, filters |
 | P1 | `frontend/src/features/task-catalog-v2/page.tsx` | list and search | list rows, search, chips, sorting |
