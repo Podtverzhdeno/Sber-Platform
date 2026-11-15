@@ -11,7 +11,12 @@ import "./participant-guide.scss";
 
 type View = "closed" | "welcome" | "hint" | "walkthrough" | "complete" | "library";
 type Place = { left: number; top: number; side: "left" | "right" | "top" | "bottom"; rect: { left: number; top: number; width: number; height: number } };
-type Props = { personId: string; section: string; navigation: string[]; onNavigate: (index: number) => void };
+type Props = { personId: string; section: string; navigation: string[]; onNavigate: (index: number) => void;
+  /** No persistent bottom-right hints on the approved minimal workspace. */
+  showFloatingTrigger?: boolean;
+  /** Keep the help library available while disabling unsolicited coachmarks. */
+  autoSuggest?: boolean;
+};
 const prefKey = (personId: string) => `impulse:guide:v1:${personId}`;
 const sessionKey = (personId: string) => `impulse:guide:session:v1:${personId}`;
 const welcomeKey = (personId: string) => `impulse:guide:welcome:v2:${personId}`;
@@ -98,7 +103,7 @@ function Mascot() {
   </div>;
 }
 
-export function ParticipantGuide({ personId, section, navigation, onNavigate }: Props) {
+export function ParticipantGuide({ personId, section, navigation, onNavigate, showFloatingTrigger = true, autoSuggest = true }: Props) {
   const [view, setView] = useState<View>("closed");
   const [stepIndex, setStepIndex] = useState(0);
   const [selectedHelpTopic, setSelectedHelpTopic] = useState<string | null>(null);
@@ -136,6 +141,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     close();
     setStepIndex(0);
     setContext("default");
+    if (!autoSuggest) return;
     const timeout = window.setTimeout(() => {
       if (!shouldAutomaticallySuggest(readPrefs(personId), section, Date.now(), sessionShown(personId))) return;
       if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
@@ -149,7 +155,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
       }
     }, 2000);
     return () => { window.clearTimeout(timeout); };
-  }, [section, personId, isHome, close, rememberAuto, pickContext]);
+  }, [section, personId, isHome, close, rememberAuto, pickContext, autoSuggest]);
 
   const startManually = () => {
     if (view !== "closed") { close(); return; }
@@ -323,12 +329,12 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     {view === "library" && <ParticipantHelpCenter key={selectedHelpTopic ?? section} section={section} initialTopicId={selectedHelpTopic} onClose={close}
       onOpenTour={() => { setView("walkthrough"); setStepIndex(0); setContext(pickContext()); }}
       availableSections={navigation} onNavigateSection={(name) => { const target = navigation.indexOf(name); if (target >= 0) onNavigate(target); }} />}
-    <button type="button" className="participant-guide-trigger" aria-expanded={view !== "closed"}
+    {showFloatingTrigger && <button type="button" className="participant-guide-trigger" aria-expanded={view !== "closed"
       aria-controls={showTip ? "participant-guide-panel" : undefined}
       aria-label={view === "closed" ? "Как здесь всё устроено?" : "Скрыть помощь"}
       title="Как здесь всё устроено?" onClick={startManually}>
       {view === "closed" ? <CircleHelp size={21}/> : <BookOpenText size={19}/>}
       <span>{view === "closed" ? "Как здесь всё устроено?" : "Скрыть помощь"}</span>
-    </button>
+    </button>}
   </div>;
 }
