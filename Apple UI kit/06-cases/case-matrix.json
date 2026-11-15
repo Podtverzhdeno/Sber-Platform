@@ -55,7 +55,7 @@
       "priority": "P0",
       "readme": "03-messaging/README.md",
       "impulse_paths": [
-        "frontend/src/features/collaboration"
+        "frontend/src/features/collaboration.tsx"
       ],
       "source_ids": [
         "messages-figma",
@@ -235,7 +235,7 @@
       "readme": "11-identity-and-settings/README.md",
       "impulse_paths": [
         "frontend/src/app/theme.ts",
-        "frontend/src/features/participant"
+        "frontend/src/features/participant.tsx"
       ],
       "source_ids": [
         "dark-mode-hig",
@@ -255,7 +255,7 @@
       "priority": "P2",
       "readme": "12-media-and-attachments/README.md",
       "impulse_paths": [
-        "frontend/src/features/collaboration"
+        "frontend/src/features/collaboration.tsx"
       ],
       "source_ids": [
         "materials",

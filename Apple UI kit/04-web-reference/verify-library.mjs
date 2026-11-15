@@ -5,7 +5,7 @@
  * Run from any working directory: node "Apple UI kit/04-web-reference/verify-library.mjs"
  */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
@@ -96,6 +96,25 @@ for (const row of caseMatrix.cases ?? []) {
   }
   check(Array.isArray(row.required_states) && row.required_states.length > 0,
     "Missing required state coverage: " + row.id);
+
+  // Reference maps use concrete repository files, not extensionless imports.
+  // Permit distributing this reference folder standalone: skip path checks if
+  // frontend source is absent; GitHub CI checks them in the complete repository.
+  const repoRoot = resolve(libraryRoot, "..");
+  if (existsSync(join(repoRoot, "frontend/src/App.tsx"))) {
+    check(Array.isArray(row.impulse_paths) && row.impulse_paths.length > 0,
+      "Missing IMPULSE file paths: " + row.id);
+    for (const target of row.impulse_paths ?? []) {
+      const resolvedTarget = resolve(repoRoot, target);
+      const relativeTarget = relative(repoRoot, resolvedTarget);
+      check(typeof target === "string"
+        && /^frontend\/src\/[A-Za-z0-9_./-]+\.(?:ts|tsx|css|scss)$/.test(target)
+        && relativeTarget.length > 0 && !relativeTarget.startsWith("..")
+        && !isAbsolute(relativeTarget)
+        && existsSync(resolvedTarget),
+        "Unresolved concrete IMPULSE file: " + row.id + " -> " + target);
+    }
+  }
 }
 
 // Verify each standalone original SVG, provenance manifest and local gallery links.

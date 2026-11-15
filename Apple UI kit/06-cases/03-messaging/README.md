@@ -1,7 +1,7 @@
 <!-- Self-authored interpretation of Apple HIG; no Apple assets embedded. -->
 # 03 — Messages patterns for IMPULSE
 
-**Target:** `MessagingWorkspace` imported from `frontend/src/features/collaboration` in `App.tsx`.  
+**Target:** `MessagingWorkspace` imported from `frontend/src/features/collaboration.tsx` in `App.tsx`.  
 **Apple refs:** [Messages template](https://www.figma.com/community/file/1367916269438172112/imessage-apps-and-stickers), [iOS 27 kit](https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27), [macOS 27 kit](https://www.figma.com/community/file/1651309434229735362/macos-27).
 
 ## Desktop
