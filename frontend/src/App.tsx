@@ -630,6 +630,8 @@ function Workspace({
         )}
         {allowed && actor.active_role === "participant" && currentSection && (
           <ParticipantGuide
+            autoSuggest={false}
+            showFloatingTrigger={false}
             personId={actor.person_id}
             section={currentSection}
             navigation={navigation}
@@ -1591,7 +1593,7 @@ function ImpulseApp() {
                   </div>
                   {actor.navigation.includes("Портфолио") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Портфолио");}}>Мой профиль</button>}
                   {actor.navigation.includes("Рейтинг") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Рейтинг");}}>Рейтинг</button>}
-                  {actor.active_role === "participant" && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);window.dispatchEvent(new Event("impulse:guide:toggle"));}}>
+                  {actor.active_role === "participant" && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);window.dispatchEvent(new Event("impulse:guide:library"));}}>
                     <CircleHelp size={16} aria-hidden="true"/>Помощь
                   </button>}
                   <button type="button" role="menuitem" disabled={loggingOut} onClick={() => {setProfileOpen(false);void logout();}}>
