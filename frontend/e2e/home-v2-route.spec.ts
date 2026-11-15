@@ -11,7 +11,7 @@ const actor = {
   csrf_token: "csrf",
 };
 
-test("home v2 avoids redundant welcome hero and preserves legacy rollback", async ({ page }) => {
+test("source-backed pixel home shows truthful API error and preserves legacy rollback", async ({ page }) => {
   let loggedIn = false;
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }] }));
@@ -29,9 +29,13 @@ test("home v2 avoids redundant welcome hero and preserves legacy rollback", asyn
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/0");
   await expect(page.getByRole("heading", { name: /Добро пожаловать/ })).toHaveCount(0);
-  await expect(page.getByText("Не удалось загрузить обзор развития.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Не удалось загрузить обзор" })).toBeVisible();
+  await expect(page.getByText("Без данных профиля прогресс и навыки не отображаются.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Повторить" })).toBeVisible();
   await page.goto("/workspace/0?v2=0");
   await expect(page.getByRole("heading", { name: /Добро пожаловать/ })).toBeVisible();
   await page.goto("/workspace/0");
-  await expect(page.getByText("Не удалось загрузить обзор развития.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Не удалось загрузить обзор" })).toBeVisible();
+  await expect(page.getByText("Без данных профиля прогресс и навыки не отображаются.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Повторить" })).toBeVisible();
 });

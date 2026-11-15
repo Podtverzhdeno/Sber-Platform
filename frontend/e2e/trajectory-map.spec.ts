@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test, type Page } from "@playwright/test";
 
 const actor = {
@@ -97,7 +98,7 @@ test("mounted trajectory map keeps deep links, Back/reload and read-only progres
   await installApi(page, methods);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Моя траектория" }).click();
+  await openAuthorizedDestination(page, "Моя траектория", "Развитие");
   await page.goto("/workspace/1?legacy=1");
   await expect(page.getByTestId("trajectory-map")).toBeVisible();
 
@@ -125,8 +126,7 @@ test("trajectory map remains usable in light theme and mobile viewport", async (
   await installApi(page, []);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: "Меню", exact: true }).click();
-  await page.getByRole("link", { name: "Моя траектория" }).click();
+  await openAuthorizedDestination(page, "Моя траектория", "Развитие");
   // This spec exercises the opt-in checkpoint map, not the canonical V2 roadmap.
   await page.goto("/workspace/1?legacy=1");
   await expect(page.getByTestId("trajectory-map")).toBeVisible();

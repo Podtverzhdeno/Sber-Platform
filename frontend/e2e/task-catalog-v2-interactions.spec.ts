@@ -51,7 +51,14 @@ async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insu
   }));
   await page.goto("/");
   await page.locator('[data-persona="participant-synthetic"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  // The reference shell has no permanent sidebar or visible "Меню" button.
+  // Exercise the same authorized brand drawer a participant uses.
+  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
+  const drawer = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(drawer).toBeVisible();
+  const practice = drawer.getByRole("button", { name: "Практика", exact: true });
+  if (await practice.getAttribute("aria-expanded") !== "true") await practice.click();
+  await drawer.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   if (initialView === "cards") await page.getByRole("button", { name: "Карточки" }).click();
 }

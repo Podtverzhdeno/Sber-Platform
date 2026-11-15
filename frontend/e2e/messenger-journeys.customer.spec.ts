@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test, type Page } from "@playwright/test";
 
 const teamChannelId = "b6a24e2f-8a0e-4a41-9cea-5f5a2e39a10a";
@@ -125,8 +126,7 @@ test("customer journeys: контекст задачи, доменные гра�
 
   await page.goto("/");
   await page.locator('[data-persona="customer-roman"]').click();
-  await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await openAuthorizedDestination(page, "Сообщения", "Общение");
   // SberChat waits for explicit selection, and task/personal channels must coexist.
   const visible=page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" });
   try {
@@ -156,7 +156,7 @@ test("customer journeys: контекст задачи, доменные гра�
   await page.getByRole("button", { name: "Открыть вклад задачи" }).click();
   await expect(page).toHaveURL(/workspace\/1\?task=/);
 
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await openAuthorizedDestination(page, "Сообщения", "Общение");
   await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
   const chatPane = page.locator(".msg-chat");
   await expect(chatPane).toBeVisible();

@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test } from "@playwright/test";
 
 type CandidateMatch = {
@@ -133,7 +134,7 @@ test("leader pilot journey runs case matching, closed invitation and reserve", a
 
   await page.goto("/");
   await page.locator('[data-persona="customer-roman"]').click();
-  await page.getByRole("link", { name: "База участников" }).click();
+  await openAuthorizedDestination(page, "База участников", "Люди");
   await expect(
     page.getByRole("heading", { name: "Подбор по подтверждённым кейсам" }),
   ).toBeVisible();

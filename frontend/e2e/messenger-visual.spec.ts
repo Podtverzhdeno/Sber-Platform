@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test, type Page } from "@playwright/test";
 
 const channelId = "b6a24e2f-8a0e-4a41-9cea-5f5a2e39a10d";
@@ -105,19 +106,12 @@ const messageRoutes = (page: Page): void => {
 };
 
 async function openNav(page: Page): Promise<void> {
-  const menu = page.getByRole("button", { name: "Меню", exact: true });
-  if (await menu.isVisible().catch(() => false)) {
-    await menu.click();
-    await expect(menu).toHaveAttribute("aria-expanded", "true");
-  }
-  await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await openAuthorizedDestination(page, "Сообщения", "Сообщество");
 }
 
 async function openMessenger(page: Page): Promise<void> {
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
-  await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await openNav(page);
   await expect(page.locator(".messenger-shell")).toBeVisible();
   await expect(page.locator(".msg-dialog-list__row").first()).toBeVisible();
