@@ -1,0 +1,23 @@
+# Claim APPLE-KIT-REFERENCE-CI-20261115
+
+- task_id: APPLE-KIT-REFERENCE-CI-20261115
+- session_id: gpt6-owner-apple-reference-ci-20261115
+- status: IN_PROGRESS
+- started_at: 2026-11-15T18:23:00+03:00
+- heartbeat_at: 2026-11-15T18:23:00+03:00
+- base_ref: docs/apple-official-source-explorer-20261115
+- depends_on: [APPLE-OFFICIAL-SOURCE-EXPLORER-20261115]
+- branch: ci/apple-kit-reference-suite-20261115
+- write_scope:
+  - .github/workflows/apple-ui-reference-qa.yml
+  - .agents/coordination/claims/APPLE-KIT-REFERENCE-CI-20261115.lock/status.md
+- shared_files: []
+- excluded: all existing workflow files, Apple UI kit/**, tools/apple-ui-kit-qa/**, docs/apple-official-reference-atlas-20261115/**, frontend/**, backend/**, main, deployment
+- purpose: add an isolated zero-secret GitHub Actions quality gate for existing reference assets, fidelity workbench and official-source atlas
+- verification:
+  - YAML syntax and GitHub Actions permissions/triggers review
+  - static Node verification of 26 scenario packs / 36 SVGs and 46 source targets
+  - real Chromium e2e for local pixel diff and interactive source atlas, with screenshot artifact upload
+- status_note: scope is new workflow file; prior Apple kit claims REVIEW, so no edits to their paths
+- progress: claim created; new workflow pending
+- blockers: GitHub runners may be queued; do not claim CI passed before actual run results
