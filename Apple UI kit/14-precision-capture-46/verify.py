@@ -20,6 +20,7 @@ for e in items:
     content = path.read_text(encoding="utf-8")
     assert e["id"] in content and e["hig_url"] in content
     assert e["hig_url"].startswith("https://developer.apple.com/design/")
+    assert e["hig_url"] != "https://developer.apple.com/design/human-interface-guidelines/", e["id"]
     assert e["source_frame_id"] is None
     assert e["geometry_px"] is None
     assert e["status"] == "MEASUREMENT_PENDING"

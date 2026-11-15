@@ -250,7 +250,7 @@
       "title": "Profile popover",
       "category": "commands",
       "record_path": "cases/APP-CAP-011-profile-popover/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/popovers",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "authenticated contextual commands",
       "variants_to_capture": [
@@ -394,7 +394,7 @@
       "title": "Segmented control",
       "category": "selection",
       "record_path": "cases/APP-CAP-017-segmented-control/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "filters, preferences and settings",
       "variants_to_capture": [
@@ -418,7 +418,7 @@
       "title": "Toggle/switch",
       "category": "selection",
       "record_path": "cases/APP-CAP-018-toggle-switch/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "filters, preferences and settings",
       "variants_to_capture": [
@@ -442,7 +442,7 @@
       "title": "Checkbox/radio",
       "category": "selection",
       "record_path": "cases/APP-CAP-019-checkbox-radio/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "filters, preferences and settings",
       "variants_to_capture": [
@@ -466,7 +466,7 @@
       "title": "Slider/stepper",
       "category": "selection",
       "record_path": "cases/APP-CAP-020-slider-stepper/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/sliders",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "filters, preferences and settings",
       "variants_to_capture": [
@@ -538,7 +538,7 @@
       "title": "Select/combo/picker",
       "category": "forms",
       "record_path": "cases/APP-CAP-023-select-combo-picker/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/pickers",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "task brief, mentor review and profile forms",
       "variants_to_capture": [
@@ -562,7 +562,7 @@
       "title": "Date/time picker",
       "category": "forms",
       "record_path": "cases/APP-CAP-024-date-time-picker/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/pickers",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "task brief, mentor review and profile forms",
       "variants_to_capture": [
@@ -754,7 +754,7 @@
       "title": "Progress bar/ring",
       "category": "feedback",
       "record_path": "cases/APP-CAP-032-progress-bar-ring/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "progress, loading and failure states",
       "variants_to_capture": [
@@ -778,7 +778,7 @@
       "title": "Skeleton/loading/activity",
       "category": "feedback",
       "record_path": "cases/APP-CAP-033-skeleton-loading-activity/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "progress, loading and failure states",
       "variants_to_capture": [
@@ -802,7 +802,7 @@
       "title": "Empty/error/offline/restricted",
       "category": "feedback",
       "record_path": "cases/APP-CAP-034-empty-error-offline-restricted/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/writing",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "progress, loading and failure states",
       "variants_to_capture": [
@@ -826,7 +826,7 @@
       "title": "Alert/confirmation",
       "category": "overlays",
       "record_path": "cases/APP-CAP-035-alert-confirmation/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/alerts",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "confirmations, overlays, popovers and notifications",
       "variants_to_capture": [
@@ -874,7 +874,7 @@
       "title": "Popover",
       "category": "overlays",
       "record_path": "cases/APP-CAP-037-popover/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/popovers",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "confirmations, overlays, popovers and notifications",
       "variants_to_capture": [
@@ -898,7 +898,7 @@
       "title": "Tooltip",
       "category": "overlays",
       "record_path": "cases/APP-CAP-038-tooltip/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "confirmations, overlays, popovers and notifications",
       "variants_to_capture": [
@@ -922,7 +922,7 @@
       "title": "Toast/notification pattern",
       "category": "overlays",
       "record_path": "cases/APP-CAP-039-toast-notification-pattern/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/notifications",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "confirmations, overlays, popovers and notifications",
       "variants_to_capture": [
@@ -946,7 +946,7 @@
       "title": "Split list/detail inspector",
       "category": "inspectors",
       "record_path": "cases/APP-CAP-040-split-list-detail-inspector/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/split-views",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "case/evidence split inspector",
       "variants_to_capture": [
@@ -1018,7 +1018,7 @@
       "title": "Attachment/file preview",
       "category": "messaging",
       "record_path": "cases/APP-CAP-043-attachment-file-preview/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/file-management",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "private messages and evidence attachments",
       "variants_to_capture": [
@@ -1042,7 +1042,7 @@
       "title": "Credential/Wallet-like card",
       "category": "credentials",
       "record_path": "cases/APP-CAP-044-credential-wallet-like-card/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/wallet",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "verified portfolio/skill credential",
       "variants_to_capture": [
@@ -1066,7 +1066,7 @@
       "title": "Contextual TipKit-like hint",
       "category": "context-help",
       "record_path": "cases/APP-CAP-045-contextual-tipkit-like-hint/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "on-demand contextual help",
       "variants_to_capture": [
@@ -1090,7 +1090,7 @@
       "title": "Live Activity-like compact status",
       "category": "live-status",
       "record_path": "cases/APP-CAP-046-live-activity-like-compact-status/README.md",
-      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/",
+      "hig_url": "https://developer.apple.com/design/human-interface-guidelines/live-activities",
       "apple_kit_source": "https://developer.apple.com/design/resources/",
       "impulse_target": "current project/course activity",
       "variants_to_capture": [

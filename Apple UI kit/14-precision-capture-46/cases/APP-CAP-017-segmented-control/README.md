@@ -4,7 +4,7 @@
 
 ## Provenance
 
-- Apple HIG: https://developer.apple.com/design/human-interface-guidelines/
+- Apple HIG: https://developer.apple.com/design/human-interface-guidelines/segmented-controls
 - Official iOS/iPadOS/macOS 27 Figma/Sketch entry: https://developer.apple.com/design/resources/
 - Figma/Sketch document version, exact component ID, source node and exported image SHA-256: **UNKNOWN (to measure)**.
 - No Apple font, SF Symbol artwork or proprietary template file is included.
