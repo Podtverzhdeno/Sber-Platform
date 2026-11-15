@@ -32,3 +32,8 @@ If any field cannot be verified, mark **UNKNOWN/PENDING** rather than fabricate.
 ## Current deliverable
 
 This folder is a reference library with proposed independent web examples and an acceptance procedure. **No app code or running route has been modified by this task.** Proceed to code integration only under a separate claimed task.
+
+
+## Source-library additions (2026-11-15)
+
+Before coding the running app, inspect the [web-implementation lab](web-implementation/README.md) and [67-entry component catalog](component-catalog.json). For a chosen frame record real measurements in [capture-record-template.json](capture-record-template.json), then apply [pixel comparison](PIXEL_DIFF_WORKFLOW.md). The demo source is neither production-bound nor equivalent to Apple native Liquid Glass. Never copy synthetic DATA into a real Impulse route.

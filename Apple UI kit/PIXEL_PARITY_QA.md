@@ -89,3 +89,8 @@ notes: "Do not claim pixel parity before independent comparison."
 ## Limit
 
 Pixel similarity is not UIKit, macOS native AppKit or SwiftUI behavior. Native Liquid Glass physics cannot be guaranteed via a pure browser implementation. Verify the **web analogue** against the selected Apple state and record divergences; never label a proposal “official Apple CSS” or “1:1” without actual measurements and review.
+
+
+## Optional measured screenshot diff helper
+
+Run [scripts/compare_reference_pixels.py](scripts/compare_reference_pixels.py) on two **same-size** authorized screenshots; see [PIXEL_DIFF_WORKFLOW.md](PIXEL_DIFF_WORKFLOW.md). It writes a 50% overlay, contrast-enhanced RGB difference and JSON mismatch fraction/bounding box. It deliberately does not rescale unlike-sized images; a high pixel-match score does not replace provenance, native-compositor caveats, functional tests or independent acceptance.

@@ -10,7 +10,14 @@
     "last_reference_gallery_update": "2026-11-15",
     "category_folder_count": 13,
     "original_svg_mockup_count": 13,
-    "apple_hosted_visual_preview_count": 5
+    "apple_hosted_visual_preview_count": 5,
+    "study_catalog_count": 67,
+    "study_catalog_groups": 13,
+    "web_implementation_demo_present": true,
+    "pixel_diff_helper_present": true,
+    "pixel_diff_helper_executed_in_this_session": false,
+    "browser_e2e_executed_in_this_session": false,
+    "edited_at": "2026-11-15"
   },
   "sources": [
     {
@@ -144,5 +151,14 @@
       "original_host": "developer.apple.com",
       "status": "apple_hosted_image_url_verified_not_copied"
     }
-  ]
+  ],
+  "status": {
+    "source_link_integrity": "reviewed",
+    "svg_static_checks": "passed",
+    "component_catalog_static_checks": "passed",
+    "browser_runtime_tests": "not_executed",
+    "pixel_diff_helper_unit_tests": "not_executed",
+    "apple_editable_frames": "not_inspected",
+    "merging_to_main": "pending_review"
+  }
 }

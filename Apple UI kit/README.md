@@ -44,3 +44,15 @@ The “reference preview” in this folder deliberately uses original generic la
 ## Completeness
 
 Coverage includes foundations (color, material, layout, typography, symbols, motion, accessibility), navigation, controls, data display, overlays, messaging, authentication, native-platform variants and web adaption. It is an indexed *representative comprehensive set*—not a claim that every Apple component and every state has been exported, inspected or pixel-verified. Expand the matrix as official design files are inspected and measured.
+
+
+## Latest additions — functional reference lab and source catalog
+
+- [Web implementation lab](web-implementation/index.html): standalone original HTML/CSS/JS prototype (toolbar, collapsed role drawer, tabs, search, form validation, modal/popover, regular/clear glass, theme and demo data states). [Run/limitations](web-implementation/README.md) · [manual browser QA checklist](web-implementation/QA_CHECKLIST.md).
+- [67-component searchable study catalog](component-catalog.html) · [machine-readable JSON](component-catalog.json) · [instructions](COMPONENT_CATALOG_GUIDE.md). This is a curated capture backlog with HIG URLs, NOT inspected Apple Figma/Sketch frame IDs. It covers 13 categories.
+- [Frame capture record template](capture-record-template.json): record actual Apple design component variant, exact metrics and acceptance evidence after obtaining licensed assets.
+- [Pixel overlay/diff workflow](PIXEL_DIFF_WORKFLOW.md) · [Python helper](scripts/compare_reference_pixels.py) · [synthetic unit tests](scripts/test_compare_reference_pixels.py). Requires Pillow locally; no proprietary Apple images are downloaded or committed.
+- [Prioritized integration backlog](IMPLEMENTATION_BACKLOG.md) details what to measure and test for the first Impulse workstreams.
+- [Apple HIG behavior rules](HIG_BEHAVIOR_RULES.md): source-backed guardrails (tab bar vs toolbar, search layout, popovers, controls, materials).
+
+**Verification status:** structure/JS syntax/DOM wiring and catalog checks done via GitHub source; actual browser run and Pillow unit tests are pending, as are official editable frame measurements. Do not call this pixel-parity approved.
