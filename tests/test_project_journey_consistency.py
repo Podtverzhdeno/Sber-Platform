@@ -81,7 +81,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
                 "problem": "Нужно проверить сквозную согласованность результатов между экранами.",
                 "deliverable": "API, тесты и ссылка на результат.",
                 "acceptance_criteria": ["API воспроизводим", "Артефакт проверяем"],
-                "deadline_at": "2026-11-01T18:00:00Z",
+                "deadline_at": "2027-11-01T18:00:00Z",
                 "data_constraints": "Синтетические данные",
                 "ip_terms": "Вклад и результаты фиксируются после проверки",
                 "nominated_mentor_id": None,
