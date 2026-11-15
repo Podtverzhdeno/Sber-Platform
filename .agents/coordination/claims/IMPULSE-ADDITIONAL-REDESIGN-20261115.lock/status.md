@@ -10,6 +10,7 @@
 - write_scope:
   - frontend/src/features/participant-additional-hub/**
   - frontend/src/features/participant.tsx (participant settings and buddy wrappers only; no customer UI changes)
+  - frontend/e2e/participant-additional.spec.ts (authorized 320/390/1440 route CJM)
   - .agents/coordination/claims/IMPULSE-ADDITIONAL-REDESIGN-20261115.lock/status.md
 - excluded: frontend/src/App.tsx; backend/API; shared navigation, role auth, contracts, customer settings, Railway config
 - plan: permission-aware local Additional tabs (AI-Buddy and Settings), calm compact settings layout, preserve profile, consents, alerts, model disabled states
