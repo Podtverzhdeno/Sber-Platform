@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "entry_id": "APP-001",
+  "source": {
+    "provider": "Apple Design Resources",
+    "platform": null,
+    "kit_link": null,
+    "kit_version": null,
+    "artboard_id": null,
+    "component_name": null,
+    "variant_name": null,
+    "license_checked": false,
+    "source_inspected": false
+  },
+  "geometry": {
+    "frame_width_px": null,
+    "frame_height_px": null,
+    "dpr": null,
+    "padding": {
+      "top": null,
+      "right": null,
+      "bottom": null,
+      "left": null
+    },
+    "radius_px": null,
+    "typography": null,
+    "border": null,
+    "shadow": null,
+    "material": null
+  },
+  "comparison": {
+    "impulse_route": null,
+    "impulse_git_sha": null,
+    "viewport_px": null,
+    "dpr": null,
+    "theme": null,
+    "locale": null,
+    "focus_state": null,
+    "source_image_file": null,
+    "target_image_file": null,
+    "diff_image_file": null,
+    "diff_json_file": null
+  },
+  "qa": {
+    "pixel_reviewed": false,
+    "behavior_reviewed": false,
+    "accessibility_reviewed": false,
+    "approved_by": null,
+    "reviewed_at": null
+  },
+  "limitations": [
+    "Any unknown field must remain null, not guessed",
+    "Apple screenshots/fonts/SF symbols not redistributed"
+  ]
+}
