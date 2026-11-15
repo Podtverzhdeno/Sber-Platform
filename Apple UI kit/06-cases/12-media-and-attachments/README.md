@@ -1,6 +1,6 @@
 # 12 — Media, file attachments and previews
 
-**Apple references:** [Image views](https://developer.apple.com/design/human-interface-guidelines/image-views), [Photos](https://developer.apple.com/design/human-interface-guidelines/photos), [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Messages template](https://www.figma.com/community/file/1367916269438172112/imessage-apps-and-stickers).
+**Apple references:** [Image wells](https://developer.apple.com/design/human-interface-guidelines/image-wells), [Collections](https://developer.apple.com/design/human-interface-guidelines/collections), [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Messages template](https://www.figma.com/community/file/1367916269438172112/imessage-apps-and-stickers).
 
 ## UI reference list
 
