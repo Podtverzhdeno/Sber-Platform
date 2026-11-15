@@ -43,10 +43,13 @@ async function fixture(page: Page, requestedView: "cards" | "list" = "cards") {
   });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  if ((page.viewportSize()?.width ?? 1024) < 1024) {
-    await page.getByRole("button", { name: "Меню", exact: true }).click();
-  }
-  await page.getByRole("link",{name:"Мои проекты"}).click();
+  // The desktop and mobile shell use the same branded overlay-only navigation.
+  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
+  const drawer = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(drawer).toBeVisible();
+  const practice = drawer.getByRole("button", { name: "Практика", exact: true });
+  if (await practice.getAttribute("aria-expanded") !== "true") await practice.click();
+  await drawer.getByRole("link", { name: "Мои проекты", exact: true }).click();
   await expect(page.locator(".mpv2")).toBeVisible();
   if (requestedView === "cards") {
     await page.locator(".mpv2").getByRole("group", { name: "Режим проектов" }).getByRole("button", { name: "Карточки" }).click();
