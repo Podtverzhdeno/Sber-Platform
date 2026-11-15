@@ -10,9 +10,9 @@
 
 ## Единая визуальная галерея
 
-**[Открыть галерею 38 сценариев / 48 SVG](index.html)** — фильтры по категориям, поиск, просмотр исходных самостоятельных SVG, переключение светлой и тёмной версии для 10 расширенных случаев. Галерея не содержит экспортированных Apple-ассетов и не подтверждает пиксельную идентичность.
+**[Открыть галерею 51 сценария и категории / 61 SVG](index.html)** — фильтры по категориям, поиск, просмотр исходных самостоятельных SVG, переключение светлой и тёмной версии для 10 расширенных случаев. Галерея не содержит экспортированных Apple-ассетов и не подтверждает пиксельную идентичность.
 
-Коллекции: [12 базовых](06-cases/VISUAL_GALLERY.md) · [16 сценариев](reference-cases/README.md) · [10 расширенных (20 SVG)](advanced-cases/README.md).
+Коллекции: [12 базовых](06-cases/VISUAL_GALLERY.md) · [16 сценариев](reference-cases/README.md) · [10 расширенных (20 SVG)](advanced-cases/README.md) · [13 категорий источников и оригинальных SVG](REFERENCE_GALLERY.md).
 
 **Инструменты переноса:** [9 компонентных пакетов](08-component-packs/README.md) · [интерактивная галерея контролов](08-component-packs/gallery.html) · [локальный screenshot-comparator](08-component-packs/compare.html) · [таблица для реальных измерений](08-component-packs/measurement-ledger.csv).
 
@@ -21,10 +21,10 @@
 1. Откройте **01-sources/official-links.md** и исходные Apple Figma/Sketch UI kits (iOS/iPadOS 27, macOS 27).
 2. Сверьте **02-specifications/**: материал, цвета, типографика, структуры, компоненты, интеракции, состояния.
 3. Используйте **03-impulse/integration-map.md**, чтобы сопоставить каждый маршрут IMPULSE с паттерном Apple.
-4. Откройте локально **04-web-reference/casebook.html** (интерактивная галерея: nav, chat, forms, materials, dialog) и изучите **04-web-reference/impulse-apple-tokens.css**. Прежняя **reference-gallery.html** также сохранена.
+4. Откройте локально [единую галерею](index.html) (51 карточка), [каталог 13 Apple-референсов](REFERENCE_GALLERY.md) и **04-web-reference/casebook.html**. Стили веб-адаптации смотрите в **04-web-reference/impulse-apple-tokens.css**. Альтернативная **reference-gallery.html** также сохранена.
 5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
 6. Пройдите **06-cases/README.md** для нужного сценария и выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
-7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+; проверяет 12 основных и 16 дополнительных SVG). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
+7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+; проверяет 12 основных и 16 дополнительных SVG). Также доступен `python3 "Apple UI kit/scripts/verify_reference_pack.py"` для новой коллекции. Результат проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
 
 ## Состав
 
@@ -51,7 +51,7 @@
 | advanced-cases/README.md | 10 расширенных сценариев, каждый в светлой и тёмной теме |
 | advanced-cases/index.html | Переключатель двух SVG-тем (20 визуализаций) |
 | advanced-cases/validate-advanced.py | XML-валидатор для 20 дополнительных SVG |
-| index.html | Общая галерея всех 48 референсов с фильтрацией и поиском |
+| index.html | Общая галерея 51 сценария / категории и всех 61 SVG с фильтрацией и поиском |
 | 08-component-packs/README.md | 9 групп интерфейсных референсов, 32 ссылки на Apple, исходные демо и QA |
 | 08-component-packs/compare.html | Инструмент локального сравнения разрешённых изображений без отправки файлов в сеть |
 | 08-component-packs/measurement-ledger.csv | Таблица замеров, пока с отметками TO_MEASURE |
@@ -60,6 +60,19 @@
 | 04-web-reference/verify-library.mjs | Проверка структуры, линковки, реальных путей IMPULSE и синтаксиса JavaScript без сети |
 | 04-web-reference/validate-svg-library.py | Строгая проверка XML, размеров, accessibility и источников 12 SVG |
 | 04-web-reference/compare-screenshots.py | Локальный pixel-overlay/MAE компаратор для **разрешённых** скриншотов |
+
+| REFERENCE_GALLERY.md | 13 категорий оригинальных визуальных примеров с ссылками Apple |
+| README_REFERENCE_LIBRARY.md | Полный справочник источников, назначение и правила переноса |
+| component-catalog.json | Каталог 67 концептуальных UI-компонентов и их официальных ссылок; размеры **не** измерены |
+| component-catalog.html | Визуальный указатель на 67 компонентов |
+| SOURCES.md, reference-manifest.json | Реестр официальных ссылок и происхождения источников |
+| scripts/verify_reference_pack.py | Проверка 13 источников, оригинальных SVG, JSON и галерей |
+| scripts/audit_source_bundle.py | Независимая проверка категоризации и лицензированных бинарных ресурсов |
+| scripts/audit_reference_links.py | Проверка относительных ссылок без сетевых запросов |
+| IMPULSE_SOURCE_CROSSWALK.json | Снимок соответствия файлами IMPULSE; изменившиеся SHA помечаются как устаревшие |
+| react-reference/ | Исходники самостоятельных React/TSX примеров, не production-код |
+| web-implementation/, web-prototype/ | Изолированные HTML/CSS/JS-образцы, не изменяющие приложение |
+
 
 ## Область применения и точность
 
