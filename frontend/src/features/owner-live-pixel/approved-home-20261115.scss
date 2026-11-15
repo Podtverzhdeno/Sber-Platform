@@ -360,6 +360,16 @@
   .page-shell--owner-pixel-home .workspace-content .impulse-pixel__trajectory {min-height:222px;height:auto;}
 }
 @media(max-width:570px) {
+  /* Compact mobile chrome has two rows: controls (0–60px) and the native
+     42px search surface (65–107px). Keep the title below the search rather
+     than letting the absolute search overlay "Главная". */
+  .page-shell.page-shell--owner-pixel-home .topbar {
+    width:100vw !important;
+    left:50vw !important;
+  }
+  .page-shell--owner-pixel-home.page-shell--apple-overlay .workspace--apple .workspace-content {
+    padding-top:94px !important;
+  }
   .page-shell--owner-pixel-home .workspace-content .impulse-pixel__stack {
     right:-31px;top:87px;width:170px;height:160px;opacity:.30;
   }
