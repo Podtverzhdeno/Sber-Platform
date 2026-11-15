@@ -10,7 +10,7 @@
 - scope: frontend/src/features/participant-results-hub/**; own isolated unit tests
 - excluded: frontend/src/App.tsx (Practice owner and UI-ALL-APPLE currently hold claims), portfolio-v2, analytics-v3, rating-v2, achievements-v2, shared shell and all backend
 - source: server actor.navigation; existing portfolio, analytics, achievements and rating routes; no fabricated data
-- progress: isolated source-backed ResultsHub + visual skin and model ready in main 377575ac; four local Vitest PASS; TypeScript PASS; eslint CI PASS on exact revision; no App route integration due ongoing Practice claim. Four local tabs preserve original authorized indexes and underlying evidence actions.
+- progress: isolated source-backed ResultsHub + visual skin and model ready in main 377575ac; four local Vitest PASS; TypeScript PASS; Vite production build PASS (2181 transformed modules); eslint CI PASS on exact revision; no App route integration due ongoing Practice claim. Four local tabs preserve original authorized indexes and underlying evidence actions.
 - verification: scoped ESLint/typecheck/Vitest/build where environment permits; main CI on exact revision; browser review outstanding
 - blockers: integration into App requires a coordinated owner-authorized non-overlapping route wiring pass
 
