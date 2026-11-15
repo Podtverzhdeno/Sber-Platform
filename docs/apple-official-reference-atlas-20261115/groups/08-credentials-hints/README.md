@@ -1,19 +1,17 @@
 # Достижения и подсказки — Apple source study
 
-Официальные исходные материалы: [Apple UI Kits Figma/Sketch](https://developer.apple.com/design/resources/); [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/).
+Official design resources: [iOS/iPadOS 27 and macOS 27 UI Kits](https://developer.apple.com/design/resources/) and [Apple HIG](https://developer.apple.com/design/human-interface-guidelines/).
 
-3 target cases, source measurements pending. These are links and checklists, **not official UI art, native code or pixel-verified Apple screenshots**.
+3 target cases, all source frame measurements pending. These are source URLs and study checklists, **not Apple-owned image exports or pixel-verified screenshots**. Per-entry guidance links have review status in [catalog.json](../../catalog.json); do not interpret "official domain" as evidence every layer was inspected.
 
-| ID | Component | Priority | Apple source | States |
+| ID | Component | Priority | Apple guidance or API | Required states |
 | --- | --- | --- | --- | --- |
-| APP-044 | Credential and Wallet-like card | P2 | [HIG](https://developer.apple.com/design/human-interface-guidelines/materials) | verified, revoked, private, unavailable |
-| APP-045 | TipKit-like contextual hint | P2 | [HIG](https://developer.apple.com/design/human-interface-guidelines/tips) | eligible, visible, dismissed, repeated |
-| APP-046 | Live Activity-like compact status | P2 | [HIG](https://developer.apple.com/design/human-interface-guidelines/live-activities) | active, paused, complete, stale, unsupported |
+| APP-044 | Credential and Wallet-like card | P2 | [Apple source](https://developer.apple.com/design/human-interface-guidelines/materials) | verified, revoked, private, unavailable |
+| APP-045 | TipKit-like contextual hint | P2 | [Apple source](https://developer.apple.com/design/human-interface-guidelines/offering-help) | eligible, visible, dismissed, repeated |
+| APP-046 | Live Activity-like compact status | P2 | [Apple source](https://developer.apple.com/design/human-interface-guidelines/live-activities) | active, paused, complete, stale, unsupported |
 
-## Application boundaries
+## Integration boundary
 
-Potential Impulse touchpoint: `frontend/src/components/ui.tsx` (read-only study; integration requires exclusive claim).
+Use existing Impulse components/routes/data. **Do not edit** `Apple UI kit/**`, `frontend/**`, or this repo's shared shell without an exclusive integration claim. For every target, record original kit version, node ID, exact variants, per-edge padding/radius, typography, materials, light/dark/keyboard states, screenshots at equal viewport/DPR, and independent reviewer approval.
 
-Each scenario requires official source frame ID, precise 27 kit version, screenshot dimensions, tokens, focus/keyboard behavior, mobile/light/dark/accessibility coverage, plus screenshot diff and independent reviewer. Unknown values remain `null` in the evidence template.
-
-[Source atlas](../../index.html) · [Capture protocol](../../CAPTURE_PROTOCOL.md)
+[Atlas](../../index.html) · [Capture protocol](../../CAPTURE_PROTOCOL.md)

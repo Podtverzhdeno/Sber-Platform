@@ -191,7 +191,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-002",
@@ -244,7 +246,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-003",
@@ -297,7 +301,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-004",
@@ -350,7 +356,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-005",
@@ -402,7 +410,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-006",
@@ -454,7 +464,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-007",
@@ -506,7 +518,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-008",
@@ -559,7 +573,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-009",
@@ -611,7 +627,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-010",
@@ -664,7 +682,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-011",
@@ -717,7 +737,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-012",
@@ -769,7 +791,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-013",
@@ -822,7 +846,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-014",
@@ -875,7 +901,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-015",
@@ -927,7 +955,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-016",
@@ -979,7 +1009,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-017",
@@ -1031,7 +1063,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-018",
@@ -1044,7 +1078,7 @@
         "macOS",
         "iOS/iPadOS"
       ],
-      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/switches",
+      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
       "source_index_url": "https://developer.apple.com/design/resources/",
       "kit_source_keys": [
         "mac-figma",
@@ -1084,7 +1118,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-019",
@@ -1097,7 +1133,7 @@
         "macOS",
         "iOS/iPadOS"
       ],
-      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/checkboxes",
+      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
       "source_index_url": "https://developer.apple.com/design/resources/",
       "kit_source_keys": [
         "mac-figma",
@@ -1136,7 +1172,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-020",
@@ -1189,7 +1227,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-021",
@@ -1242,7 +1282,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-022",
@@ -1294,7 +1336,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-023",
@@ -1347,7 +1391,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-024",
@@ -1360,7 +1406,7 @@
         "macOS",
         "iOS/iPadOS"
       ],
-      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/date-pickers",
+      "guideline_url": "https://developer.apple.com/documentation/swiftui/datepicker",
       "source_index_url": "https://developer.apple.com/design/resources/",
       "kit_source_keys": [
         "mac-figma",
@@ -1400,7 +1446,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "apple_developer_documentation",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-025",
@@ -1453,7 +1501,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-026",
@@ -1505,7 +1555,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-027",
@@ -1557,7 +1609,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-028",
@@ -1609,7 +1663,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-029",
@@ -1661,7 +1717,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-030",
@@ -1713,7 +1771,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-031",
@@ -1766,7 +1826,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-032",
@@ -1818,7 +1880,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-033",
@@ -1870,7 +1934,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-034",
@@ -1923,7 +1989,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-035",
@@ -1976,7 +2044,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-036",
@@ -2029,7 +2099,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-037",
@@ -2081,7 +2153,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-038",
@@ -2094,7 +2168,7 @@
         "macOS",
         "iOS/iPadOS"
       ],
-      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/tooltips",
+      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
       "source_index_url": "https://developer.apple.com/design/resources/",
       "kit_source_keys": [
         "mac-figma",
@@ -2133,7 +2207,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-039",
@@ -2186,7 +2262,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-040",
@@ -2238,7 +2316,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-041",
@@ -2291,7 +2371,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-042",
@@ -2344,7 +2426,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-043",
@@ -2397,7 +2481,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-044",
@@ -2449,7 +2535,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "apple_official_deep_link_not_individually_verified"
     },
     {
       "id": "APP-045",
@@ -2462,7 +2550,7 @@
         "macOS",
         "iOS/iPadOS"
       ],
-      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/tips",
+      "guideline_url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
       "source_index_url": "https://developer.apple.com/design/resources/",
       "kit_source_keys": [
         "mac-figma",
@@ -2501,7 +2589,9 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     },
     {
       "id": "APP-046",
@@ -2554,7 +2644,16 @@
       "interaction_verified": false,
       "independent_reviewed": false,
       "implementation_started": false,
-      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included."
+      "notes": "HIG guidance reference. Editable Apple source frame still needs manual inspection and measured export; no Apple image assets included.",
+      "guidance_kind": "human_interface_guidelines",
+      "guidance_url_review": "official_page_accessible"
     }
-  ]
+  ],
+  "meta": {
+    "design_resources_page_verified_at": "2026-11-15",
+    "guidance_deep_links_partially_verified": true,
+    "figma_sketch_layers_inspected": false,
+    "certified_pixel_parity": false,
+    "source_license_required": true
+  }
 }
