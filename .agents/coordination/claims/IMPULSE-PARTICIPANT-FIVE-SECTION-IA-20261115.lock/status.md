@@ -1,0 +1,25 @@
+# Claim IMPULSE-PARTICIPANT-FIVE-SECTION-IA-20261115
+
+- task_id: IMPULSE-PARTICIPANT-FIVE-SECTION-IA-20261115
+- session_id: gpt6-owner-participant-ia-20261115-2037
+- status: IN_PROGRESS
+- started_at: 2026-11-15T20:37:00+03:00
+- heartbeat_at: 2026-11-15T20:37:00+03:00
+- base_revision: 024a732dd666aa206f43f106fc66c00a92f30a34
+- user_decision: "сразу всегда в main пуш"; design-only five-section Apple minimalist IA; preserve all existing capabilities and subsection reachability
+- source: main participant groups from frontend/src/features/calm-navigation/model.ts; owner overlay contract from openspec/changes/impulse-apple-app-experience-20261114/docs/navigation-overlay-v4.md
+- depends_on: []
+- write_scope:
+  - openspec/changes/participant-five-section-content-first-20261115/**
+  - .agents/coordination/claims/IMPULSE-PARTICIPANT-FIVE-SECTION-IA-20261115.lock/status.md
+- excluded:
+  - frontend/**
+  - backend/**, API, DB, migrations, secrets
+  - openspec/changes/impulse-apple-app-experience-20261114/** (claimed by UI-ALL-APPLE and UI-APPLE-INTEGRATE)
+  - existing sidebars/topbar/role navigation and Railway
+- verification:
+  - source mapping to existing server-authorized participant destinations
+  - OpenSpec structural validation by CI; independent reviewer required for acceptance
+  - first-fold and full CJM E2E acceptance scenarios recorded
+- progress: isolated specification authoring; PR #203 already merged separately into main
+- blockers: local workspace unavailable for local test runs; main CI must verify exact source revision
