@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-QUALITY-GATES-20261115
 - session_id: gpt6-apple-kit-readonly-quality-gates-20261115-1819
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T18:19:00+03:00
 - heartbeat_at: 2026-11-15T18:19:00+03:00
 - depends_on: [APPLE-UI-KIT-FIDELITY-WORKBENCH-20261115]
