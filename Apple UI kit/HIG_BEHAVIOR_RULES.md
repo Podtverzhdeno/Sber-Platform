@@ -54,3 +54,13 @@ Prominent vs secondary and destructive buttons must be distinguishable, labeled 
 ## Limits
 
 This document does **not** provide a 1:1 Apple CSS implementation or per-component numerical metrics. Current official editable kit versions are reachable via https://developer.apple.com/design/resources/; real layer export and measurement remain outstanding.
+
+## 8. October 2026 macOS touch guidance
+Source: https://developer.apple.com/design/human-interface-guidelines/designing-for-macos
+
+Mac retains keyboard/precision-pointer workflows; touch now requires discoverable, tappable actions and no critical hover-only affordances. Do not inflate every desktop row. Review role-specific scenarios in [MACOS_TOUCH_2026.md](11-motion-accessibility-responsive/MACOS_TOUCH_2026.md).
+
+## 9. November 2026 Live Activities kit refresh
+Source: https://developer.apple.com/design/whats-new/
+
+Updated Figma/Sketch templates for iOS 27 include macOS examples. Impulse may study truthful compact status hierarchy but **must not** claim OS-level Live Activities integration. See [LIVE_ACTIVITIES_2026.md](09-progress-feedback-states/LIVE_ACTIVITIES_2026.md).

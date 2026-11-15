@@ -84,3 +84,7 @@ For other controls (segmented controls, toggles, sliders, pickers, popovers, ale
 ## Native-to-web limitations
 
 A Figma/Sketch layout can be *measured* and reimplemented in HTML/CSS, but a native SwiftUI `glassEffect` and the browser `backdrop-filter` are different renderers. Any unmeasured CSS token in this folder is labeled a **proposed Impulse web value**, not an official Apple token. Source URLs may require login/terms; follow Apple/Figma licensing before use.
+
+## Newer official design changes (verified 2026-11-15)
+
+Apple's [design update log](https://developer.apple.com/design/whats-new/) reports that the **Live Activities UI kits were refreshed on November 6, 2026**, adding macOS components/examples, and [macOS design guidance](https://developer.apple.com/design/human-interface-guidelines/designing-for-macos) was updated for touch input **October 28, 2026**. These facts are summarized in [CURRENT_OFFICIAL_UPDATES_2026.md](CURRENT_OFFICIAL_UPDATES_2026.md), with dedicated [Live Activities](09-progress-feedback-states/LIVE_ACTIVITIES_2026.md) and [macOS Touch](11-motion-accessibility-responsive/MACOS_TOUCH_2026.md) packets. Individual Apple Figma/Sketch layer inspections remain pending.

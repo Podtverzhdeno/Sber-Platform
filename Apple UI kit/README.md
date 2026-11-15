@@ -56,3 +56,9 @@ Coverage includes foundations (color, material, layout, typography, symbols, mot
 - [Apple HIG behavior rules](HIG_BEHAVIOR_RULES.md): source-backed guardrails (tab bar vs toolbar, search layout, popovers, controls, materials).
 
 **Verification status:** structure/JS syntax/DOM wiring and catalog checks done via GitHub source; actual browser run and Pillow unit tests are pending, as are official editable frame measurements. Do not call this pixel-parity approved.
+
+## 2026 source updates and quality gate
+
+- [Current official Apple changes](CURRENT_OFFICIAL_UPDATES_2026.md): September 27-kit updates, November 6 Live Activities, October 28 macOS touch.
+- [macOS touch acceptance](11-motion-accessibility-responsive/MACOS_TOUCH_2026.md) and [new Live Activities](09-progress-feedback-states/LIVE_ACTIVITIES_2026.md) for six-role Impulse patterns.
+- [Offline reference source audit](SOURCE_QUALITY_GATE.md) checks structure, source provenance, component IDs and HTML/JS links without downloading Apple design assets. Run locally after checkout; the presence of a script is not a passed test.

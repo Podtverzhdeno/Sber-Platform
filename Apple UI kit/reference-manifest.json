@@ -17,7 +17,10 @@
     "pixel_diff_helper_present": true,
     "pixel_diff_helper_executed_in_this_session": false,
     "browser_e2e_executed_in_this_session": false,
-    "edited_at": "2026-11-15"
+    "edited_at": "2026-11-15",
+    "last_verified_official_design_update": "2026-11-15",
+    "offline_source_audit_script_added": true,
+    "offline_source_audit_execution_verified": false
   },
   "sources": [
     {
@@ -160,5 +163,28 @@
     "pixel_diff_helper_unit_tests": "not_executed",
     "apple_editable_frames": "not_inspected",
     "merging_to_main": "pending_review"
-  }
+  },
+  "latest_verified_changes": [
+    {
+      "date": "2026-11-06",
+      "summary": "Live Activities UI kits updated for iOS 27 and macOS examples",
+      "source": "https://developer.apple.com/design/whats-new/",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    },
+    {
+      "date": "2026-10-28",
+      "summary": "macOS design updated with touch input guidance",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    },
+    {
+      "date": "2026-09-17",
+      "summary": "iOS/iPadOS 27 and macOS 27 Figma UI kits updated",
+      "source": "https://developer.apple.com/design/whats-new/",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    }
+  ]
 }
