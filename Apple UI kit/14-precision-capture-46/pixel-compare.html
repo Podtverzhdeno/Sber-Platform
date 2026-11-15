@@ -72,14 +72,14 @@ legend{padding:0 6px}
 <button class="mode" type="button" data-mode="split" aria-pressed="true">Разделение</button>
 <button class="mode" type="button" data-mode="overlay" aria-pressed="false">Наложение 50%</button>
 </div></fieldset>
-<label for="split">Доля референса: <output id="split-value">50%</output><input type="range" id="split" min="0" max="100" step="1" value="50"></label>
+<label for="split">Доля скриншота Impulse: <output id="split-value">50%</output><input type="range" id="split" min="0" max="100" step="1" value="50"></label>
 </div>
 <div class="frame"><div class="viewport" id="viewport"><canvas id="comparison-reference" aria-label="Референс"></canvas><canvas id="comparison-target" aria-label="Скриншот реализации"></canvas></div></div>
 <h2 style="margin-top:22px">Тепловая карта различий</h2><canvas id="heatmap" aria-label="Тепловая карта пиксельных отличий"></canvas>
 <p class="muted">Красный: отличие выше допуска. Прозрачный: совпадающие каналы в пределах заданного допуска. Ровно два сравниваемых изображения; совмещения и масштабирования алгоритм не выполняет.</p>
 <button id="save-report" type="button">Сохранить JSON-отчёт</button>
 </section>
-<footer class="muted">Локальный веб-инструмент Impulse, не разработан Apple. Не содержит Apple UI kit, шрифтов, SF Symbols или изображений Apple. <a href="PIXEL_PARITY_QA.md">Проверка исходных кадров и состояния — см. родительский протокол</a>.</footer>
+<footer class="muted">Локальный веб-инструмент Impulse, не разработан Apple. Не содержит Apple UI kit, шрифтов, SF Symbols или изображений Apple. <a href="../PIXEL_PARITY_QA.md">Проверка исходных кадров и состояния — см. родительский протокол</a>.</footer>
 </main>
 <script>
 "use strict";
