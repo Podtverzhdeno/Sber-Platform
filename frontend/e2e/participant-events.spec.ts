@@ -48,7 +48,7 @@ async function api(page: Page, visualReference = false) {
 }
 
 test("event catalog keeps cards and preserves filter/detail through URL, reload and Back", async ({ page }) => {
-  await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.getByRole("link", { name: "События" }).click();
+  await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.goto("/workspace/1");
   await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
   await page.getByRole("button", { name: /Фильтры/ }).click();
@@ -65,7 +65,7 @@ test("event catalog keeps cards and preserves filter/detail through URL, reload 
 });
 
 test("event detail remains readable on mobile", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 }); await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.getByRole("button", { name: "Меню", exact: true }).click(); await page.getByRole("link", { name: "События" }).click(); await page.getByRole("button", { name: "Подробнее" }).click(); await expect(page.getByRole("dialog", { name: "AI Journey 2026" })).toBeVisible(); await expect(page.getByText("7")).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 }); await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.goto("/workspace/1"); await page.getByRole("button", { name: "Подробнее" }).click(); await expect(page.getByRole("dialog", { name: "AI Journey 2026" })).toBeVisible(); await expect(page.getByText("7")).toBeVisible();
 });
 
 
@@ -73,7 +73,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await api(page, true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
   await expect(page.getByTestId("events-v2")).toBeVisible();
   const hero = page.locator(".participant-events .ev-hero");
   await expect(hero.locator(".ev-kicker")).toHaveText("События от Сбера и партнёров");
@@ -173,7 +173,7 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await api(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
   const eventCard = page.getByTestId("event-reference-card");
   await expect(eventCard).toHaveCount(1);
   await expect(page.locator(".ev-filters")).toHaveCount(0);
@@ -216,7 +216,7 @@ test("events retain cards and filters with a compact Apple-inspired first fold",
   await api(page, true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
 
   await expect(page.locator(".ev-hero")).toBeVisible();
   await expect(page.locator(".ev-metrics>div")).toHaveCount(3);
@@ -245,7 +245,7 @@ test("events filter popup: staged selection, count, reset, chip removal and Esca
   await api(page,true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
   const toggle = page.getByRole("button", { name: /Фильтры/ });
   await toggle.click();
   const panel = page.locator(".ev-v3-popover");
@@ -271,7 +271,7 @@ test("Community navigation connects authorized Events and Messages at mobile and
   await api(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
   const nav = page.getByRole("navigation", { name: "Подразделы сообщества" });
   await expect(nav).toBeVisible();
   await expect(nav.getByRole("link", { name: "События" })).toHaveAttribute("aria-current", "page");
@@ -300,7 +300,7 @@ test("mini filter stays inside mobile viewport without changing original event c
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
-  await page.getByRole("link", { name: "События" }).click();
+  await page.goto("/workspace/1");
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   const toggle = page.locator(".ev-compact-trigger");
   await toggle.click();
