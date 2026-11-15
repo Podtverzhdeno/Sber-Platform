@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "project": "IMPULSE",
+    "verified_date": "2026-11-15",
+    "note": "Official links as navigation pointers; not redistributable asset downloads.",
+    "version": "Apple UI Kit 27"
+  },
+  "sources": [
+    {
+      "id": "design-resources",
+      "kind": "official-index",
+      "url": "https://developer.apple.com/design/resources/"
+    },
+    {
+      "id": "ios27-figma",
+      "kind": "official-figma",
+      "url": "https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27"
+    },
+    {
+      "id": "ios27-sketch",
+      "kind": "official-sketch",
+      "url": "https://www.sketch.com/s/04c24d8b-38fb-4afb-8836-36617e022f02"
+    },
+    {
+      "id": "macos27-figma",
+      "kind": "official-figma",
+      "url": "https://www.figma.com/community/file/1651309434229735362/macos-27"
+    },
+    {
+      "id": "macos27-sketch",
+      "kind": "official-sketch",
+      "url": "https://www.sketch.com/s/57153a31-3379-4737-8ac6-dbfd6525f052"
+    },
+    {
+      "id": "human-interface-guidelines",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/"
+    },
+    {
+      "id": "liquid-glass",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/documentation/technologyoverviews/liquid-glass"
+    },
+    {
+      "id": "materials",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/materials"
+    },
+    {
+      "id": "sf-symbols",
+      "kind": "application",
+      "url": "https://developer.apple.com/sf-symbols/"
+    },
+    {
+      "id": "fonts",
+      "kind": "official-asset-index",
+      "url": "https://developer.apple.com/fonts/"
+    },
+    {
+      "id": "license",
+      "kind": "legal",
+      "url": "https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf"
+    }
+  ]
+}
