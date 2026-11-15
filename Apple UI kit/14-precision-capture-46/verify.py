@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check Apple UI kit 46-case capture registry, using the standard library only."""
+
 import csv
 import json
 import re
@@ -47,7 +48,7 @@ for category in categories:
 assert "<dialog" in lab and 'role="status"' in lab
 assert "prefers-reduced-motion" in lab and "prefers-reduced-transparency" in lab
 assert "forced-colors" in lab and "focus-visible" in lab
-assert '<script src=' not in lab and 'https://raw.githubusercontent.com' not in lab
+assert "<script src=" not in lab and "https://raw.githubusercontent.com" not in lab
 # Verify candidate paths against the actual checked-out Impulse repository.
 mapping = json.loads((root / "impulse-integration-candidates.json").read_text(encoding="utf-8"))
 targets = mapping["records"]
@@ -76,23 +77,38 @@ assert source_index["editable_apple_layers_inspected"] is False
 assert source_index["apple_copyrighted_assets_included"] is False
 assert {entry["url"] for entry in sources} == {entry["hig_url"] for entry in items}
 for source in sources:
-    assert source["url"].startswith("https://developer.apple.com/design/human-interface-guidelines/")
+    assert source["url"].startswith(
+        "https://developer.apple.com/design/human-interface-guidelines/"
+    )
     assert source["status"] == "OFFICIAL_HIG_CHAPTER_RESOLVED"
     assert source["source_images_copied"] is False
     assert source["source_frame_geometry_measured"] is False
-    assert source["case_ids"] == [entry["id"] for entry in items if entry["hig_url"] == source["url"]]
+    assert source["case_ids"] == [
+        entry["id"] for entry in items if entry["hig_url"] == source["url"]
+    ]
 
 # Offline screenshot comparator source integrity. Runtime checks live in separate tests.
 pixel_html = (root / "pixel-compare.html").read_text(encoding="utf-8")
-for required in ("function differences(", "function loadImage(", "pixel_parity_certified:false",
-                 "source_geometry_verified:false", "URL.createObjectURL", 'href="../PIXEL_PARITY_QA.md"',
-                 "rgba_0_255", 'id="reference-file"', 'id="actual-file"', 'id="heatmap"'):
+for required in (
+    "function differences(",
+    "function loadImage(",
+    "pixel_parity_certified:false",
+    "source_geometry_verified:false",
+    "URL.createObjectURL",
+    'href="../PIXEL_PARITY_QA.md"',
+    "rgba_0_255",
+    'id="reference-file"',
+    'id="actual-file"',
+    'id="heatmap"',
+):
     assert required in pixel_html, f"pixel-compare missing: {required}"
 assert not re.search(r"<script\b[^>]*\bsrc=", pixel_html, re.IGNORECASE)
 assert (root / "test_pixel_compare.cjs").is_file()
 assert (root / "qa_pixel_compare.py").is_file()
 assert (root / "PIXEL_COMPARE_WORKFLOW.md").is_file()
 
-print(f"OK: {len(items)} case folders, {len(rows)} ledger rows, "
-      f"{len(lab_cases)} indexed lab cases, {len(categories)} original study pattern families; "
-      "no fabricated Apple measurements")
+print(
+    f"OK: {len(items)} case folders, {len(rows)} ledger rows, "
+    f"{len(lab_cases)} indexed lab cases, {len(categories)} original study pattern families; "
+    "no fabricated Apple measurements"
+)
