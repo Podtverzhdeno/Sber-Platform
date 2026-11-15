@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
 
 // Reference-specific compositions for the remaining R-* flows from
 // visual-reference-catalog.md. Partner doc: visual-route-traceability.md.
@@ -698,6 +699,21 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
   const actor = actorOf("participant", participantBase.display_name, participantNavigation);
   await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
   await installParticipantData(page);
+  // The canonical route reads an authorized overview, unlike ?legacy=1.
+  // Supply a genuine schema-shaped fixture so the test checks the rendered
+  // layout rather than the error/loading state.
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: [
+          ...overviewFixture.roles,
+          { track_key: "data", title: "Data-аналитик", state: "paused", attempt_number: 1, completed_milestones: 1, total_milestones: 3 },
+          { track_key: "product", title: "Продакт-менеджер", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 4 },
+        ],
+      },
+    }),
+  );
   await openWorkspace(page, participantBase.key);
   await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
 
