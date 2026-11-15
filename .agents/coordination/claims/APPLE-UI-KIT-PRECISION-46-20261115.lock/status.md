@@ -1,0 +1,24 @@
+# Claim APPLE-UI-KIT-PRECISION-46-20261115
+
+- task_id: APPLE-UI-KIT-PRECISION-46-20261115
+- session_id: gpt6-20261115-precision-46-owner-continuation
+- status: IN_PROGRESS
+- started_on: 2026-11-15
+- base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
+- owner_instruction: "Продолжай вносить и коммитить"
+- depends_on: []
+- write_scope:
+  - Apple UI kit/14-precision-capture-46/**
+  - .agents/coordination/claims/APPLE-UI-KIT-PRECISION-46-20261115.lock/status.md
+- coordination: independent child branch based on PR #181, additive path not present in other Apple PRs; existing broad Apple claims are not edited or overwritten. Owner-requested continuation to be reviewed by their owner/coordinator.
+- excluded:
+  - existing Apple UI kit root files and 01-13 folders
+  - Apple UI kit/reference-cases/** and Apple UI kit/advanced-cases/**
+  - frontend/**, backend/**, App.tsx, docs/**, openspec/**, deployments, all other claims
+- verification:
+  - 46 unique source-linked reference capture records
+  - machine-readable manifest and consistent per-case markdown
+  - dependency-free Python validation of manifest + source status + exact path coverage
+  - GitHub fetch-back/readback and branch diff
+- progress: owner-directed isolated branch and claim established; capture registry changes pending.
+- blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
