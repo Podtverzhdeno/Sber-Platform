@@ -85,9 +85,6 @@ export function toPixelHomeModel({
       roleLevel.required_courses : null,
     activeTaskCount: overview.active_tasks.length,
     confirmedSkills,
-    requirementsSummary: roleLevel ?
-      `Обязательные курсы: ${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)}. Практика: ${String(roleLevel.credited_practices)} из ${String(roleLevel.required_practices)}.`
-      : null,
     weekSummary: overview.weekly_focus.versioned ?
       `За неделю выполнено ${String(overview.weekly_focus.done_days)} из ${String(overview.weekly_focus.target_days)} запланированных дней.`
       : null,
