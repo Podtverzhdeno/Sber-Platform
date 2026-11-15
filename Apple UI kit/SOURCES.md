@@ -2,6 +2,20 @@
 
 Last verified 2026-11-15 via Apple Developer Design Resources and HIG. “Listed” means Apple published the kit/link; “layers inspected” means actual Figma/Sketch editable document was opened and measured—**none of the linked proprietary kit layers have been inspected here**.
 
+## Verified official Apple-hosted visual previews (no copied assets)
+
+The two current UI Kit preview images below were resolved from Apple's Design Resources page, not inferred from a filename. They display remotely in [OFFICIAL_VISUAL_GALLERY.md](OFFICIAL_VISUAL_GALLERY.md) and in the [local gallery](reference-gallery.html). They are not checked into the repository.
+
+| Source | Apple-hosted preview URL | Notes |
+|---|---|---|
+| iOS/iPadOS 27 | https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-iOS27_2x.png | Official 27 preview only, not all layers |
+| macOS 27 | https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-macOS27_2x.png | Official 27 preview only, not all layers |
+| Messages template | https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Message-Template_2x.png | Template preview; not complete Messages.app UI |
+| TipKit template | https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-TipKit_2x.png | Context-help reference |
+| Live Activities template | https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Live-Activities_2x.png | Template preview |
+
+Apple also published refreshed 27 Figma resources on **September 17, 2026**: https://developer.apple.com/design/whats-new/ . Reconfirm the source version before measuring individual components.
+
 ## Official editable source kits
 
 | ID | Platform | Official link | Tool | Access / certainty |
@@ -15,6 +29,7 @@ Last verified 2026-11-15 via Apple Developer Design Resources and HIG. “Listed
 | APP-MESSAGES-FIG | Messages apps and stickers | https://www.figma.com/community/file/1367916269438172112/imessage-apps-and-stickers | Figma | Apple-linked template, not automatically a full Messages.app UI kit |
 | APP-LIVEACT-FIG | Live Activities | https://www.figma.com/community/file/1367915437752334285/live-activities | Figma | Apple-linked; native iOS surface, web only analogue |
 | APP-TIPKIT-FIG | TipKit | https://www.figma.com/community/file/1367917705471226837/tipkit | Figma | Apple-linked; contextual help reference |
+| APP-WALLET-FIG | Wallet design template | https://www.figma.com/community/file/1367917956770293718/wallet | Figma | Apple-listed; Apple Wallet is not integrated into Impulse |
 | APP-APPLEPAY-FIG | Apple Pay | https://www.figma.com/community/file/1367915141082663884/apple-pay | Figma | Apple-linked, do not imply Apple Pay is integrated |
 | APP-SIGNIN-FIG | Sign in with Apple | https://www.figma.com/community/file/1367916685468040146/sign-in-with-apple | Figma | Apple-linked; must follow separate branding rules |
 

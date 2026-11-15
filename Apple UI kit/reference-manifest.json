@@ -6,7 +6,11 @@
     "official_design_kit_layers_inspected": false,
     "archive_contains_licensed_apple_assets": false,
     "source_of_truth": "https://developer.apple.com/design/resources/",
-    "style_tokens_are_official": false
+    "style_tokens_are_official": false,
+    "last_reference_gallery_update": "2026-11-15",
+    "category_folder_count": 13,
+    "original_svg_mockup_count": 13,
+    "apple_hosted_visual_preview_count": 5
   },
   "sources": [
     {
@@ -103,5 +107,42 @@
     "No mirroring Apple Figma/Sketch binaries",
     "Browser approximation cannot claim native glass compositor",
     "Official 27 kit layer measurement and source frame export still pending"
+  ],
+  "official_preview_images": [
+    {
+      "id": "ios27-preview",
+      "platform": "iOS/iPadOS 27",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-iOS27_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "macos27-preview",
+      "platform": "macOS 27",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-macOS27_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "messages-preview",
+      "platform": "Messages template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Message-Template_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "tipkit-preview",
+      "platform": "TipKit template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-TipKit_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "live-activities-preview",
+      "platform": "Live Activities template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Live-Activities_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    }
   ]
 }

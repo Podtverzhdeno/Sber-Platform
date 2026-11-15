@@ -8,6 +8,15 @@ Make Apple design references **findable, measurable, and reproducible** in the R
 
 **Source hierarchy:** official downloadable Figma/Sketch UI kits → Apple Human Interface Guidelines → native implementation documentation → measured reference screenshot at a fixed viewport → this folder's web approximation. Never reverse that order or claim that a browser blur filter is Apple's actual rendering engine.
 
+## Visual-first: browse the references
+
+- [**Visual gallery (local HTML)**](reference-gallery.html): 13 independently drawn SVG case studies + 5 remote Apple-hosted official thumbnails. Open the file from a checked-out repository to view the gallery.
+- [**Official Apple thumbnails (GitHub preview)**](OFFICIAL_VISUAL_GALLERY.md): actual preview imagery from Apple's iOS 27/macOS 27 kits and Messages/TipKit/Live Activities, linked to Apple servers, not redistributed.
+- [**13 categorized reference folders**](REFERENCE_GALLERY.md): per-case source and state checklist, web study SVG and machine-readable provenance.
+- [**Automatic consistency verifier**](scripts/verify_reference_pack.py): run `python "Apple UI kit/scripts/verify_reference_pack.py"` from the repository root.
+
+The Apple-hosted thumbnails are real Apple previews but **not editable layer measurements**; the local SVG boards are original illustrations, not screenshots of Apple's apps. Do not confuse them.
+
 ## Start here
 
 1. [Official source register](SOURCES.md): direct iOS/iPadOS 27, macOS 27, watchOS, visionOS design files and Apple component guidelines.
