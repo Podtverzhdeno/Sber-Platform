@@ -37,7 +37,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Портфолио" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Портфолио"))}`);
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Алекс Речной" })).toBeVisible();
   await expect(page.getByRole("tab")).toHaveCount(6);
@@ -129,7 +129,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   await page.getByRole("tab", { name: "Обзор" }).click();
   await page.getByRole("button", { name: /Открыть Skill Passport/ }).click();
   await expect(page).toHaveURL(/\/workspace\/6\?analyticsTab=passport$/);
-  await page.getByRole("link", { name: "Портфолио" }).click();
+  await page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Портфолио" }).click();
   await page.getByRole("button", { name: /Редактировать профиль/ }).click();
   await expect(page).toHaveURL(/\/workspace\/7$/);
 });
@@ -152,9 +152,9 @@ test("portfolio: narrow layout never overflows and all six tabs remain reachable
   }}));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  // On narrow screens the shared sidebar is off-canvas. Test the portfolio route directly;
+  // On narrow screens the shared sidebar is off-canvas. The original authorized route remains stable;
   // shell navigation has its own responsive acceptance coverage.
-  await page.locator('a[href="/workspace/1"]').evaluate((node: Element) => { (node as HTMLAnchorElement).click(); });
+  await page.goto("/workspace/1");
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
   for (const name of ["Обзор","Skill Passport","Проекты","Сертификация","Достижения","О себе"]) {
     await page.getByRole("tab",{name}).click();

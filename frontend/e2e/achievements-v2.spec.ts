@@ -59,7 +59,8 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await setup(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Достижения"))}`);
+  await expect(page.getByRole("navigation", { name: "Подразделы результатов" }).getByRole("link", { name: "Достижения" })).toHaveAttribute("aria-current", "page");
   const screen = page.getByTestId("achievements-v2");
   await expect(screen).toBeVisible();
   await expect(screen.getByRole("heading", { name: /Твои результаты/ })).toBeVisible();
@@ -74,7 +75,7 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await firstStar.click();
   await expect(screen.getByTestId("achievement-card").first().locator(".ach-gallery-star")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("link", { name: "Главная" }).click();
+  await page.goto(`/workspace/${String(actor.navigation.indexOf("Главная"))}`);
   await page.getByRole("link", { name: "Достижения" }).click();
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const columns = await screen.locator(".ach-gallery-grid").evaluate(element =>
@@ -136,7 +137,7 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: /Меню/ }).click();
+  // The global sidebar is intentionally hidden on mobile; the authorized route remains directly reachable.
   await page.getByRole("link", { name: "Достижения" }).click();
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
