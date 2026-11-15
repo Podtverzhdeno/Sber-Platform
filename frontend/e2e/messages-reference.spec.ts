@@ -246,7 +246,7 @@ test("Messages shares the exact navigation shell with Analytics and preserves th
   const sidebar=page.locator(".calm-sidebar");
   const signature=async () => sidebar.evaluate(el=>({
     brand:el.querySelector(".calm-sidebar__brand")?.textContent,
-    groups:Array.from(el.querySelectorAll(".calm-sidebar__group"),item=>item.textContent?.trim()),
+    groups:Array.from(el.querySelectorAll(".calm-sidebar__group"),item=>item.textContent.trim()),
     promo:el.querySelector(".sidebar-message")?.innerHTML,
   }));
   const expected=await signature();
