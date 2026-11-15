@@ -51,12 +51,16 @@ async function openCatalog(page: Page, theme: "light" | "dark"): Promise<void> {
   await page.goto("/");
   await page.locator('[data-persona="participant-synthetic"]').click();
   await expect(page.locator(".workspace")).toBeVisible();
-  const menu = page.getByRole("button", { name: "Меню", exact: true });
-  if (await menu.isVisible().catch(() => false)) {
-    await menu.click();
-    await expect(menu).toHaveAttribute("aria-expanded", "true");
-  }
-  await page.getByRole("link", { name: "Задачи", exact: true }).click();
+  // The approved overlay-only shell has no visible "Меню" button.
+  // Open the server-authorized routes through the Impulse brand and expand
+  // the same "Практика" group the user sees on desktop and mobile.
+  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
+  const drawer = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(drawer).toBeVisible();
+  const practice = drawer.getByRole("button", { name: "Практика", exact: true });
+  if (await practice.getAttribute("aria-expanded") !== "true") await practice.click();
+  await expect(practice).toHaveAttribute("aria-expanded", "true");
+  await drawer.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   await page.getByRole("button", { name: "Карточки" }).click();
   await expect(page.locator(".catalog-v2-card")).toHaveCount(2);

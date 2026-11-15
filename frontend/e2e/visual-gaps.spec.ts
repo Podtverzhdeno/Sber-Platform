@@ -26,7 +26,9 @@ for (const gap of gaps) {
     await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: { person_id: `visual-${gap.role}`, display_name: gap.name, active_role: gap.role, assigned_roles: [gap.role], scopes: [], consent_scopes: [], navigation: gap.navigation, csrf_token: "visual-csrf" } }));
     await page.goto("/");
     await page.locator(`[data-persona="${gap.persona}"]`).click();
-    if (gap.section > 0) await page.getByRole("link", { name: gap.navigation[gap.section], exact: true }).click();
+    // Visual composition test: isolate the authorized destination from the
+    // overlay menu, which is independently covered by Shared Sidebar QA.
+    if (gap.section > 0) await page.goto(`/workspace/${String(gap.section)}`);
     await expect(page.locator(`[data-reference="${gap.reference}"]`)).toBeVisible();
     await page.getByRole("button", { name: "Открыть рабочий список" }).click();
     await expect(page.getByRole("status")).toBeVisible();

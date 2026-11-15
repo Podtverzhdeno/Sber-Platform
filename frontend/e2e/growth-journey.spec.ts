@@ -367,15 +367,24 @@ test.describe("mobile touch journey: theme, project evidence and readiness in li
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  const themeToggle = page.locator(".theme-toggle");
-  await themeToggle.tap();
+  // The approved 3-state theme control replaces the old binary .theme-toggle.
+  // Select light mode by actual icon state (sun), not by assuming one fixed tap.
+  const themeToggle = page.locator(".owner-theme-switch");
+  await expect(themeToggle).toBeVisible();
+  for (let index = 0; index < 3; index += 1) {
+    if ((await themeToggle.getAttribute("aria-label"))?.includes("солнце")) break;
+    await themeToggle.tap();
+  }
+  await expect(themeToggle).toHaveAttribute("aria-label", /солнце/);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(themeToggle).toHaveAttribute("aria-pressed", "false");
 
   const openProjects = async (): Promise<void> => {
-    await page.getByRole("button", { name: "Меню", exact: true }).click();
-    await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
-    await page.getByRole("link", { name: "Мои проекты" }).click();
+    await page.getByRole("button", { name: "Impulse — открыть разделы" }).tap();
+    const drawer = page.getByRole("dialog", { name: "Главное меню" });
+    await expect(drawer).toBeVisible();
+    const practice = drawer.getByRole("button", { name: "Практика", exact: true });
+    if (await practice.getAttribute("aria-expanded") !== "true") await practice.tap();
+    await drawer.getByRole("link", { name: "Мои проекты", exact: true }).tap();
   };
 
   await openProjects();
