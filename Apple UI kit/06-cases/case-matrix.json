@@ -217,7 +217,8 @@
       ],
       "source_ids": [
         "alerts",
-        "progress-indicators"
+        "progress-indicators",
+        "notifications"
       ],
       "required_states": [
         "read",
@@ -258,7 +259,9 @@
       ],
       "source_ids": [
         "materials",
-        "messages-figma"
+        "messages-figma",
+        "image-wells",
+        "collections"
       ],
       "required_states": [
         "uploading",
