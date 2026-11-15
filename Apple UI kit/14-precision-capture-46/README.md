@@ -7,6 +7,7 @@ This follow-up to [Apple UI kit/](../README.md) covers **all 46 component target
 - `cases/APP-CAP-001-*/README.md` through `APP-CAP-046-*/README.md`: per-component source capture and QA contracts.
 - `manifest.json`: 46 unique stable IDs, **direct Apple HIG chapters**, Impulse use case, target states and explicit unmeasured fields.
 - `SOURCE_COVERAGE_AUDIT.md`: 46 individual HIG chapter links, provenance status and 19 source-refinement notes (native-only exceptions explicitly disclosed).
+- `official-source-index.json`: 24 distinct Apple HIG chapter URLs verified to resolve, mapped back to all 46 cases. **No source Figma/Sketch frames or pixel values claimed**.
 - `measurement-ledger.csv`: 46 empty measurement rows. **Do not fabricate numbers or copy native Apple source assets.**
 - `gallery.html`: filterable offline HTML directory of the capture registry.
 - `interactive-state-lab.html`: accessible, dependency-free visual study of all 46 case names using **14 distinct native-web pattern examples**; light/dark mode, 320/390px simulated containers, keyboard, local form and menu states. It intentionally does **not** reproduce 46 Apple source frames, and its demonstration data are never connected to Impulse API.

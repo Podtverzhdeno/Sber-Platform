@@ -67,6 +67,21 @@ for target in targets:
         assert path.resolve().is_relative_to(repo_root.resolve()), relative
         assert path.is_file(), f"missing candidate: {relative}"
 
+# Source-index integrity, without network calls or assumptions about Apple layer measurements.
+source_index = json.loads((root / "official-source-index.json").read_text(encoding="utf-8"))
+sources = source_index["sources"]
+assert len(sources) == source_index["source_count"] == 24
+assert source_index["case_count"] == len(items) == 46
+assert source_index["editable_apple_layers_inspected"] is False
+assert source_index["apple_copyrighted_assets_included"] is False
+assert {entry["url"] for entry in sources} == {entry["hig_url"] for entry in items}
+for source in sources:
+    assert source["url"].startswith("https://developer.apple.com/design/human-interface-guidelines/")
+    assert source["status"] == "OFFICIAL_HIG_CHAPTER_RESOLVED"
+    assert source["source_images_copied"] is False
+    assert source["source_frame_geometry_measured"] is False
+    assert source["case_ids"] == [entry["id"] for entry in items if entry["hig_url"] == source["url"]]
+
 print(f"OK: {len(items)} case folders, {len(rows)} ledger rows, "
       f"{len(lab_cases)} indexed lab cases, {len(categories)} original study pattern families; "
       "no fabricated Apple measurements")
