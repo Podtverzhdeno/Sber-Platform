@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "title": "Apple UI kit references for Impulse",
+    "checked_at": "2026-11-15",
+    "repo": "Podtverzhdeno/Sber-Platform",
+    "official_design_kit_layers_inspected": false,
+    "archive_contains_licensed_apple_assets": false,
+    "source_of_truth": "https://developer.apple.com/design/resources/",
+    "style_tokens_are_official": false
+  },
+  "sources": [
+    {
+      "id": "ios27-figma",
+      "platform": "iOS/iPadOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "ios27-sketch",
+      "platform": "iOS/iPadOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.sketch.com/s/04c24d8b-38fb-4afb-8836-36617e022f02",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "macos27-figma",
+      "platform": "macOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.figma.com/community/file/1651309434229735362/macos-27",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "macos27-sketch",
+      "platform": "macOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.sketch.com/s/57153a31-3379-4737-8ac6-dbfd6525f052",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "hig-materials",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+      "status": "read"
+    },
+    {
+      "id": "hig-color",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color",
+      "status": "read"
+    },
+    {
+      "id": "hig-buttons",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+      "status": "read"
+    },
+    {
+      "id": "hig-sidebars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "status": "read"
+    },
+    {
+      "id": "hig-toolbars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars",
+      "status": "read"
+    },
+    {
+      "id": "hig-tabbars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "status": "read"
+    },
+    {
+      "id": "hig-search",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "status": "read"
+    },
+    {
+      "id": "hig-sheets",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "status": "read"
+    },
+    {
+      "id": "hig-menus",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "status": "read"
+    },
+    {
+      "id": "hig-tables",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+      "status": "read"
+    }
+  ],
+  "restrictions": [
+    "No Apple font binaries or exported SF Symbols",
+    "No mirroring Apple Figma/Sketch binaries",
+    "Browser approximation cannot claim native glass compositor",
+    "Official 27 kit layer measurement and source frame export still pending"
+  ]
+}
