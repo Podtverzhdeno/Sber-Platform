@@ -73,6 +73,13 @@ class AuditSourceBundleTests(unittest.TestCase):
     def test_valid_fixture_passes(self) -> None:
         self.assertEqual(audit(self.root), [])
 
+    def test_other_numbered_modules_are_not_source_atlas_categories(self) -> None:
+        for extra in ("06-cases", "08-component-packs", "03-impulse"):
+            folder = self.root / extra
+            folder.mkdir(exist_ok=True)
+            (folder / "README.md").write_text("Independent reference collection", encoding="utf-8")
+        self.assertEqual(audit(self.root), [])
+
     def test_missing_dom_id_is_detected(self) -> None:
         (self.root / "web-implementation/app.js").write_text('el("notThere")')
         self.assertTrue(any("missing HTML id" in issue for issue in audit(self.root)))
