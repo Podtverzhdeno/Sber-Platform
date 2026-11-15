@@ -30,6 +30,8 @@ jobs:
         run: node "Apple UI kit/04-web-reference/verify-library.mjs"
       - name: Validate original SVG board XML and provenance
         run: python3 "Apple UI kit/04-web-reference/validate-svg-library.py"
+      - name: Validate 10 advanced light/dark SVG pairs
+        run: python3 "Apple UI kit/advanced-cases/validate-advanced.py"
       - name: Explain scope of checks
         run: |
           echo "Structural reference QA only."
