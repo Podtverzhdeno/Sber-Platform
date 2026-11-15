@@ -106,7 +106,9 @@ export function CalmSidebar({
       if (event.key === "Escape") {
         event.preventDefault();
         setDrawerOpen(false);
-        triggerRef.current?.focus();
+        const trigger = triggerRef.current;
+        if (trigger && window.getComputedStyle(trigger).display !== "none") trigger.focus();
+        else document.querySelector<HTMLButtonElement>(".owner-topbar-brand")?.focus();
       }
       if (event.key !== "Tab" || !panelRef.current) return;
       const focusable = Array.from(
@@ -157,7 +159,9 @@ export function CalmSidebar({
     cancelHoverExit();
     setDrawerOpen(false);
     setHoverOpen(false);
-    triggerRef.current?.focus();
+    const trigger = triggerRef.current;
+    if (trigger && window.getComputedStyle(trigger).display !== "none") trigger.focus();
+    else document.querySelector<HTMLButtonElement>(".owner-topbar-brand")?.focus();
   };
   const followLink = () => {
     cancelHoverExit();
