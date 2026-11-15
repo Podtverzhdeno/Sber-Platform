@@ -7,23 +7,7 @@ import "./results-hub.scss";
  * Does not invent achievement counters or alter portfolio, analytics, trophy or
  * rating data; the routed screen remains the source of truth for every action.
  */
-export const RESULT_SECTIONS = ["Портфолио", "Аналитика", "Достижения", "Рейтинг"] as const;
-
-type ResultsSection = (typeof RESULT_SECTIONS)[number];
-
-const sectionSummaries: Record<ResultsSection, string> = {
-  "Портфолио": "Ваши проекты, личный вклад, навыки и документы с подтверждением.",
-  "Аналитика": "Измеримый прогресс, динамика и источники результатов.",
-  "Достижения": "Награды, сертификаты и проверяемая история участия.",
-  "Рейтинг": "Опубликованный рейтинг с понятными правилами и периодами.",
-};
-
-export function resultDestinations(navigation: readonly string[]) {
-  return RESULT_SECTIONS.flatMap((label) => {
-    const index = navigation.indexOf(label);
-    return index < 0 ? [] : [{ label, href: "/workspace/" + String(index) }];
-  });
-}
+import { RESULT_SECTIONS, resultDestinations, sectionSummaries } from "./model";
 
 export function ResultsHub({
   navigation,

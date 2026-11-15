@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { RESULT_SECTIONS, ResultsHub, resultDestinations } from "./ResultsHub";
+import { ResultsHub } from "./ResultsHub";
+import { RESULT_SECTIONS, resultDestinations } from "./model";
 
 describe("ResultsHub participant information architecture", () => {
   const navigation = [
