@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-QUALITY-GATES-20261115
 - session_id: gpt6-apple-kit-readonly-quality-gates-20261115-1819
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T18:19:00+03:00
 - heartbeat_at: 2026-11-15T18:19:00+03:00
 - depends_on: [APPLE-UI-KIT-FIDELITY-WORKBENCH-20261115]
@@ -21,3 +21,5 @@
 - known_limit: actual Node/Chromium execution not performed on a checked-out repo; only remote tree validation, isolated pure-code parsing and prior 2x2 mock-pixel checks in earlier session
 - next_safe_step: independent reviewer runs both scripts on exact PR SHA after prior reference PR #184/#186/#189 are accepted; visual screenshots reviewed; only integrator merges to main
 - blockers: Apple kit parent and three descendant claims are REVIEW, so do not modify Apple UI kit paths; browser execution requires checked-out repository with frontend dependencies
+
+- ci_followup_fix: 2026-11-15T19:27+03:00, commit e466bca696a0449ad51f9a64d84d34bd46e567d5 updates verifier regex to accept const dimensionsMatch arrow expression; matched actual app.js; initial CI run 43735388951 failed on old code. Independent runner retest still required after propagation.
