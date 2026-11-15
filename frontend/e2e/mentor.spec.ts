@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test } from "@playwright/test";
 
 test("mentor routes rubric queue into workspace and opens messenger context", async ({
@@ -117,7 +118,7 @@ test("mentor routes rubric queue into workspace and opens messenger context", as
   const workspaceScreenshot = await page.locator(".review-workbench").screenshot();
   expect(workspaceScreenshot.byteLength).toBeGreaterThan(1_000);
 
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await openAuthorizedDestination(page, "Сообщения", "Общение");
   await page.locator(".msg-dialog-list__row").filter({ hasText: "MVP для mentor journey" }).click();
   await expect(page.locator(".chat-context h2")).toHaveText("MVP для mentor journey");
   await expect(page.locator(".chat-context")).toContainText("Проект");
