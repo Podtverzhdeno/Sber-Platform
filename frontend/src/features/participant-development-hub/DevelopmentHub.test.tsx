@@ -103,7 +103,7 @@ describe("content-first Development section", () => {
   it("opens an explicit checklist of next-level courses, including the practical contribution", () => {
     renderSection();
     fireEvent.click(screen.getByRole("button", { name: "Уровни" }));
-    expect(screen.getByTestId("hub-location")).toHaveTextContent("/workspace/1?role=python&view=levels");
+    expect(screen.getByTestId("hub-location")).toHaveTextContent("/workspace/1?role=python&hub=levels");
     const requirements = screen.getByTestId("development-level-requirements");
     expect(within(requirements).getByText("L0 → L1 · цикл 1")).toBeVisible();
     const rows = within(requirements).getByTestId("development-required-courses");
@@ -118,7 +118,7 @@ describe("content-first Development section", () => {
   });
 
   it("preserves role query while switching between trajectories and levels", () => {
-    renderSection({ url: "/workspace/1?role=python&stage=foundation&view=levels" });
+    renderSection({ url: "/workspace/1?role=python&stage=foundation&hub=levels" });
     expect(screen.getByTestId("development-level-requirements")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Траектории" }));
     expect(screen.getByTestId("legacy-roadmap")).toBeVisible();
@@ -126,21 +126,21 @@ describe("content-first Development section", () => {
   });
 
   it("never fabricates a level for grey/unselected tracks or a missing server snapshot", () => {
-    renderSection({ url: "/workspace/1?view=levels", level: null, roleKey: null });
+    renderSection({ url: "/workspace/1?hub=levels", level: null, roleKey: null });
     expect(screen.getByText("Выберите направление")).toBeVisible();
     expect(screen.queryByText("L0")).toBeNull();
     expect(screen.queryByTestId("development-required-courses")).toBeNull();
   });
 
   it("does not create unauthorized course links, even when keys exist", () => {
-    renderSection({ url: "/workspace/1?view=levels", allowed: navigation.filter((x) => x !== "Bootcamp") });
+    renderSection({ url: "/workspace/1?hub=levels", allowed: navigation.filter((x) => x !== "Bootcamp") });
     expect(screen.queryByRole("link", { name: "Курсы" })).toBeNull();
     expect(screen.queryByRole("link", { name: /Открыть курс/ })).toBeNull();
     expect(screen.getByText("Основы Python")).toBeVisible();
   });
 
   it("shows unpublished next-cycle curriculum without inventing course names or a false advancement", () => {
-    renderSection({ url: "/workspace/1?view=levels", level: {
+    renderSection({ url: "/workspace/1?hub=levels", level: {
       ...level, level: 1, cycle_number: 2, curriculum_state: "unpublished",
       required_course_keys: [], advance_ready: false,
     } });
@@ -149,7 +149,7 @@ describe("content-first Development section", () => {
   });
 
   it("shows completed level L3 as a terminal state with historical evidence still available", () => {
-    renderSection({ url: "/workspace/1?view=levels", level: { ...level, level: 3, max_level: 3 } });
+    renderSection({ url: "/workspace/1?hub=levels", level: { ...level, level: 3, max_level: 3 } });
     expect(screen.getByText("Программа освоена")).toBeVisible();
     expect(screen.queryByTestId("development-required-courses")).toBeNull();
   });

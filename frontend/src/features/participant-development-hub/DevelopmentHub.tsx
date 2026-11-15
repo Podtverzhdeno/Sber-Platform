@@ -174,12 +174,12 @@ export function DevelopmentHubContent({
   children,
 }: DevelopmentHubContentProps) {
   const [params, setParams] = useSearchParams();
-  const showingLevels = params.get("view") === "levels";
+  const showingLevels = params.get("hub") === "levels";
   const bootcamp = courseDestination(navigation, roleKey);
   const selectView = (view: "trajectory" | "levels") => {
     const next = new URLSearchParams(params);
-    if (view === "levels") next.set("view", "levels");
-    else next.delete("view");
+    if (view === "levels") next.set("hub", "levels");
+    else next.delete("hub");
     setParams(next);
   };
 
