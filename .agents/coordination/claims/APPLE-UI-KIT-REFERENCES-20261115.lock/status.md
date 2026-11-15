@@ -2,9 +2,9 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T17:01:00+03:00
-- heartbeat_at: 2026-11-15T17:26:00+03:00
+- heartbeat_at: 2026-11-15T18:00:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
 - depends_on: []
 - source: owner-directed standalone repository reference task
@@ -28,4 +28,6 @@
   - No application source, routes, backend, shared theme or parallel-agent scope modified.
 - current_branch_qa_sha: 0ac3dc4a5216085c3846120aca040a4fe1838716 (subsequent claim status update advances branch)
 - review_gate: independent review pending, draft PR #181; not merged into main.
+- resumed_scope_20261115: owner again asked to keep adding and committing on PR #181; continue dedicated Apple UI kit reference library and source-backed web component examples only.
+- planned_write_scope: Apple UI kit/** and this claim only; no frontend/shared integration.
 - blockers: official editable Figma/Sketch 27 kit layers cannot be inspected here; true 1:1 measured reproduction, screenshot diff and browser E2E remain unverified. Standalone preview has not been executed in a browser. No independent reviewer approval yet. Apple assets are links only, not redistributed.
