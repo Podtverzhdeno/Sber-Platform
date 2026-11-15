@@ -2,9 +2,9 @@
 
 - task_id: OWNER-APPLE-UI-KIT-20261115
 - session_id: gpt6-owner-apple-ui-reference-library-20261115-1701
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T17:01:00+03:00
-- heartbeat_at: 2026-11-15T17:20:00+03:00
+- heartbeat_at: 2026-11-15T17:30:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012 (remote main; local git status unavailable)
 - owner_instruction: create a separate Apple UI kit reference folder with Apple official Figma/Sketch/Liquid Glass sources for Impulse
 - depends_on: []
@@ -26,3 +26,9 @@
 - blockers:
   - Figma files are access-controlled from the browser; source links are verifiable but interior layer properties require inspection in Figma/Sketch
   - exact native Liquid Glass refraction cannot be obtained with standalone browser CSS
+
+## Owner-directed continuation (same task, 2026-11-15)
+- owner_instruction: «Продолжай работу» on PR #183. Resume previous claim after review handoff to add case-specific reference packs and rigorous comparison tools.
+- write_scope unchanged: Apple UI kit/** and this own status file. No frontend, production or main deployment modifications.
+- start_state: PR #183 open; main advanced, so inspect diff before any merge. Remote GitHub only, local `git status` unavailable.
+- new verification: official Apple links and in-browser source/target screenshot comparison utility with accurate labels; no claims of native parity.
