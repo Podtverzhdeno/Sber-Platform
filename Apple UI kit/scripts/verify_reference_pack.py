@@ -3,6 +3,7 @@
 Run: python "Apple UI kit/scripts/verify_reference_pack.py"
 This checks files, JSON and local SVG XML, NOT browser rendering or Apple pixel parity.
 """
+
 from __future__ import annotations
 
 import json
@@ -27,19 +28,39 @@ EXPECTED_GROUPS = [
     "13-official-visual-references",
 ]
 REQUIRED_TOP = [
-    "README.md", "SOURCES.md", "LIQUID_GLASS.md", "PROVENANCE_AND_LICENSE.md",
-    "COMPONENT_ATLAS.md", "IMPULSE_MAPPING.md", "PIXEL_PARITY_QA.md",
-    "AGENT_HANDOFF.md", "REFERENCE_GALLERY.md", "OFFICIAL_VISUAL_GALLERY.md",
-    "reference-gallery.html", "reference-manifest.json", "design-tokens.json",
-    "component-coverage.csv", "web-prototype/index.html",
+    "README.md",
+    "SOURCES.md",
+    "LIQUID_GLASS.md",
+    "PROVENANCE_AND_LICENSE.md",
+    "COMPONENT_ATLAS.md",
+    "IMPULSE_MAPPING.md",
+    "PIXEL_PARITY_QA.md",
+    "AGENT_HANDOFF.md",
+    "REFERENCE_GALLERY.md",
+    "OFFICIAL_VISUAL_GALLERY.md",
+    "reference-gallery.html",
+    "reference-manifest.json",
+    "design-tokens.json",
+    "component-coverage.csv",
+    "web-prototype/index.html",
 ]
+
+
 def main() -> int:
     problems: list[str] = []
     for relative in REQUIRED_TOP:
         if not (ROOT / relative).is_file():
             problems.append(f"Missing top-level file: {relative}")
-    gallery = (ROOT / "REFERENCE_GALLERY.md").read_text(encoding="utf8") if (ROOT / "REFERENCE_GALLERY.md").exists() else ""
-    gallery_html = (ROOT / "reference-gallery.html").read_text(encoding="utf8") if (ROOT / "reference-gallery.html").exists() else ""
+    gallery = (
+        (ROOT / "REFERENCE_GALLERY.md").read_text(encoding="utf8")
+        if (ROOT / "REFERENCE_GALLERY.md").exists()
+        else ""
+    )
+    gallery_html = (
+        (ROOT / "reference-gallery.html").read_text(encoding="utf8")
+        if (ROOT / "reference-gallery.html").exists()
+        else ""
+    )
     count = 0
     for slug in EXPECTED_GROUPS:
         directory = ROOT / slug
@@ -55,8 +76,11 @@ def main() -> int:
         if ref.is_file():
             try:
                 data = json.loads(ref.read_text(encoding="utf8"))
-                if data.get("category_id") != slug: problems.append(f"Wrong category id: {slug}")
-                if not str(data.get("reference_page", "")).startswith("https://developer.apple.com/"):
+                if data.get("category_id") != slug:
+                    problems.append(f"Wrong category id: {slug}")
+                if not str(data.get("reference_page", "")).startswith(
+                    "https://developer.apple.com/"
+                ):
                     problems.append(f"Non-Apple canonical source: {slug}")
                 if data.get("kit_component_layers_inspected") is not False:
                     problems.append(f"Cannot assert source frames were inspected: {slug}")
@@ -76,15 +100,23 @@ def main() -> int:
     for name in ("reference-manifest.json", "design-tokens.json"):
         path = ROOT / name
         if path.is_file():
-            try: json.loads(path.read_text(encoding="utf8"))
-            except json.JSONDecodeError as exc: problems.append(f"Invalid JSON {name}: {exc}")
+            try:
+                json.loads(path.read_text(encoding="utf8"))
+            except json.JSONDecodeError as exc:
+                problems.append(f"Invalid JSON {name}: {exc}")
     if problems:
         print("FAIL: " + str(len(problems)) + " problems")
-        for error in problems: print(" - " + error)
+        for error in problems:
+            print(" - " + error)
         return 1
-    print(f"OK: {count} category directories, JSON source metadata, local original SVG XML, galleries")
-    print("Not checked: Apple binary licenses, editable kit layers, browser rendering, pixel parity")
+    print(
+        f"OK: {count} category directories, JSON source metadata, local original SVG XML, galleries"
+    )
+    print(
+        "Not checked: Apple binary licenses, editable kit layers, browser rendering, pixel parity"
+    )
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

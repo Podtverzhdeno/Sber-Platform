@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-11-15",
+  "pr_number": 181,
+  "reference_branch": "docs/apple-ui-kit-refs-20261115",
+  "source_run": {
+    "sha": "507db8f65c1304f2e2b1f70092659eec3350f787",
+    "general_ci_run": 43736343697,
+    "result": "failure",
+    "reference_qa_run": 43736343674,
+    "result_reference": "success",
+    "ruff_files_total": 13,
+    "ruff_files_patched_in_branch": 10,
+    "ruff_changes_applied": 76,
+    "ruff_fix_sha": "bc161381cdc616d4fbc30fde7ccfec59dbbe7357",
+    "main_only_unformatted_files": [
+      "Apple UI kit/04-web-reference/compare-screenshots.py",
+      "Apple UI kit/04-web-reference/validate-svg-library.py",
+      "Apple UI kit/advanced-cases/validate-advanced.py"
+    ],
+    "app_e2e_failure_scope": "not_in_this_reference_library_claim",
+    "e2e_root_cause_verified": false
+  },
+  "new_reference_run": {
+    "run_id": 43750517341,
+    "result": "success"
+  },
+  "native_apple_frame_measurement_performed": false,
+  "full_general_ci_green": false
+}

@@ -5,6 +5,7 @@ Offline: reads only files and compares tracked Git blob SHA-1 values.
 A changed hash is a warning unless --strict-sha is supplied. It is NOT an
 Apple/Figma source-frame verification or a browser/visual test.
 """
+
 from __future__ import annotations
 import argparse
 import hashlib
@@ -18,7 +19,9 @@ def git_blob_sha(raw: bytes) -> str:
     return hashlib.sha1(header + raw).hexdigest()
 
 
-def verify(repo_root: Path, manifest_path: Path, strict_sha: bool = False) -> tuple[list[str], list[str]]:
+def verify(
+    repo_root: Path, manifest_path: Path, strict_sha: bool = False
+) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     try:
@@ -34,7 +37,10 @@ def verify(repo_root: Path, manifest_path: Path, strict_sha: bool = False) -> tu
         if not isinstance(identity, str) or identity in seen:
             errors.append(f"Missing/duplicate identifier: {identity}")
         seen.add(identity)
-        if entry.get("actual_apple_kit_frames_inspected") is True or entry.get("measured_parity") is True:
+        if (
+            entry.get("actual_apple_kit_frames_inspected") is True
+            or entry.get("measured_parity") is True
+        ):
             errors.append(f"Unsupported Apple frame/parity claim: {identity}")
         for path_key, hash_key in (
             ("impulse_file", "impulse_blob_sha_main"),
@@ -61,8 +67,10 @@ def verify(repo_root: Path, manifest_path: Path, strict_sha: bool = False) -> tu
                 continue
             if expected and actual != expected:
                 message = f"{identity}: SHA changed for {relative}: {expected} -> {actual}"
-                if strict_sha: errors.append(message)
-                else: warnings.append(message)
+                if strict_sha:
+                    errors.append(message)
+                else:
+                    warnings.append(message)
     return errors, warnings
 
 
@@ -70,14 +78,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument(
-        "--manifest", type=Path,
+        "--manifest",
+        type=Path,
         default=Path(__file__).resolve().parents[1] / "IMPULSE_SOURCE_CROSSWALK.json",
     )
     parser.add_argument("--strict-sha", action="store_true")
     args = parser.parse_args(argv)
     errors, warnings = verify(args.repo_root, args.manifest, args.strict_sha)
-    for message in warnings: print("WARN: " + message)
-    for message in errors: print("FAIL: " + message)
+    for message in warnings:
+        print("WARN: " + message)
+    for message in errors:
+        print("FAIL: " + message)
     if errors:
         print(f"FAIL: {len(errors)} issue(s), {len(warnings)} warning(s)")
         return 1

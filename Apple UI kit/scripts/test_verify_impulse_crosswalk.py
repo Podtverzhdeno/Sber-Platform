@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Synthetic tests for the offline Impulse source-crosswalk verifier."""
+
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -19,14 +20,16 @@ class CrosswalkTests(unittest.TestCase):
         self.file.write_text("export const example = 1;\n", encoding="utf-8")
         self.manifest = self.repo / "crosswalk.json"
         self.data = {
-            "targets": [{
-                "id": "AUI-IMP-001",
-                "impulse_file": "frontend/src/demo.tsx",
-                "impulse_blob_sha_main": git_blob_sha(self.file.read_bytes()),
-                "test_file": None,
-                "test_blob_sha_main": None,
-                "measured_parity": False,
-            }]
+            "targets": [
+                {
+                    "id": "AUI-IMP-001",
+                    "impulse_file": "frontend/src/demo.tsx",
+                    "impulse_blob_sha_main": git_blob_sha(self.file.read_bytes()),
+                    "test_file": None,
+                    "test_blob_sha_main": None,
+                    "measured_parity": False,
+                }
+            ]
         }
         self.write()
 

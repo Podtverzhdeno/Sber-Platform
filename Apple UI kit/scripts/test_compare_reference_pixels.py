@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Unit checks for the optional Pillow-based pixel comparison helper."""
+
 from __future__ import annotations
 
 import json
@@ -28,7 +29,9 @@ class CompareReferencePixelsTest(unittest.TestCase):
             Image.new("RGB", (12, 8), (25, 30, 35)).save(b)
             run = subprocess.run(
                 [sys.executable, str(SCRIPT), str(a), str(b), "--out", str(p / "out")],
-                text=True, capture_output=True, check=False,
+                text=True,
+                capture_output=True,
+                check=False,
             )
             self.assertEqual(run.returncode, 0, run.stderr)
             data = json.loads((p / "out" / "report.json").read_text())
@@ -48,10 +51,20 @@ class CompareReferencePixelsTest(unittest.TestCase):
             other.save(b)
             run = subprocess.run(
                 [
-                    sys.executable, str(SCRIPT), str(a), str(b),
-                    "--threshold", "12", "--max-mismatch-pct", "0",
-                    "--out", str(p / "out")
-                ], text=True, capture_output=True, check=False,
+                    sys.executable,
+                    str(SCRIPT),
+                    str(a),
+                    str(b),
+                    "--threshold",
+                    "12",
+                    "--max-mismatch-pct",
+                    "0",
+                    "--out",
+                    str(p / "out"),
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
             )
             self.assertEqual(run.returncode, 1, run.stderr)
             data = json.loads((p / "out" / "report.json").read_text())
@@ -67,7 +80,9 @@ class CompareReferencePixelsTest(unittest.TestCase):
             Image.new("RGB", (11, 10), (0, 0, 0)).save(b)
             run = subprocess.run(
                 [sys.executable, str(SCRIPT), str(a), str(b), "--out", str(p / "out")],
-                text=True, capture_output=True, check=False,
+                text=True,
+                capture_output=True,
+                check=False,
             )
             self.assertEqual(run.returncode, 2)
             self.assertIn("identical CSS viewport", run.stderr)

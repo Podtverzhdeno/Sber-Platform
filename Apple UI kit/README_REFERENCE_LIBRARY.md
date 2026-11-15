@@ -82,3 +82,14 @@ This supplemental guide preserves the PR #181 information that was moved out of 
 - [Offline crosswalk verifier](IMPULSE_SOURCE_CROSSWALK_QA.md) checks path existence and warns about changed source SHAs. Synthetic unit tests included, not yet executed on a checkout.
 
 The crosswalk is a **handoff to a separate integration task**, not permission to modify App.tsx, shared themes, navigation, authorization or real user data from a source-library task.
+
+## Integration with newer main component packs
+
+Canonical [README.md](README.md) is synchronized with main source revision `ccc8aa014952bd50cbfcbaeacaee9e24194c9d65`, which now includes the independently maintained `08-component-packs/` measurements and browser comparison instructions. Those materials coexist with this PR's 13 reference packets, 67-component capture catalog, independent web laboratory, real-Impulse crosswalk and QA tooling. The canonical README should remain owned by the main-line library; this supplemental guide documents the PR-only additions without redefining the source-of-truth or claiming Apple-native 1:1 parity.
+
+## Latest source register, QA and merge reconciliation
+
+- [14 officially listed Figma/Sketch resource pairs](OFFICIAL_EDITABLE_SOURCES_2026.md) · [JSON register](OFFICIAL_EDITABLE_SOURCES_2026.json) — 28 actual Apple-indexed URLs, with access and licensing caveats. These are link records, not downloaded Apple assets.
+- [Dated CI triage](CI_TRIAGE_2026-11-15.md) records the 2026-11-15 Ruff and frontend E2E failures and what was fixed. The specialist Apple UI reference QA passed on merge revision `4dd8c0b`; overall CI still awaits independently verified acceptance.
+- Merge revision `4dd8c0b` has **two parents**: source-reference branch `0c76a91` and main snapshot `45216c4`. The merge tree was validated across 1,723 Git blobs, resolving 15 three-way path collisions; canonical README from main was preserved, supplemented by this document, while latest QA logic was retained and formatted.
+- Review acceptance remains separate from merging: no official Figma/Sketch component layer has been measured, no native Liquid Glass 1:1 proof exists, and no application runtime route was intentionally changed by reference work.

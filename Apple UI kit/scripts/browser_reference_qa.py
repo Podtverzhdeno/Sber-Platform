@@ -4,6 +4,7 @@
 Requires: python -m pip install playwright && python -m playwright install chromium
 No Impulse API writes, Figma layer inspection, Apple font downloads, or external navigation.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -31,13 +32,23 @@ def exercise_desktop(page: object, out: Path | None) -> int:
     check(page.locator("#tasks li").count() == 3, "expected 3 synthetic rows")
     checks += 1
 
-    check(page.locator("#drawer").get_attribute("inert") is not None, "drawer must be inert initially")
+    check(
+        page.locator("#drawer").get_attribute("inert") is not None, "drawer must be inert initially"
+    )
     page.locator("#menuBtn").click()
     check(page.locator("#drawer").get_attribute("data-open") == "true", "drawer did not open")
-    check(page.locator("#closeDrawer").evaluate("(el) => document.activeElement === el"), "drawer close is not focused")
+    check(
+        page.locator("#closeDrawer").evaluate("(el) => document.activeElement === el"),
+        "drawer close is not focused",
+    )
     page.keyboard.press("Escape")
-    check(page.locator("#drawer").get_attribute("data-open") == "false", "Escape did not close drawer")
-    check(page.locator("#menuBtn").evaluate("(el) => document.activeElement === el"), "focus not restored to menu")
+    check(
+        page.locator("#drawer").get_attribute("data-open") == "false", "Escape did not close drawer"
+    )
+    check(
+        page.locator("#menuBtn").evaluate("(el) => document.activeElement === el"),
+        "focus not restored to menu",
+    )
     checks += 1
 
     page.locator("#profileBtn").click()
@@ -47,8 +58,13 @@ def exercise_desktop(page: object, out: Path | None) -> int:
     checks += 1
 
     page.locator("#tabCustomer").click()
-    check(page.locator("#tabCustomer").get_attribute("aria-selected") == "true", "customer tab state")
-    check(page.locator("#tasks").inner_text().find("Техническое задание") >= 0, "customer list not updated")
+    check(
+        page.locator("#tabCustomer").get_attribute("aria-selected") == "true", "customer tab state"
+    )
+    check(
+        page.locator("#tasks").inner_text().find("Техническое задание") >= 0,
+        "customer list not updated",
+    )
     page.locator("#tabParticipant").click()
     page.locator("#search").fill("доступ")
     check(page.locator("#tasks li").count() == 1, "search did not filter synthetic rows")
@@ -59,19 +75,30 @@ def exercise_desktop(page: object, out: Path | None) -> int:
     check(page.locator("#empty").is_visible(), "empty state not shown")
     page.locator('[data-state="error"]').click()
     check("Ошибка" in page.locator("#empty").inner_text(), "error state missing")
-    check(page.locator("#empty").get_attribute("role") == "alert", "error state must be announced urgently")
+    check(
+        page.locator("#empty").get_attribute("role") == "alert",
+        "error state must be announced urgently",
+    )
     page.locator("#empty").get_by_role("button", name="Повторить пример").click()
     check(page.locator("#tasks li").count() == 3, "error retry did not restore ready state")
     page.locator("#search").fill("несуществующий-пример")
-    check(page.locator("#empty").get_by_role("button", name="Очистить поиск").is_visible(), "search clear recovery missing")
+    check(
+        page.locator("#empty").get_by_role("button", name="Очистить поиск").is_visible(),
+        "search clear recovery missing",
+    )
     page.locator("#empty").get_by_role("button", name="Очистить поиск").click()
     check(page.locator("#tasks li").count() == 3, "clear search did not restore rows")
     checks += 1
 
     page.locator('[data-glass-choice="clear"]').click()
-    check(page.locator("#glassExample").get_attribute("data-glass") == "clear", "clear glass toggle")
+    check(
+        page.locator("#glassExample").get_attribute("data-glass") == "clear", "clear glass toggle"
+    )
     page.locator('[data-glass-choice="regular"]').click()
-    check(page.locator("#glassExample").get_attribute("data-glass") == "regular", "regular glass toggle")
+    check(
+        page.locator("#glassExample").get_attribute("data-glass") == "regular",
+        "regular glass toggle",
+    )
     checks += 1
 
     old_theme = page.locator("html").get_attribute("data-theme")
@@ -114,7 +141,11 @@ def exercise_desktop(page: object, out: Path | None) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--screenshots-dir", type=Path, help="Optional local screenshots (do not commit Apple images)")
+    parser.add_argument(
+        "--screenshots-dir",
+        type=Path,
+        help="Optional local screenshots (do not commit Apple images)",
+    )
     args = parser.parse_args(argv)
     if not HERE.is_file():
         print("Reference lab not found: " + str(HERE))
@@ -134,7 +165,10 @@ def main(argv: list[str] | None = None) -> int:
             context.close()
             touch = browser.new_context(
                 viewport={"width": 390, "height": 844},
-                locale="ru-RU", has_touch=True, is_mobile=True, reduced_motion="reduce"
+                locale="ru-RU",
+                has_touch=True,
+                is_mobile=True,
+                reduced_motion="reduce",
             )
             mobile = touch.new_page()
             mobile.goto(HERE.resolve().as_uri(), wait_until="load")
@@ -145,7 +179,9 @@ def main(argv: list[str] | None = None) -> int:
             touch.close()
             browser.close()
         print(f"PASS: {n + 2} browser checks, five responsive viewports, touch and reduced-motion")
-        print("NOT VERIFIED: Apple source frame parity, owner pixel diff, native Liquid Glass or full Impulse app")
+        print(
+            "NOT VERIFIED: Apple source frame parity, owner pixel diff, native Liquid Glass or full Impulse app"
+        )
         return 0
     except (AssertionError, PlaywrightError) as error:
         print("FAIL: " + str(error))
