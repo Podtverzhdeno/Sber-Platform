@@ -63,7 +63,7 @@
   doc.querySelectorAll(".sideitem").forEach(button => button.addEventListener("click", () => {
     doc.querySelectorAll(".sideitem").forEach(other => other.removeAttribute("aria-current"));
     button.setAttribute("aria-current", "page");
-    q(button.dataset.anchor).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+    q(button.dataset.anchor).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   }));
   q("search").addEventListener("input", event => {
     const term = event.target.value.toLocaleLowerCase("ru").trim();
