@@ -142,6 +142,39 @@ for (const card of vectorManifest.cards ?? []) {
   check(visualGallery.includes('./' + card.image), "Visual gallery has no linked SVG: " + card.id);
 }
 
+// New searchable portal: ensure all 38 cards point to local, checked-in sources.
+const unified = text("index.html");
+const portalMatch = unified.match(/const entries=(\[[^\n]+\]);\nconst gallery=/);
+check(Boolean(portalMatch), "Unified portal must embed a parseable static card catalogue");
+if (portalMatch) {
+  const cards = JSON.parse(portalMatch[1]);
+  const groups = { base: 0, case: 0, advanced: 0 };
+  const uniqueDocs = new Set();
+  let totalImages = 0;
+  for (const card of cards) {
+    const pathAllowed = value => typeof value === "string"
+      && /^(?:06-cases|reference-cases|advanced-cases)\/[A-Za-z0-9_/-]+\.(?:svg|md)$/.test(value)
+      && existsSync(join(libraryRoot, value));
+    check(pathAllowed(card.img), "Missing/invalid portal SVG: " + card.img);
+    check(pathAllowed(card.doc), "Missing/invalid portal docs: " + card.doc);
+    if (card.kind === "advanced") {
+      check(pathAllowed(card.light), "Missing advanced light SVG: " + card.light);
+      totalImages += 2;
+    } else totalImages += 1;
+    check(card.kind in groups, "Unknown portal card type: " + card.kind);
+    groups[card.kind] = (groups[card.kind] ?? 0) + 1;
+    check(!uniqueDocs.has(card.doc), "Duplicate portal card documentation: " + card.doc);
+    uniqueDocs.add(card.doc);
+  }
+  check(cards.length === 38 && totalImages === 48,
+    "Portal count should be 38 scenarios / 48 SVG");
+  check(groups.base === 12 && groups.case === 16 && groups.advanced === 10,
+    "Portal group counts inconsistent: " + JSON.stringify(groups));
+}
+for (const token of ['id="search"', 'data-filter="advanced"', 'id="theme"', 'aria-live="polite"', 'prefers-reduced-motion']) {
+  check(unified.includes(token), "Missing portal accessibility/control: " + token);
+}
+
 const html = text("04-web-reference/casebook.html");
 for (const localHref of html.matchAll(/(?:href|src)="(\.\/[^"]+)"/g)) {
   const local = resolve(libraryRoot, "04-web-reference", localHref[1]);
