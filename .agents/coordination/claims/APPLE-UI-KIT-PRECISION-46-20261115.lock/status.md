@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: REVIEW
+- status: IN_PROGRESS
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -54,5 +54,6 @@
   - GitHub source readback: 8/8 selected files fetched; comparator JS syntax passed; 46 capture records and 24 official HIG chapter source records preserved; CSS/HTML contains no external scripts; source QA metadata preserves `pixel_parity_certified=false`.
   - Precision limitations: this is raw RGBA pixel comparison, not perceptual/semantic similarity or an authorized Apple Figma frame export. No Apple screenshot/font/SF Symbol binary or actual React app code modified.
   - Not verified: actual Chromium run on checked-out PR, real Figma/Sketch source frame geometry, comparison screenshot and independent reviewer acceptance. Do NOT merge or deploy from this author session.
+- owner_resume_20261115_2158: owner requested continuation; identified real failure in GitHub Actions CI run 43736535478: three own Python files fail Ruff formatting, while others in parent Apple UI kit also fail. Resuming for strictly scoped Ruff formatting and QA improvements.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
