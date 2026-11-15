@@ -1,0 +1,32 @@
+{
+  "category_id": "01-liquid-glass-materials",
+  "title": "Liquid Glass / Standard Materials",
+  "platform": "macOS 27 + iOS/iPadOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/materials",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "toolbar, glass button, glass panel, clear/regular, standard content surface"
+  ],
+  "impulse_target": [
+    "Topbar, role drawer, notification and avatar popover"
+  ],
+  "study_states": [
+    "regular vs clear",
+    "light vs dark",
+    "rich backdrop",
+    "blur unsupported",
+    "high contrast",
+    "reduced transparency"
+  ],
+  "anti_patterns": [
+    "Glass content card everywhere",
+    "transparent text over bright image",
+    "implying CSS recreates native refraction"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
