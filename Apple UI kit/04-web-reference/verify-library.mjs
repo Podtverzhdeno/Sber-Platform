@@ -113,7 +113,7 @@ for (const card of vectorManifest.cards ?? []) {
   const xml = text(relative);
   check(xml.startsWith('<?xml version="1.0"') && xml.includes('<svg') && xml.includes('</svg>'),
     "Missing SVG root or closing tag: " + relative);
-  check(!/<script\\b|<foreignObject\\b|https?:[^"'\\s]*\\.(png|jpg|webp|svg)/i.test(xml),
+  check(!/<script\b|<foreignObject\b|https?:[^"'\s]*\.(png|jpg|webp|svg)/i.test(xml),
     "Unexpected embedded script/external asset in " + relative);
   check(card.image === card.id + "/reference-board.svg",
     "Incorrect case SVG path: " + card.id);
