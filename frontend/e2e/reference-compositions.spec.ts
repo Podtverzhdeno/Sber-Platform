@@ -847,6 +847,10 @@ test("R-PAR-02 opens the next course from the real roadmap detail drawer", async
   const drawer = page.getByRole("dialog", { name: "Детали этапа" });
   await expect(drawer).toBeVisible();
   await expect(drawer).toContainText("Подготовиться к реальной практике");
+  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await details.getByRole("button", { name: /Продолжить/ }).click();
+  await expect(drawer).toBeVisible();
   await drawer.getByRole("button", { name: "Открыть курс" }).click();
   await expect(page).toHaveURL(/\/workspace\/2\?[^#]*course=python-base/);
 });
@@ -880,7 +884,7 @@ test("R-PAR-02 rejected optional role keeps the original career path", async ({ 
   const primary = page.locator('[data-testid="trajectory-role-card"][data-role-key="python"]');
   await optional.click();
   await page.getByRole("button", { name: /Изучать дополнительно/ }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByTestId("trajectory-optional-actions").getByRole("alert")).toBeVisible();
   await expect(optional).toHaveAttribute("data-tone", "unselected");
   await expect(primary).toHaveAttribute("data-tone", "primary");
   expect(attempted).toBe(true);
