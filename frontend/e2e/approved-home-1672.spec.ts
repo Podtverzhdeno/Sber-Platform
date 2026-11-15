@@ -103,11 +103,11 @@ for (const width of [1448, 1024, 820, 570, 390, 320]) {
     if (width <= 570) {
       // No covered heading, clipped search, or lost 15px under Windows scrollbar.
       const search = await page.locator(".topbar .global-search").boundingBox();
-      const heading = await page.locator(".impulse-pixel__heading p").boundingBox();
+      const heading = await page.locator(".impulse-pixel__journey-link").boundingBox();
       const bar = await page.locator(".topbar").boundingBox();
       expect(search && heading && bar).toBeTruthy();
       if (search && heading && bar) {
-        expect(heading.y, "Home role subtitle must clear the mobile search").toBeGreaterThanOrEqual(search.y + search.height + 12);
+        expect(heading.y, "Home journey action must clear the mobile search").toBeGreaterThanOrEqual(search.y + search.height + 12);
         expect(search.x).toBeGreaterThanOrEqual(0);
         expect(search.x + search.width).toBeLessThanOrEqual(width + 1);
         expect(bar.width, "Mobile chrome must cover the real viewport").toBeGreaterThanOrEqual(width - 1);
