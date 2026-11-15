@@ -7,10 +7,13 @@ This follow-up to [Apple UI kit/](../README.md) covers **all 46 component target
 - `cases/APP-CAP-001-*/README.md` through `APP-CAP-046-*/README.md`: per-component source capture and QA contracts.
 - `manifest.json`: 46 unique stable IDs, associated HIG resource, Impulse use case, target states and explicit unmeasured fields.
 - `measurement-ledger.csv`: 46 empty measurement rows. **Do not fabricate numbers or copy native Apple source assets.**
-- `gallery.html`: filterable offline HTML directory of this capture registry, no JS framework or external runtime.
+- `gallery.html`: filterable offline HTML directory of the capture registry.
+- `interactive-state-lab.html`: accessible, dependency-free visual study of all 46 case names using **14 distinct native-web pattern examples**; light/dark mode, 320/390px simulated containers, keyboard, local form and menu states. It intentionally does **not** reproduce 46 Apple source frames, and its demonstration data are never connected to Impulse API.
 - `verify.py`: Python 3 standard-library consistency check.
 
 Run on a checkout: `python "Apple UI kit/14-precision-capture-46/verify.py"`.
+
+For manual visual review, open `interactive-state-lab.html` in Chromium and WebKit, examine keyboard/hover/touch at 320, 390 and 1440px, check the `prefers-reduced-motion`, reduced-transparency, forced-colors and high-contrast fallbacks, and verify the actual Figma frame before claiming parity. **This session has not executed an actual browser screenshot test against the committed HTML.**
 
 ## Accuracy boundary
 
