@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "component": "Impulse Fidelity Workbench",
+  "date": "2026-11-15",
+  "input": {
+    "types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp"
+    ],
+    "max_file_bytes": 41943040,
+    "max_pixels": 24000000,
+    "required_files": 2
+  },
+  "modes": [
+    "overlay",
+    "side",
+    "diff"
+  ],
+  "rules": {
+    "diff_requires_equal_pixel_dimensions": true,
+    "resize_before_compare": false,
+    "comparison": "maximum absolute RGB channel difference > threshold",
+    "threshold_range": [
+      0,
+      100
+    ],
+    "average_error": "MAE RGB per channel",
+    "transparent_background": "#ffffff"
+  },
+  "outputs": [
+    "impulse-pixel-report.json",
+    "impulse-diff.png"
+  ],
+  "privacy": {
+    "sends_files_to_server": false,
+    "persistent_storage": false,
+    "external_scripts": false
+  },
+  "acceptance": {
+    "pixel_verified": false,
+    "native_liquid_glass_identical": false,
+    "apple_sources_embedded": false
+  }
+}
