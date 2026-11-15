@@ -39,6 +39,8 @@ try {
     locale: "ru-RU"
   });
   const page = await context.newPage();
+  const remoteRequests = [];
+  page.on("request", request => { if (/^https?:\/\//i.test(request.url())) remoteRequests.push(request.url()); });
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(pathToFileURL(pagePath).href, {waitUntil: "load"});
   assert.match(await page.title(), /Impulse/i);
@@ -94,6 +96,13 @@ try {
   assert.equal(payload.threshold_max_channel_delta,33);
   assert.equal(payload.verified_official_apple_source,false);
 
+  const pngEvent = page.waitForEvent("download");
+  await page.locator("#export-png").click();
+  const heatmapDownload = await pngEvent;
+  const pngBuffer = await readFile(await heatmapDownload.path());
+  assert.ok(pngBuffer.length > 32,"Empty heatmap PNG");
+  assert.equal(pngBuffer.subarray(0,8).toString("hex"),"89504e470d0a1a0a","Invalid PNG signature");
+
   // A wrong-size image must prevent numeric comparisons and reports.
   await upload(page.locator("#target-input"),"wrong-size.png",await createPng(3,2,true));
   await page.waitForFunction(()=>document.querySelector("#status")?.textContent==="Разный размер изображений");
@@ -109,6 +118,7 @@ try {
   assert.ok(overflow<=1,"Horizontal overflow on 390px: "+overflow);
 
   assert.deepEqual(errors,[], "Browser page errors");
+  assert.deepEqual(remoteRequests,[], "Workbench unexpectedly made network requests");
   console.log("PASS: image upload, 25% pixel diff, RGB MAE, threshold state, JSON export, dimension guard, mobile overflow");
   console.log("Screenshots:",output);
   await context.close();
