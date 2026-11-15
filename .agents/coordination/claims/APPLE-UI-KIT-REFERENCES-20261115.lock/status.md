@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T17:01:00+03:00
 - heartbeat_at: 2026-11-15T18:38:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
@@ -44,3 +44,5 @@
 - Not executed: Chromium/Playwright browser rendering, Python Pillow unit tests, live Impulse E2E, Apple 27 editable Figma/Sketch frame measurements.
 - Review action: independent reviewer to run local HTTP demo, Python unit suite, verify remote Apple links and capture actual license-compatible source frames before the proposed source-to-Impulse 1:1 workflow.
 - Status remains REVIEW, PR draft, no merge/deploy.
+
+- continuation_note_20261115: owner explicitly requested another commit cycle; scope remains only Apple UI kit/** and this claim, no application integration.
