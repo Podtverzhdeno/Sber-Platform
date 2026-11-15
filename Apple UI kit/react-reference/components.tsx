@@ -87,9 +87,13 @@ export function SegmentedControl<T extends string>({
     if (!allowed.length) return;
     event.preventDefault();
     const current = allowed.findIndex((option) => option.value === options[index]?.value);
+    const forward = event.key === "ArrowRight";
+    // A controlled value can be temporarily absent from the options (async filters).
+    // In that case choose the first/last enabled option rather than a negative index.
     const nextIndex = event.key === "Home" ? 0
       : event.key === "End" ? allowed.length - 1
-      : (current + (event.key === "ArrowRight" ? 1 : allowed.length - 1)) % allowed.length;
+      : current < 0 ? (forward ? 0 : allowed.length - 1)
+      : (current + (forward ? 1 : allowed.length - 1)) % allowed.length;
     const target = allowed[nextIndex];
     if (!target) return;
     onChange(target.value);
@@ -133,11 +137,19 @@ export function SearchField({
   disabled?: boolean;
 }) {
   const id = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const clear = () => {
+    // Focus the field before removing the clear button. Otherwise keyboard focus
+    // can be stranded on an element which React immediately removes.
+    inputRef.current?.focus();
+    onChange("");
+  };
   return (
     <div className="aui-search">
       <label htmlFor={id}>{label}</label>
       <div className="aui-search__line">
         <input
+          ref={inputRef}
           id={id}
           type="search"
           value={value}
@@ -146,7 +158,7 @@ export function SearchField({
           onChange={(event) => onChange(event.currentTarget.value)}
         />
         {value.length > 0 && !disabled && (
-          <button type="button" onClick={() => onChange("")} aria-label={"Очистить: " + label}>
+          <button type="button" onClick={clear} aria-label={"Очистить: " + label}>
             ×
           </button>
         )}
