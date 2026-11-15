@@ -724,12 +724,14 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
         contentRight: content.getBoundingClientRect().right,
       };
     });
-    expect(layout, `Development layout must mount at width ${String(width)}`).not.toBeNull();
-    expect(layout!.pageWidth, `No document horizontal scrolling at ${String(width)}px`).toBeLessThanOrEqual(width + 1);
-    expect(layout!.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeGreaterThanOrEqual(0);
-    expect(layout!.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeLessThanOrEqual(16);
-    expect(layout!.contentLeft).toBeGreaterThanOrEqual(-1);
-    expect(layout!.contentRight).toBeLessThanOrEqual(width + 1);
+    if (layout === null) {
+      throw new Error(`Development layout did not mount at ${String(width)}px`);
+    }
+    expect(layout.pageWidth, `No document horizontal scrolling at ${String(width)}px`).toBeLessThanOrEqual(width + 1);
+    expect(layout.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeGreaterThanOrEqual(0);
+    expect(layout.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeLessThanOrEqual(16);
+    expect(layout.contentLeft).toBeGreaterThanOrEqual(-1);
+    expect(layout.contentRight).toBeLessThanOrEqual(width + 1);
   }
 });
 
