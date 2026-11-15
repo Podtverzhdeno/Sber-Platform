@@ -239,7 +239,7 @@ export function CalmSidebar({
           aria-hidden="true"
           onClick={closeDrawer}
         />,
-        document.body,
+        document.querySelector(".page-shell--apple-overlay") ?? document.body,
       )}
 
       <aside
