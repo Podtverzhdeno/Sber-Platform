@@ -1,0 +1,19 @@
+# Claim APPLE-UI-KIT-QUALITY-GATES-20261115
+
+- task_id: APPLE-UI-KIT-QUALITY-GATES-20261115
+- session_id: gpt6-apple-kit-readonly-quality-gates-20261115-1819
+- status: IN_PROGRESS
+- started_at: 2026-11-15T18:19:00+03:00
+- heartbeat_at: 2026-11-15T18:19:00+03:00
+- depends_on: [APPLE-UI-KIT-FIDELITY-WORKBENCH-20261115]
+- base_branch: docs/apple-ui-kit-fidelity-workbench-20261115
+- branch: docs/apple-ui-kit-quality-gates-20261115
+- write_scope:
+  - tools/apple-ui-kit-qa/**
+  - .agents/coordination/claims/APPLE-UI-KIT-QUALITY-GATES-20261115.lock/status.md
+- shared_files: []
+- excluded: Apple UI kit/**, frontend/**, backend/**, openspec/tasks.md, all other agents' claims, CI and deployment
+- objective: non-invasive QA validators of the 26 existing Apple concept-reference packs and dedicated browser regression smoke for the offline pixel comparison workbench
+- tests: node built-ins only for reference structure checks; Playwright browser smoke can use the repo's existing frontend-installed Playwright dependency (no package changes)
+- progress: claim created; files pending
+- blockers: Apple kit parent and three descendant claims are REVIEW, so do not modify Apple UI kit paths; browser execution requires checked-out repository with frontend dependencies
