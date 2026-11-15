@@ -88,7 +88,7 @@ for required in ("function differences(", "function loadImage(", "pixel_parity_c
                  "source_geometry_verified:false", "URL.createObjectURL", 'href="../PIXEL_PARITY_QA.md"',
                  "rgba_0_255", 'id="reference-file"', 'id="actual-file"', 'id="heatmap"'):
     assert required in pixel_html, f"pixel-compare missing: {required}"
-assert not re.search(r"<script\\b[^>]*\\bsrc=", pixel_html, re.IGNORECASE)
+assert not re.search(r"<script\b[^>]*\bsrc=", pixel_html, re.IGNORECASE)
 assert (root / "test_pixel_compare.cjs").is_file()
 assert (root / "qa_pixel_compare.py").is_file()
 assert (root / "PIXEL_COMPARE_WORKFLOW.md").is_file()
