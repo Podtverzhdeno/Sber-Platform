@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: IN_PROGRESS
+- status: REVIEW
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -55,5 +55,12 @@
   - Precision limitations: this is raw RGBA pixel comparison, not perceptual/semantic similarity or an authorized Apple Figma frame export. No Apple screenshot/font/SF Symbol binary or actual React app code modified.
   - Not verified: actual Chromium run on checked-out PR, real Figma/Sketch source frame geometry, comparison screenshot and independent reviewer acceptance. Do NOT merge or deploy from this author session.
 - owner_resume_20261115_2158: owner requested continuation; identified real failure in GitHub Actions CI run 43736535478: three own Python files fail Ruff formatting, while others in parent Apple UI kit also fail. Resuming for strictly scoped Ruff formatting and QA improvements.
+- owner_resume_20261115_ci_triage:
+  - Inspected GitHub Actions run 43736535478 for own PR #190 SHA 3344266e1e345c7e349bd6f51ea7850caf8cc647. CI failed, including backend Ruff formatter and some frontend E2E shards.
+  - Formatter logs identified 13 unformatted files: 3 under own `14-precision-capture-46/**` and 10 under parent-owned `Apple UI kit/scripts/**`. Applied exact Ruff formatter changes to qa_browser.py (e1758a84), qa_pixel_compare.py (bb2a0d3a), verify.py (79a2f77a). Removed unused qa_browser urlparse import (2e016a25).
+  - Did not edit the ten parent-owned scripts or UI runtime; later parent CI state must be checked separately.
+  - Added assert-based parent COMPONENT_ATLAS.md numbered 46-case queue/title drift guard to verify.py (b097e017; simplified b6fca4f4); GitHub readback confirmed original 46 titles match current parent.
+  - Added CI_TRIAGE_AND_REVIEW.md documenting historical run, path ownership, application E2E gates, exact-branch commands and remaining source fidelity blockers (b217952a).
+  - Current exact-head Ruff+Playwright CI not yet reported successful; no checked-out local browser execution and no Figma/Sketch measurements. Remain draft, independent review required.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
