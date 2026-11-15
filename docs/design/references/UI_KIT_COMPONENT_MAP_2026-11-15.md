@@ -1,0 +1,53 @@
+# Impulse — подбор реальных UI Kit под утверждённый главный экран
+
+**Приоритет: P0 / владелец утвердил визуальный эталон 15.11.2026.**
+
+**Источник пикселей:** `Impulse-UI-References-2026-11-14/00-approved-master/Impulse-Главная-УТВЕРЖДЕНО-2026-11-15.png`, PNG 1672×941 RGBA, 2 328 233 байт, SHA-256 `c12128d68c1ddaeaab24e11b2ae992993f1cb835a9f8136fdd9438bba31e8616`.
+
+**Правило:** этот файл — главный источник геометрии и визуального языка темно-синей Главной. Предыдущие HTML/PNG остаются техническими исходниками для исторических сравнений, но в случае визуального конфликта новый утверждённый скриншот имеет приоритет. Имена, профессии, курсы, уровни, прогресс и счетчики в PNG демонстрационные; продакшен обязан показывать значения живого API конкретного авторизованного пользователя.
+
+## 1. Привязка элементов к настоящим UI Kits
+
+| № | Элемент по утверждённому скриншоту | UI Kit / точное название элемента | Рекомендуемый React-примитив | Действие для точного визуального совпадения |
+|---|---|---|---|---|
+| 1 | Плавающий navbar: Impulse, поиск, тема, streak, bell, avatar | **Apple macOS 27 Figma UI Kit** — Toolbar / Grouped Controls; **Obra shadcn/ui Pro** — Toolbar (OC), Button & Icon Button Rounded (OC) | Семантический `<header>` + native `<button>`; optional Radix for overlays | Габариты и материал от screenshot; тёмный полупрозрачный nav, внутренняя кайма и общий радиус. **Не** копировать системный menu bar буквально |
+| 2 | Скруглённый поиск с лупой и `⌘ K` | **macOS UI Kit by alexkaessner** `_Fields and Labels/Searchfield/⚫️ Dark/Placeholder` (Sketch symbol 9E41D1BF-0918-4F2D-A326-00BE9C2C6F43); **shadcn/ui** Command + InputGroup + Kbd | `cmdk` + собственный input/shortcut (или shadcn Command) | Референсная форма на 1672px: ~750×52, 18–20px radius, очень тёмная заливка и тонкий светлый stroke. Sketch sample 110×20 **не** переносить как итоговый размер |
+| 3 | Кнопка темы: солнце / голубая луна / тёмная луна | **Obra** Button & Icon Button Rounded; **macOS UI Kit** Toolbar SF Symbol Dark | Нативная кнопка + существующий `lucide-react` Sun/Moon/MoonStar | Единственная кликабельная кнопка, циклические 3 режима, состояние отражается в aria-label и local preference |
+| 4 | Счётчик огня 11 | **Obra** Badge + Button/Icon Button; **macOS** Toolbar Grouped Control | Button + `Flame` от lucide-react + live streak | Пилюля ~84×43, тёмная поверхность и микроблик; число только из API. Не зашивать `11` |
+| 5 | Уведомления, синяя точка | **Obra** Popover + Button & Icon Button; **macOS UI Kit** `Popovers/⚫️ Dark/Top/Center Arrow` (EDF4CCDD-41EF-459C-BEAD-D3E1F850C063) | `@radix-ui/react-popover` или эквивалентный доступный Popover | Иконка bell, декоративная dot при непрочитанных, открытие по клику, Esc, focus return |
+| 6 | Аватар + стрелка | **Obra** Avatar + Dropdown Menu; **macOS** Menu/Menu Items/Text/⚫️ Dark/Normal (ABA3690E-9FB5-4C71-9DC5-762521D7B69C) | Avatar `<img>` + `@radix-ui/react-dropdown-menu` | Снимок профиля из API, композиция справа, меню поверх UI с правильным z-index и клавиатурой |
+| 7 | Левый главный hero «Создание AI-агентов» | **Obra** Card — только структура; **Apple HIG** стандартный content material | Card/div + локальные CSS/SVG токены Impulse | ~920×292 в этом референсе, radius 23–24px; текст, progress, CTA и 3D-объект. НЕТ готового UI Kit, совпадающего с оформлением целиком |
+| 8 | Иллюстрация из трёх светящихся пластин | В готовых UI Kit **эквивалента не найдено**; Sketch `Layer`-иконка не равно 3D-объекту | Отдельный прозрачный PNG/WebP/SVG ассет или CSS 3D, НЕ интерактивная кнопка | Нужен самостоятельный ассет по утверждённому фрагменту, с корректной прозрачностью и тенями; желательно сравнение RGB/edge glow с эталоном |
+| 9 | Синяя кнопка «Продолжить» | **Obra** Button & Icon Button Rounded; **macOS** `_Buttons/Push Button/⚫️ Dark/0 Large/Active` (AF018363-EAF2-4AFD-AB9D-D90411EF6178) | Native `<button>` с `Play`, CSS gradient | В скриншоте примерно 234×50, radius ~16; насыщенный ярко-синий градиент. Сохранить текущий обработчик продолжения курса |
+| 10 | Правая карточка «Моя траектория», L0→L1 | **Obra** Card + Badge; **macOS** Segmented Control Dark **только как эстетический ориентир**, НЕ функциональный переключатель | `<section>` + status badges | ~390×292, двумерный материал `#252b3e` с градиентом; L0/L1 статусы и «Подробнее», не hardcoded значения |
+| 11 | Три метрики: Уровень / Задачи / Навыки | **Obra** Number (OC) + Separator | Семантические `<dl>` и border-left | Одна строка, два разделителя, без вложенных мини-карточек, значения API |
+| 12 | Прогресс «Следующий уровень» | **Obra** Progress (в актуальной Community с 26.10.2026 перенесён в Pro); **shadcn/ui** Progress | `<progress>` или `@radix-ui/react-progress` | Тонкая синяя полоса на тёмном треке и единственная краткая подпись; отсутствие дублирующего текста о курсах/практике |
+| 13 | «Задачи и неделя» / «Инструменты» | **Obra** Collapsible или Accordion; **macOS** Disclosure Triangle Dark `39543B27-2AE3-4333-A3E9-9EA7FB9F2439` | `<button aria-expanded>` + Collapsible / shadcn Accordion | В **этом** эталоне это строки с тонкими разделителями, НЕ стеклянные закрытые карточки. По нажатию — доступный подфункционал |
+| 14 | Фоновая тёмная «орбитальная» волна справа | Нет в типовых UI Kits | Исходное тематическое фоновое изображение или комбинация SVG mask + radial-gradients | Уникальная графика макета, не подменять generic glass gradient. Сверить на 1672×941 и 390×844 |
+| 15 | Логотип Impulse — сияющая четырёхлучевая звезда | Lucide `Sparkles` даёт приблизительную форму, **не** точную | Кастомный SVG по разрешённому оригиналу, семантическая кнопка | Должен остаться функциональный вызов боковой навигации, без текстовой кнопки «Меню» |
+
+### Текущая пригодность найденных наборов
+
+1. **Визуальный стандарт: Apple macOS 27 UI Kit (Figma/Sketch).** Официальная библиотека современного Liquid Glass. Применение: toolbar, popover, control groups, дизайн-токены и состояния. Не является React-пакетом. https://developer.apple.com/design/resources/ ; Figma https://www.figma.com/community/file/1651309434229735362/macos-27
+2. **Дизайн ↔ код: Obra shadcn/ui Kit Pro.** Прямые варианты для Button, Command, Avatar, Dropdown Menu, Progress, Accordion, Popover и Toolbar; коммерческая Figma-библиотека. https://shadcn.obra.studio/components . **Важно:** Community с 17.10.2026 лишилась тёмной темы, а с 26.10.2026 ряд компонентов (включая Command, Progress, Toolbar-related/Navigation, Drawer и др.) ушёл в Pro; бесплатную версию нельзя назвать полным эквивалентом. https://shadcn.obra.studio/changelog/community
+3. **Доступный ранее Sketch Kit: `alexkaessner/macOS-UI-Kit` (MIT).** В локально изученном `impulse_macos_sketch_component_inventory.json`: 890 masters, 275 text styles, 109 layer styles, 54 shared swatches. Есть Dark Toolbar, Searchfield, Push Button, Menu Item, Popovers, Disclosure. Основа историческая (Big Sur/Monterey), **не** современный Liquid Glass. https://github.com/alexkaessner/macOS-UI-Kit
+4. **Технические React-примитивы: `shadcn/ui` + Radix / Base UI / `cmdk`.** Компоненты имеют семантику, фокус и управление с клавиатуры, но стандартный CSS не повторяет цвет/материал PNG без целевой темы. В текущем Impulse нет Tailwind/shadcn/Radix: frontend использует React 19, Sass и `lucide-react`. Полная миграция ради одного экрана не нужна; рациональнее брать выборочно Radix/cmdk и сохранять API и текущие Sass-селекторы. https://ui.shadcn.com/docs/components/radix/command
+5. **Рефракционный эффект (опциональная проверка, не сразу в production):** `@zakisheriff/liquid-glass` 0.1.3, MIT, `GlassNav`/`GlassButton`/`GlassInput`/`GlassCard`, чистые React-компоненты. https://github.com/zakisheriff/Liquid-Glass ; альтернативный `liquidglass` MIT + renderer fallback https://glass.kreatix.dev/ . Библиотеки сравнительно новые; **реального PoC по производительности, Safari/Firefox, pointer events и доступности в Impulse пока нет.** Градиенты, компоненты и контентные карточки можно сделать точнее и стабильнее в Sass без масштабной рефракции.
+
+## 2. Не переносить из красивого PNG буквально
+
+- Профессия под заголовком (`AI Security Engineer`) не совпадает с указанием модуля (`AI Agent Engineer`) в примере — интерфейс обязан брать обе строки из актуальных полей своей модели, не подменять данные по скриншоту.
+- «3 из 6», «L0», «L1», «11», «2» — демонстрационные числа; только авторизованный backend.
+- 3D-иллюстрация и декоративные свечения — не должны блокировать текст, клавиатуру, касания или появление всплывающих меню.
+- Секция задач и секция инструментов в новом эталоне плоские раскрывающиеся строки. Не возвращать нижние стеклянные карточки из более раннего сгенерированного варианта.
+- Не вводить плавающую кнопку подсказок справа снизу, и не возвращать боковую панель постоянно видимой.
+- Не распространять проприетарные Apple SF Pro и SF Symbols как файлы. Для React использовать уже имеющийся `lucide-react`, а шрифты — разрешённый системный стек.
+
+## 3. Порядок реализации и доказательство точности
+
+- **P0:** хранить PNG как первичный benchmark и сравнивать готовый React screenshot при **одинаковом viewport 1672×941, DPR, масштабе и шрифте**. Проверить отдельно геометрию поисковой панели и карточек, толщину обводки, тексты и отсутствие перекрытий.
+- **P1:** визуально переиспользовать официальный Toolbar и Obra Rounded Button/Avatar/Dropdown/Progress/Accordion, но без требования добавить Tailwind во весь проект.
+- **P2:** вручную воспроизвести фоновую волну и 3D-стек из утверждённого изображения (это не компоненты UI Kit).
+- **P3:** отработать responsive 1448/1024/390/320, три темы, keyboard/ARIA, reduced transparency, API-функции и E2E. Сделать per-element overlay diff и актировать только реальные пройденные проверки.
+
+**Статус 15.11.2026:** оригинал сохранён в Library, UI Kit источники и конкретные символы проверены, код эталонной реализации ещё не менялся и pixel-perfect приёмка не объявлена.
