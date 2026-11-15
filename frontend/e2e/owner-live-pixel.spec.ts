@@ -102,6 +102,16 @@ test("profile dropdown preserves logout/rating and mobile has no horizontal clip
   await expect(page.getByRole("button",{name:"Impulse — открыть разделы"})).toBeVisible();
   await page.getByRole("button",{name:"Меню профиля"}).click();
   await expect(page.getByRole("menuitem",{name:"Выйти"})).toBeVisible();
-  await expect(page.getByRole("menuitem",{name:"Рейтинг"})).toBeVisible();
+  // The menu follows the API-authorized navigation: the reader fixture does
+  // not grant Rating, and a hidden route must not become visible for a test.
+  const rankingAllowed = await page.evaluate(async () => {
+    const response = await fetch("/api/v1/me", { credentials: "same-origin" });
+    const authorized = await response.json() as { navigation: string[] };
+    return authorized.navigation.includes("Рейтинг");
+  });
+  const rating = page.getByRole("menuitem",{name:"Рейтинг"});
+  if (rankingAllowed) await expect(rating).toBeVisible();
+  else await expect(rating).toHaveCount(0);
+  await expect(page.getByRole("menuitem",{name:"Помощь"})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
 });
