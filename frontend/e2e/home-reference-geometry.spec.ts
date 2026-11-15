@@ -47,9 +47,10 @@ test("approved desktop home replaces the obsolete ZIP grid at 1448px", async ({ 
   const trajectory = await page.locator(".impulse-pixel__trajectory").boundingBox();
   expect(hero).not.toBeNull();
   expect(trajectory).not.toBeNull();
-  expect(hero!.width).toBeGreaterThan(trajectory!.width * 2);
-  expect(Math.abs(hero!.y - trajectory!.y)).toBeLessThanOrEqual(2);
-  expect(hero!.height).toBe(252);
+  if (!hero || !trajectory) throw new Error("Approved main cards must render");
+  expect(hero.width).toBeGreaterThan(trajectory.width * 2);
+  expect(Math.abs(hero.y - trajectory.y)).toBeLessThanOrEqual(2);
+  expect(hero.height).toBe(252);
   await expect(page.locator(".impulse-pixel__glass").first()).toHaveCSS("backdrop-filter", "none");
   await noHorizontalScroll(page);
 });
@@ -61,7 +62,8 @@ test("approved mobile home stacks real course and trajectory at 390px", async ({
   const trajectory = await page.locator(".impulse-pixel__trajectory").boundingBox();
   expect(hero).not.toBeNull();
   expect(trajectory).not.toBeNull();
-  expect(trajectory!.y).toBeGreaterThan(hero!.y + hero!.height);
+  if (!hero || !trajectory) throw new Error("Mobile main cards must render");
+  expect(trajectory.y).toBeGreaterThan(hero.y + hero.height);
   await expect(page.getByRole("button", { name: "Меню", exact: true })).toBeHidden();
   await expect(page.locator(".participant-guide")).toHaveCount(0);
   await noHorizontalScroll(page);
