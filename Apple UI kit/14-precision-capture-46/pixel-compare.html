@@ -120,6 +120,7 @@ function differences(a,b,threshold){
   if(a.width!==b.width||a.height!==b.height)throw new Error("Размеры изображений различаются — сначала сделайте снимки при одинаковом viewport и масштабе.");
   const pixels=a.width*a.height;
   if(pixels<1 || pixels>16000000)throw new Error("Разрешено максимум 16 млн пикселей в изображении.");
+  if(a.data.length!==pixels*4||b.data.length!==pixels*4)throw new Error("Некорректная длина RGBA-данных изображения.");
   const heat=new Uint8ClampedArray(pixels*4);
   let sum=0,changed=0;
   for(let i=0;i<a.data.length;i+=4){
