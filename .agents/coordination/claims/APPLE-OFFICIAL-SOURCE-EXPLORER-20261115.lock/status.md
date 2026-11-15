@@ -2,7 +2,7 @@
 
 - task_id: APPLE-OFFICIAL-SOURCE-EXPLORER-20261115
 - session_id: gpt6-official-hig-explorer-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T18:20:00+03:00
 - heartbeat_at: 2026-11-15T18:20:00+03:00
 - base_branch: docs/apple-ui-kit-quality-gates-20261115
@@ -25,3 +25,5 @@
 
 - reopened_at: 2026-11-15T21:58+03:00
 - reopened_reason: actual Chromium screenshots from Apple reference QA success run 43736411544 show sticky header captured mid-page in fullPage evidence after scroll; make evidence deterministic at scrollTop zero; no runtime or kit assets touched
+
+- screenshot_qa_fix: 2026-11-15T21:58+03:00; inspected exact Chromium artifact 14170652359 from run 43736411544; fullPage captured sticky header mid-document after automatic scroll; browser-smoke now restores details to collapsed and scrollY zero for 1440/390/320 before screenshot. JS syntax verified; fresh runner test required after downstream propagation.
