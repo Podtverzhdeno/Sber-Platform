@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Impulse — Apple-inspired UI reference (unofficial)</title>
+<link rel="stylesheet" href="./impulse-apple-tokens.css">
+<style>
+*{box-sizing:border-box}body{margin:0}.layout{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh;gap:14px;padding:16px}.sidebar{padding:20px;align-self:start;position:sticky;top:16px;min-height:calc(100vh - 32px)}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;position:sticky;top:16px;z-index:2}.content{min-width:0;display:grid;gap:20px}.body{padding:12px 6px 40px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{padding:24px}.muted{color:var(--ai-muted)}h1{font-size:30px;line-height:1.2;margin:0}h2{font-size:20px;margin:0 0 18px}h3{font-size:15px;margin:18px 0 8px}.stack{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.field{display:grid;gap:7px}.nav{display:grid;gap:4px;margin-top:26px}.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:750}.logo{background:var(--ai-accent);color:#fff;border-radius:13px;padding:9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{padding:18px;background:var(--ai-surface-raised);border-radius:var(--ai-r-md)}.stat strong{display:block;font-size:29px}.chat{display:grid;gap:12px;min-height:170px}.chathead{padding-bottom:14px;border-bottom:1px solid var(--ai-stroke)}.demo-canvas{border-radius:20px;min-height:190px;padding:18px;background:linear-gradient(120deg,#a4b9c9 0%,#d9dce4 50%,#edc8b2 100%);display:flex;align-items:center;justify-content:center}.demo-canvas .ai-glass{padding:20px 24px;text-align:center}.switch{display:flex;align-items:center;gap:8px}footer{padding:16px;font-size:12px}.badge{display:inline-block;border-radius:999px;background:color-mix(in srgb,var(--ai-accent) 12%,transparent);color:var(--ai-accent);font-weight:600;padding:6px 12px}.ai-input{width:100%}@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static;min-height:0}.nav{display:flex;flex-wrap:wrap}.topbar{position:static}.cols{grid-template-columns:1fr}}@media(max-width:560px){.layout{padding:8px;gap:8px}.stats{grid-template-columns:1fr}.panel{padding:16px}.topbar{flex-wrap:wrap}.stack{align-items:stretch}.stack .ai-btn{flex:1}}
+</style>
+</head>
+<body class="ai-shell">
+<div class="layout">
+<aside class="ai-glass sidebar">
+<div class="brand"><span class="logo" aria-hidden="true">I</span> IMPULSE</div>
+<p class="muted">Apple-inspired web reference</p>
+<nav class="nav" aria-label="Главная навигация">
+<a class="ai-nav-item" href="#dashboard" aria-current="page">⌂&nbsp; Обзор</a>
+<a class="ai-nav-item" href="#components">◉&nbsp; Компоненты</a>
+<a class="ai-nav-item" href="#messages">▤&nbsp; Сообщения</a>
+<a class="ai-nav-item" href="#materials">◈&nbsp; Материалы</a>
+</nav>
+</aside>
+<main class="content">
+<header class="ai-glass topbar"><div><strong>Дизайн-система IMPULSE</strong><div class="muted" style="font-size:12px">Независимая веб-адаптация, не официальный Apple UI Kit</div></div><div class="stack"><label for="theme">Тема:</label><select class="ai-input" id="theme" style="width:auto"><option value="light">Светлая</option><option value="dark">Тёмная</option><option value="system">Системная</option></select></div></header>
+<div class="body">
+<section class="ai-surface panel" id="dashboard"><span class="badge">Visual reference</span><h1 style="margin-top:14px">От идеи к результату</h1><p class="muted">Интерфейс для просмотра состояний, плотности, прозрачности и типографики.</p><div class="stats"><div class="stat"><span class="muted">Курсы</span><strong>12</strong><span>Активных</span></div><div class="stat"><span class="muted">Проекты</span><strong>08</strong><span>В работе</span></div><div class="stat"><span class="muted">Навыки</span><strong>24</strong><span>Подтверждено</span></div></div></section>
+<div class="cols">
+<section class="ai-surface panel" id="components"><h2>Контролы и поля</h2><div class="stack"><button class="ai-btn primary">Основное действие</button><button class="ai-btn">Вторичное</button><button class="ai-btn" disabled>Недоступно</button></div><h3>Поля</h3><label class="field">Поиск<input class="ai-input" placeholder="Курсы, проекты и навыки…"></label><h3>Состояния</h3><div class="stack"><span class="badge">Выбрано</span><label class="switch"><input type="checkbox" checked> Уведомления</label><label class="switch"><input type="checkbox"> Дополнительно</label></div></section>
+<section class="ai-surface panel" id="messages"><h2>Сообщения</h2><div class="chathead"><strong>Команда проекта</strong><div class="muted">Пример переписки</div></div><div class="chat"><div class="ai-chat-bubble">Обсудим следующую итерацию?</div><div class="ai-chat-bubble sent">Да, обновим дизайн-систему.</div></div><label class="field" style="margin-top:12px">Новое сообщение<input class="ai-input" placeholder="Написать сообщение…"></label></section>
+</div>
+<section id="materials"><h2>Прозрачные функциональные слои</h2><div class="demo-canvas"><div class="ai-glass"><strong>Regular glass (web approximation)</strong><p class="muted" style="margin:8px 0 0">Blur + saturation + edge + shadow</p></div></div><p class="muted">Эффект приближённый. Внутренние карточки и длинный текст рекомендуются на непрозрачных поверхностях.</p></section>
+<footer class="muted">Ссылка на официальные Apple макеты: <a href="https://developer.apple.com/design/resources/" rel="noreferrer">Design Resources</a>. Все компоненты этой страницы — авторские, без лицензированных Apple ассетов.</footer>
+</div>
+</main>
+</div>
+<script>
+(function () {
+  const select=document.getElementById('theme');
+  const media=window.matchMedia('(prefers-color-scheme: dark)');
+  function apply() {const v=select.value;document.documentElement.dataset.theme=v==='system'?(media.matches?'dark':'light'):v;}
+  select.addEventListener('change',apply);media.addEventListener?.('change',()=>{if(select.value==='system')apply()});apply();
+})();
+</script>
+</body>
+</html>

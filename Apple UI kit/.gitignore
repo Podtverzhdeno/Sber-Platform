@@ -1,0 +1,8 @@
+# Never commit Apple licensed design kits, original screenshots or local visual comparisons.
+_local-reference/
+_local-output/
+*.fig
+*.sketch
+*.sketchlibrary
+*.figma
+.DS_Store
