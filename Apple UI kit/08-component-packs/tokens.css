@@ -1,0 +1,58 @@
+/* Impulse-authored Apple-inspired REFERENCE tokens, NOT Apple official token export. */
+/* Standalone gallery only: do not import into the production app without review. */
+:root {
+  color-scheme: light;
+  --ak-canvas: #f4f5f8;
+  --ak-surface: #ffffff;
+  --ak-raised: #fff;
+  --ak-ink: #1d1d1f;
+  --ak-secondary: #63646a;
+  --ak-line: #d9dbe3;
+  --ak-accent: #007aff;
+  --ak-accent-hover: #0067d8;
+  --ak-on-accent: white;
+  --ak-success: #16854b;
+  --ak-danger: #d70015;
+  --ak-warning: #9c6200;
+  --ak-glass: rgba(248,249,253,.68);
+  --ak-glass-line: rgba(255,255,255,.7);
+  --ak-glass-shadow: 0 12px 40px rgba(28,34,58,.14);
+  --ak-blur: 22px;
+  --ak-radius-sm: 10px;
+  --ak-radius: 15px;
+  --ak-radius-card: 21px;
+  --ak-radius-sheet: 26px;
+  --ak-control-height: 42px;
+  --ak-space-1: 4px;
+  --ak-space-2: 8px;
+  --ak-space-3: 12px;
+  --ak-space-4: 16px;
+  --ak-space-5: 24px;
+  --ak-space-6: 32px;
+  --ak-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ak-ease: cubic-bezier(.2,.8,.2,1);
+}
+[data-mode="dark"] {
+  color-scheme: dark;
+  --ak-canvas: #0c1225;
+  --ak-surface: #1b2540;
+  --ak-raised: #242f4c;
+  --ak-ink: #f7f8ff;
+  --ak-secondary: #b8c0d6;
+  --ak-line: #3a4662;
+  --ak-accent: #419dff;
+  --ak-accent-hover: #6fb4ff;
+  --ak-on-accent: #08182a;
+  --ak-success: #4ad78a;
+  --ak-danger: #ff6668;
+  --ak-warning: #ffcc62;
+  --ak-glass: rgba(40,56,93,.52);
+  --ak-glass-line: rgba(229,237,255,.17);
+  --ak-glass-shadow: 0 16px 44px rgba(0,3,18,.37);
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --ak-glass: var(--ak-surface); --ak-blur: 0px; }
+}
+@media (forced-colors: active) {
+  :root { --ak-glass: Canvas; --ak-ink: CanvasText; --ak-line: CanvasText; --ak-glass-shadow: none; --ak-blur: 0px; }
+}

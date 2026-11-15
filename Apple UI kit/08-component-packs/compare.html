@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Impulse · визуальная проверка 1:1</title>
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="compare.css"><script defer src="compare.js"></script></head>
+<body data-mode="dark">
+<main class="page">
+<a href="README.md" class="back">← Apple UI kit</a>
+<div class="eyebrow">IMPULSE / SCREENSHOT QA</div><h1>Сравнение с эталоном</h1>
+<p class="intro">Загрузите оригинальный разрешённый референс и скриншот Impulse. Сравнение работает локально в браузере без отправки файлов на сервер. Для достоверных цифр оба изображения должны иметь одинаковую ширину и высоту.</p>
+<div class="controls">
+<label class="file">1 · Эталон Apple / Impulse <input id="reference" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<label class="file">2 · Реализация Impulse <input id="actual" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<label>Режим
+<select id="mode"><option value="overlay">Наложение</option><option value="split">Половины</option><option value="diff">Пиксельная разница</option><option value="reference">Только эталон</option><option value="actual">Только реализация</option></select></label>
+<label>Непрозрачность реализации: <output id="opacityValue">50%</output><input id="opacity" type="range" min="0" max="100" value="50"></label>
+<label>Порог различия (0–255): <output id="thresholdValue">24</output><input id="threshold" type="range" min="0" max="255" value="24"></label>
+<button id="report" type="button" disabled>Сохранить JSON-отчёт</button>
+</div>
+<div class="status" id="status" role="status" aria-live="polite">Выберите два изображения, снятые в одинаковых условиях.</div>
+<div class="stage"><canvas id="screen" aria-label="Сравнение эталонного и полученного скриншотов" role="img"></canvas></div>
+<div class="metrics" aria-live="polite"><div><small>Размеры</small><strong id="dimensions">—</strong></div><div><small>Mean absolute error RGB</small><strong id="mae">—</strong></div><div><small>Пикселей с заметным различием</small><strong id="pixels">—</strong></div></div>
+<h2>Условия воспроизводимости</h2>
+<p class="intro">Фиксируйте SHA кода, ширину × высоту viewport, DPR, масштаб браузера, системные шрифты, данные, тему, состояние окна и прокрутку. Отчёт содержит числовую разницу изображений, но <strong>не подтверждает</strong> нативную эквивалентность Liquid Glass, корректность интеракций или юридическое право копирования исходника.</p>
+<ul><li>В режиме «Наложение» двигайте ползунок: несовпадения видны по двойным краям.</li><li>«Половины» разделяет эталон слева и реализацию справа.</li><li>«Пиксельная разница» выделяет отличия красным; метрика чувствительна к шрифтам, сглаживанию и данным.</li><li>Файлы остаются в памяти вкладки; экспортируются только вычисленные результаты и введённые вручную метаданные отсутствуют.</li></ul>
+<p class="footer">Оригинальный инструмент Impulse. Не включает Apple images/fonts/SF symbols. <a href="acceptance.md">Полный QA checklist</a>.</p>
+</main></body></html>
