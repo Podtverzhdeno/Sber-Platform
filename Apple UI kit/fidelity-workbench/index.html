@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Impulse — Fidelity Workbench</title>
+<link rel="stylesheet" href="styles.css"><script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти к инструменту</a>
+<header class="masthead">
+  <a class="brand" href="../README.md"><span class="symbol">✦</span>Impulse <small>DESIGN LAB</small></a>
+  <nav aria-label="Каталоги"><a href="../reference-cases/README.md">Основные референсы</a><a href="../advanced-cases/README.md">Расширенные</a><a href="https://developer.apple.com/design/resources/" target="_blank" rel="noopener noreferrer">Apple Design Resources ↗</a></nav>
+  <span class="offline">● Локальная обработка</span>
+</header>
+<main id="main" class="page">
+  <section class="hero">
+    <div class="hero-copy"><p class="eyebrow">REFERENCE LAB / PIXEL COMPARISON</p><h1>Визуальная точность.<br><em>Измеряемая, а не условная.</em></h1>
+      <p class="lead">Сравнивайте исходный Apple-референс и скриншот Impulse в одинаковом масштабе. Файлы остаются в браузере: никаких запросов, сторонних библиотек и отправки изображений.</p>
+      <button type="button" class="btn primary" id="demo">Открыть демонстрацию ↗</button>
+      <a class="btn secondary" href="README.md">Методика сравнения</a>
+    </div>
+    <div class="hero-visual" aria-hidden="true"><div class="abstract-screen left"></div><div class="abstract-screen right"></div><div class="abstract-disc">↔</div></div>
+  </section>
+
+  <section aria-labelledby="upload-heading" class="section">
+    <div class="section-head"><div><p class="eyebrow">01 / INPUT</p><h2 id="upload-heading">Загрузите скриншоты</h2></div><p>PNG · JPEG · WEBP · до 40 МБ</p></div>
+    <div class="upload-grid">
+      <div class="upload"><label for="source-input"><span class="letter">A</span><span><strong>Источник / Apple</strong><small>Разрешённый экспорт из Figma или Sketch</small></span></label>
+        <input id="source-input" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="source-meta"><p id="source-meta">Не выбран</p></div>
+      <div class="upload"><label for="target-input"><span class="letter">B</span><span><strong>Реализация / Impulse</strong><small>Тот же viewport, масштаб, DPR и тема</small></span></label>
+        <input id="target-input" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="target-meta"><p id="target-meta">Не выбран</p></div>
+    </div>
+    <div id="dimension-note" class="notice" role="status">Нужно загрузить два изображения. Пиксельный diff не выполняется при разных размерах.</div>
+  </section>
+
+  <section class="section" aria-labelledby="compare-heading">
+    <div class="section-head"><div><p class="eyebrow">02 / ANALYSIS</p><h2 id="compare-heading">Сравнение интерфейсов</h2></div>
+      <div class="modes" role="group" aria-label="Режим просмотра">
+        <button type="button" data-mode="overlay" aria-pressed="true">Наложение</button>
+        <button type="button" data-mode="side" aria-pressed="false">Рядом</button>
+        <button type="button" data-mode="diff" aria-pressed="false" disabled>Diff</button>
+      </div>
+    </div>
+    <div class="viewer">
+      <div class="placeholder" id="placeholder"><div class="placeholder-icon" aria-hidden="true">◫</div><h3>Два изображения — один результат</h3><p>Выберите исходник и реализацию либо нажмите «Открыть демонстрацию». Подлинные ассеты Apple в комплект не включены.</p></div>
+      <div id="visuals" hidden>
+        <div id="overlay-view" class="overlay" aria-label="Наложение исходного изображения и скриншота Impulse">
+          <img id="layer-source" alt="Исходный скриншот" class="layer"><img id="layer-target" alt="Реализация Impulse" class="layer target">
+          <div id="divider" class="divider" aria-hidden="true"><span>↔</span></div><span class="pin left">A · Источник</span><span class="pin right">B · Impulse</span>
+        </div>
+        <div id="side-view" class="side" hidden><figure><img id="side-source" alt="Исходник целиком"><figcaption>A · Источник</figcaption></figure><figure><img id="side-target" alt="Реализация целиком"><figcaption>B · Impulse</figcaption></figure></div>
+        <figure id="diff-view" class="diff" hidden><canvas id="diff-canvas" role="img" aria-label="Тепловая карта отличающихся пикселей"></canvas><figcaption>Розовым отмечены пиксели, разница RGB которых превышает установленный порог.</figcaption></figure>
+      </div>
+    </div>
+    <div class="sliders">
+      <label for="reveal"><span><strong>Положение разделителя</strong><small>Доля изображения B справа</small></span><b id="reveal-value">50%</b><input id="reveal" type="range" min="0" max="100" value="50" step="1" aria-valuetext="50 процентов"></label>
+      <label for="threshold"><span><strong>Допуск RGB</strong><small>Разница по максимальному каналу</small></span><b id="threshold-value">12</b><input id="threshold" type="range" min="0" max="100" value="12" step="1" aria-valuetext="12 из 255"></label>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="metrics-heading">
+    <div class="section-head"><div><p class="eyebrow">03 / EVIDENCE</p><h2 id="metrics-heading">Результат проверки</h2></div><span id="status" role="status" aria-live="polite" class="status">Ожидаются изображения</span></div>
+    <div class="metrics">
+      <article><small>Различающиеся пиксели</small><strong id="metric-different">—</strong><p>превышение порога</p></article>
+      <article><small>Доля различий</small><strong id="metric-percent">—</strong><p>от всех пикселей</p></article>
+      <article><small>Средняя ошибка RGB</small><strong id="metric-mae">—</strong><p>0–255, среднее по 3 каналам</p></article>
+      <article><small>Размеры</small><strong id="metric-size">—</strong><p>одинаковые px для diff</p></article>
+    </div>
+    <div class="exports"><button type="button" class="btn secondary" id="export-json" disabled>Скачать JSON-отчёт</button><button type="button" class="btn secondary" id="export-png" disabled>Скачать diff PNG</button><p>Метрики проверяют только изображение, не поведение или подлинность исходника.</p></div>
+  </section>
+  <section class="section help">
+    <h2>Что нужно для проверки 1:1</h2>
+    <div class="help-grid">
+      <article><b>01</b><h3>Единая геометрия</h3><p>Viewport, DPR, zoom, шрифты, локаль, тема и состояние UI должны совпадать. Нельзя подгонять размеры ради красивого сравнения.</p></article>
+      <article><b>02</b><h3>Официальный источник</h3><p>Получите разрешённый исходник через <a href="https://developer.apple.com/design/resources/" target="_blank" rel="noopener noreferrer">Apple Design Resources</a> и запишите точную версию, платформу и frame.</p></article>
+      <article><b>03</b><h3>Проверка поведения</h3><p>Низкая визуальная ошибка не доказывает корректность API, доступности, RBAC, действий, focus и сохранения состояния.</p></article>
+    </div>
+    <p class="disclaimer">Самостоятельный инструмент Impulse, не официальный продукт Apple. Нативный Liquid Glass нельзя автоматически заменить фильтром CSS. <a href="https://developer.apple.com/design/human-interface-guidelines/materials" target="_blank" rel="noopener noreferrer">Правила Apple HIG Materials</a>.</p>
+  </section>
+</main>
+<footer>IMPULSE · APPLE UI KIT / FIDELITY WORKBENCH <span>LOCAL ONLY · NO THIRD-PARTY ASSETS</span></footer>
+</body></html>
