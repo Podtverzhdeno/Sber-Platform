@@ -62,3 +62,15 @@ Coverage includes foundations (color, material, layout, typography, symbols, mot
 - [Current official Apple changes](CURRENT_OFFICIAL_UPDATES_2026.md): September 27-kit updates, November 6 Live Activities, October 28 macOS touch.
 - [macOS touch acceptance](11-motion-accessibility-responsive/MACOS_TOUCH_2026.md) and [new Live Activities](09-progress-feedback-states/LIVE_ACTIVITIES_2026.md) for six-role Impulse patterns.
 - [Offline reference source audit](SOURCE_QUALITY_GATE.md) checks structure, source provenance, component IDs and HTML/JS links without downloading Apple design assets. Run locally after checkout; the presence of a script is not a passed test.
+
+
+## Supplemental QA — link integrity and mobile recovery
+
+This supplemental guide preserves the PR #181 information that was moved out of the main Apple UI kit README to resolve overlap with the independently maintained canonical README in main.
+
+- [Standalone Markdown/HTML relative-link audit](LINK_INTEGRITY_QA.md) validates local document and example paths and ships synthetic regression tests. 144 local links across 13 core pages were separately resolved against a GitHub tree; executing the new Python audit locally remains pending.
+- [Original responsive reference laboratory](web-implementation/index.html) preserves labelled search below 640px, offers Retry for simulated error and Clear Search for zero-results; these controls remain demo-only with no Impulse API mutations.
+- [Browser QA](BROWSER_ACCEPTANCE.md) includes 320/390px search, keyboard, touch, focus and recovery checks. Its Chromium execution remains unverified.
+- [Source quality gate](SOURCE_QUALITY_GATE.md) explains the offline structural checks; per-frame Apple 27 Figma/Sketch measurements and independent pixel acceptance remain pending.
+
+**Canonical directory index:** [README.md](README.md) from current main. This supplemental page describes the isolated PR #181 source bundle without overriding the main library's 12- and 16-case reference collections.

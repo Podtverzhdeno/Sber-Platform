@@ -16,7 +16,7 @@
 4. Откройте локально **04-web-reference/casebook.html** (интерактивная галерея: nav, chat, forms, materials, dialog) и изучите **04-web-reference/impulse-apple-tokens.css**. Прежняя **reference-gallery.html** также сохранена.
 5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
 6. Пройдите **06-cases/README.md** для нужного сценария и выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
-7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
+7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+; проверяет 12 основных и 16 дополнительных SVG). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
 
 ## Состав
 
@@ -37,6 +37,9 @@
 | 06-cases/VISUAL_GALLERY.md | 12 SVG-превью, отображаемых непосредственно в GitHub |
 | 06-cases/visual-gallery.html | **12 оригинальных SVG-референсов** в единой галерее |
 | 06-cases/visual-manifest.json | Источники, категории, статусы и ограничения для 12 SVG |
+| reference-cases/README.md | Новая коллекция из 16 самостоятельных SVG 1200×760, источник и сценарий в каждой папке |
+| reference-cases/index.html | Автономная HTML-галерея дополнительных 16 кейсов |
+| reference-cases/manifest.json | Машиночитаемый реестр 16 кейсов и соответствий файлам IMPULSE |
 | 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
 | 04-web-reference/verify-library.mjs | Проверка структуры, линковки, реальных путей IMPULSE и синтаксиса JavaScript без сети |
 | 04-web-reference/validate-svg-library.py | Строгая проверка XML, размеров, accessibility и источников 12 SVG |
@@ -60,6 +63,12 @@
 **HIG:** https://developer.apple.com/design/human-interface-guidelines/  
 **Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
 
+## Вторая коллекция: 16 новых SVG-сценариев
+
+[Открыть каталог 16 кейсов](reference-cases/README.md) · [HTML-галерея](reference-cases/index.html) · [Манифест](reference-cases/manifest.json).
+
+Эти 16 дополнительных **оригинальных** иллюстраций 1200×760 перенесены из рабочей ветки #184 без изменения основного приложения; все ссылки на юридические ограничения, визуальный QA и реальные source paths исправлены для текущего `main`. Нельзя считать иллюстрации официальными Apple-макетами или измеренной реализацией 1:1.
+
 ## Интерактивный casebook (новый)
 
 [Открыть casebook.html](04-web-reference/casebook.html) — в одной автономной web-странице показаны категории UI и реальные состояния. Отдельная [галерея 12 сценариев](06-cases/README.md) содержит конкретные правила для navigation, messaging, forms, dialogs, analytics, accessibility и других областей. Выделение в отдельные папки позволяет точечно переносить дизайн в IMPULSE без вмешательства в соседние подсистемы.
@@ -71,11 +80,3 @@
 [Посмотреть 12 SVG прямо в GitHub](06-cases/VISUAL_GALLERY.md) · [Открыть HTML-галерею](06-cases/visual-gallery.html) · [Манифест 12 SVG](06-cases/visual-manifest.json) · [Каталог сценариев](06-cases/README.md).
 
 Это **наши векторные схемы 1600×900**, которые можно изучать/редактировать как SVG, но **они не являются скриншотами Apple и не дают гарантию совпадения 1:1**. Измерять настоящую геометрию необходимо по разрешённым оригинальным дизайн-файлам Apple (Figma/Sketch) на целевых состояниях. Если другие параллельные PR содержат альтернативные примеры, при слиянии сохраняйте каждую уникальную коллекцию и единственный согласованный README; [план согласования](07-integration/merge-handoff.md).
-
-## Link-integrity gate (November 2026)
-
-- [Standalone Markdown/HTML relative-link audit](LINK_INTEGRITY_QA.md): checks locally resolved references without network access and includes synthetic regression tests. A connected-GitHub scan already checked **144 local links across 13 principal pages with zero missing paths**; Python execution remains an independent pending check.
-- [Responsive original web example](web-implementation/index.html): fixed previously hidden mobile search, and added accessible error Retry and no-results Clear Search actions. Its source passed a JavaScript syntax + HTML element-ID check; browser interaction tests are committed but **not yet executed**.
-- [Browser acceptance script](BROWSER_ACCEPTANCE.md): includes narrow search and recovery scenarios for 320/390px views.
-
-These are auditable references, not Apple 27 editable component exports or signed-off 1:1 design parity.
