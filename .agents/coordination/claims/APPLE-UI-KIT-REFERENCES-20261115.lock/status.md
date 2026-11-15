@@ -2,9 +2,9 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T17:01:00+03:00
-- heartbeat_at: 2026-11-15T18:00:00+03:00
+- heartbeat_at: 2026-11-15T18:38:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
 - depends_on: []
 - source: owner-directed standalone repository reference task
@@ -31,3 +31,16 @@
 - resumed_scope_20261115: owner again asked to keep adding and committing on PR #181; continue dedicated Apple UI kit reference library and source-backed web component examples only.
 - planned_write_scope: Apple UI kit/** and this claim only; no frontend/shared integration.
 - blockers: official editable Figma/Sketch 27 kit layers cannot be inspected here; true 1:1 measured reproduction, screenshot diff and browser E2E remain unverified. Standalone preview has not been executed in a browser. No independent reviewer approval yet. Apple assets are links only, not redistributed.
+
+## Owner continuation handoff — source library, 2026-11-15
+
+- New commits (before status update):
+  - 537e09306abd1c11c6dbb08b445f3ffde3c33320: standalone interactive original web study (HTML/CSS/JS, manual QA).
+  - cf1ba7ed5dbdeb808ea26172280a3be2af164236: 67 components across 13 groups, searchable HIG source/capture catalog, measured frame template.
+  - 77bbf20e3b3b4b15e0ce75e8f12763f825e85ac1: independent Pillow-based pixel difference tool + synthetic unit tests.
+  - 307bbd803a86cfcc46265a435c4cf3726f6a413f: README/HIG behavior rules/15-workstream migration backlog/QA documentation.
+- Read-only checks done: 7/7 key source files fetched; JS source parsed successfully, 26 referenced DOM IDs found, CSS braces balanced, 67 unique component identifiers and no false frame measurement claims; README links and catalog viewer verified structurally.
+- GitHub PR #181 currently changes 70 files, none outside Apple UI kit/** and this claim path. Main application source untouched.
+- Not executed: Chromium/Playwright browser rendering, Python Pillow unit tests, live Impulse E2E, Apple 27 editable Figma/Sketch frame measurements.
+- Review action: independent reviewer to run local HTTP demo, Python unit suite, verify remote Apple links and capture actual license-compatible source frames before the proposed source-to-Impulse 1:1 workflow.
+- Status remains REVIEW, PR draft, no merge/deploy.
