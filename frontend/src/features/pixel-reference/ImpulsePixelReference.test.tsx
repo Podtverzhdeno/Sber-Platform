@@ -60,6 +60,16 @@ describe("Impulse pixel reference", () => {
     expect(screen.getByText("Impulse")).toBeInTheDocument();
   });
 
+  it("keeps an accessible home heading without showing the redundant visible title", () => {
+    const { container } = render(<ImpulsePixelReference {...props()} />);
+    const heading = screen.getByRole("heading", { name: "Главная" });
+    expect(heading).toHaveClass("sr-only");
+    expect(heading).toHaveAttribute("id", "workspace-title");
+    expect(container.querySelector(".impulse-pixel__heading h1:not(.sr-only)")).toBeNull();
+    expect(screen.getByText("AI Security Engineer")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Мой путь" })).toBeEnabled();
+  });
+
   it("renders real current module and both dynamic progress values", () => {
     render(<ImpulsePixelReference {...props()} />);
     expect(screen.getByRole("heading", {name:"Создание AI-агентов"})).toBeInTheDocument();
