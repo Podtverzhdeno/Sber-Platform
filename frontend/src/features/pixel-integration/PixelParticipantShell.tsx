@@ -71,7 +71,7 @@ export function PixelParticipantShell({
         onOpenNavigation={onOpenNavigation}
         onOpenJourney={() => { onOpenWorkspace("trajectory"); }}
         onContinue={() => { followPixelPrimaryTarget(overview, onOpenTarget, onOpenWorkspace); }}
-        onOpenRequirements={() => { /* Local disclosure; no server mutation. */ }}
+        onOpenRequirements={() => { onOpenWorkspace("trajectory"); }}
         onOpenTasks={() => { onOpenTarget("tasks", ""); }}
         onOpenTools={onOpenTools}
         onOpenRanking={onOpenRanking}
