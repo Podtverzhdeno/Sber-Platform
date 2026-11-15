@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../api/client";
 import { Badge, SafeExternalLink, StatePanel } from "../components/ui";
 import { ParticipantRatingV2 } from "./rating-v2/page";
+import { ResultsNavigation } from "./participant-results-hub/ResultsNavigation";
 
 type Contribution = { contribution_id: string; project_title: string; personal_summary: string; artifact_keys: string[]; grade: string | null; review_reason: string | null; verification_status: string };
 type Course = { key: string; title: string; status: string };
@@ -91,5 +92,5 @@ export function ParticipantPortfolio() {
 /** Preserve the established participant route; the full UI is scoped to Rating V2. */
 export function ParticipantRating({ personId }: { personId?: string }) {
   const navigate = useNavigate();
-  return <ParticipantRatingV2 currentPersonId={personId} onOpenMessages={() => { void navigate("/workspace/10"); }} />;
+  return <div className="rating-results-entry" data-testid="rating-results-entry"><ResultsNavigation activeSection="Рейтинг" /><ParticipantRatingV2 currentPersonId={personId} onOpenMessages={() => { void navigate("/workspace/10"); }} /></div>;
 }

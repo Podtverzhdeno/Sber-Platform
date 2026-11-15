@@ -1,7 +1,7 @@
 # Claim IMPULSE-RESULTS-SUBSECTION-INTEGRATION-20261115
 - task_id: IMPULSE-RESULTS-SUBSECTION-INTEGRATION-20261115
 - session_id: gpt6-owner-results-subnav-20261115-2326
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T23:26:00+03:00
 - heartbeat_at: 2026-11-15T23:26:00+03:00
 - owner_instruction: sequential redesign, immediate main and Railway deploy after checks
@@ -20,5 +20,8 @@
   - backend, all data projections, services, auth/roles, Railway config, other participants/customer routes
 - plan: one server-authorized Results group switcher shown on each of four existing participant destinations without modifying their data or controls; preserve original route indexes and deep links
 - verification: unit, TypeScript, scoped ESLint, production build, Playwright 320/390/1440 and unauthorized access states, exact main CI, Railway deployment
-- progress: claim acquired; code work next
+- progress: four existing Results routes now render server-permission-aware local group nav. No App.tsx or backend changes; the old user data views and deep-link destinations are untouched.
+- verified: Vitest ResultsNavigation 4/4 PASS, Playwright Chromium 2/2 PASS for all four destinations/Back and 320/390/1440 navigation bounds, TypeScript PASS, ESLint scoped PASS, Vite production build PASS (2191 modules)
+- remaining: exact main CI, independent screenshot comparison, post-deploy Railway smoke
+- reference commit: dfa4c945 on ui/results-subsection-navigation-20261115
 - blockers: independent screenshot parity
