@@ -36,6 +36,9 @@ test("P0 approved home: 1672×941 geometry, materials and live content", async (
   const track = await page.locator(".impulse-pixel__trajectory").boundingBox();
   expect(toolbar && search && content && hero && track).toBeTruthy();
   if (!toolbar || !search || !content || !hero || !track) return;
+  // Always capture before geometry assertions, so red runs remain inspectable.
+  await page.screenshot({ path: "test-results/impulse-approved-home-1672.png", animations: "disabled" });
+  console.log("APPROVED_HOME_GEOMETRY", JSON.stringify({ toolbar, search, content, hero, track }));
 
   closeTo(toolbar.x, 59, 3);
   closeTo(toolbar.height, 73, 2);
@@ -71,8 +74,7 @@ test("P0 approved home: 1672×941 geometry, materials and live content", async (
   await expect(page.locator(".participant-guide")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Меню", exact: true })).toBeHidden();
 
-  // Screenshot for manual overlay against the original 1672×941 PNG.
-  await page.screenshot({ path: "test-results/impulse-approved-home-1672.png", animations: "disabled" });
+  // Snapshot recorded before assertions for red and green runs alike.
 });
 
 test("approved home uses real actions, not a flattened screenshot", async ({ page }) => {
