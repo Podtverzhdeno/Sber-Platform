@@ -55,8 +55,6 @@ jobs:
     env:
       CI: "true"
       TZ: Europe/Moscow
-      APPLE_QA_OUTPUT: ${{ runner.temp }}/apple-kit-fidelity-visual-evidence
-      APPLE_ATLAS_SCREENSHOTS: ${{ runner.temp }}/apple-kit-source-atlas-evidence
     steps:
       - name: Check out exact tested revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -72,15 +70,19 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
       - name: Test local source atlas search, filters and mobile layout
+        env:
+          APPLE_ATLAS_SCREENSHOTS: ${{ runner.temp }}/apple-kit-source-atlas-evidence
         run: node docs/apple-official-reference-atlas-20261115/browser-smoke.mjs
       - name: Test fidelity A/B screenshots, RGB heatmap and exports
+        env:
+          APPLE_QA_OUTPUT: ${{ runner.temp }}/apple-kit-fidelity-visual-evidence
         run: node tools/apple-ui-kit-qa/browser-smoke.mjs
       - name: Upload source atlas desktop/mobile screenshots
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: apple-source-atlas-visual-evidence
-          path: ${{ env.APPLE_ATLAS_SCREENSHOTS }}/
+          path: ${{ runner.temp }}/apple-kit-source-atlas-evidence/
           retention-days: 14
           if-no-files-found: warn
       - name: Upload fidelity comparison desktop/mobile screenshots
@@ -88,6 +90,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: apple-fidelity-workbench-visual-evidence
-          path: ${{ env.APPLE_QA_OUTPUT }}/
+          path: ${{ runner.temp }}/apple-kit-fidelity-visual-evidence/
           retention-days: 14
           if-no-files-found: warn
