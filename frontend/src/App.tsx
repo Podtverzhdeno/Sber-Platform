@@ -313,6 +313,34 @@ const participantMetricSeries = [
 
 const queryClient = appQueryClient;
 
+/** Preserve the unauthenticated theme control without reintroducing a Menu button. */
+function ThemeControl({
+  value,
+  onChange,
+}: {
+  value: ThemeChoice;
+  onChange: (next: ThemeChoice) => void;
+}) {
+  const next: ThemeChoice = value === "light" ? "dark" : value === "dark" ? "system" : "light";
+  const Icon = value === "light" ? Sun : value === "dark" ? MoonStar : Moon;
+  const labels: Record<ThemeChoice, string> = {
+    light: "Светлая тема",
+    dark: "Тёмная тема",
+    system: "Системная тема",
+  };
+  return (
+    <button
+      type="button"
+      className="theme-control"
+      aria-label={`Тема: ${labels[value]}. Переключить`}
+      title={labels[value]}
+      onClick={() => onChange(next)}
+    >
+      <Icon aria-hidden="true" size={18} />
+    </button>
+  );
+}
+
 function LoginScreen({
   personas,
   loading,
