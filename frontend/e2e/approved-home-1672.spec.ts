@@ -17,7 +17,8 @@ async function openApprovedHome(page: Page): Promise<void> {
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/0");
   await expect(page.getByTestId("pixel-live-shell")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Главная" })).toBeVisible();
+  // The page title remains accessible to screen readers, but owner removed it visually.
+  await expect(page.getByRole("heading", { name: "Главная" })).toHaveClass(/sr-only/);
 }
 
 function closeTo(value: number, expected: number, tolerance = 4): void {
@@ -50,7 +51,8 @@ test("P0 approved home: 1672×941 geometry, materials and live content", async (
   closeTo(content.x, 160, 4);
   closeTo(content.width, 1336, 3);
   closeTo(hero.x, 160, 4);
-  closeTo(hero.y, 210, 11);
+  // Removing the oversized visible page heading intentionally pulls both main panels up 38px.
+  closeTo(hero.y, 172, 11);
   closeTo(hero.width, 920, 3);
   closeTo(hero.height, 292, 2);
   closeTo(track.x, 1107, 4);
@@ -59,7 +61,8 @@ test("P0 approved home: 1672×941 geometry, materials and live content", async (
   expect(Math.abs(hero.y - track.y)).toBeLessThanOrEqual(2);
 
   await expect(page.locator(".impulse-pixel__hero h2")).toHaveCSS("font-size", "36px");
-  await expect(page.locator(".impulse-pixel__heading h1")).toHaveCSS("font-size", "43px");
+  await expect(page.locator(".impulse-pixel__heading h1")).toHaveClass(/sr-only/);
+  await expect(page.locator(".impulse-pixel__heading p")).toBeVisible();
   await expect(page.locator(".impulse-pixel__primary")).toHaveCSS("min-height", "50px");
   await expect(page.locator(".page-shell--owner-pixel-home")).toHaveCSS("background-image", /impulse-approved-orbit.svg/);
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
@@ -99,11 +102,11 @@ for (const width of [1448, 1024, 820, 570, 390, 320]) {
     if (width <= 570) {
       // No covered heading, clipped search, or lost 15px under Windows scrollbar.
       const search = await page.locator(".topbar .global-search").boundingBox();
-      const heading = await page.locator(".impulse-pixel__heading h1").boundingBox();
+      const heading = await page.locator(".impulse-pixel__heading p").boundingBox();
       const bar = await page.locator(".topbar").boundingBox();
       expect(search && heading && bar).toBeTruthy();
       if (search && heading && bar) {
-        expect(heading.y, "Home heading must clear the mobile search").toBeGreaterThanOrEqual(search.y + search.height + 12);
+        expect(heading.y, "Home role subtitle must clear the mobile search").toBeGreaterThanOrEqual(search.y + search.height + 12);
         expect(search.x).toBeGreaterThanOrEqual(0);
         expect(search.x + search.width).toBeLessThanOrEqual(width + 1);
         expect(bar.width, "Mobile chrome must cover the real viewport").toBeGreaterThanOrEqual(width - 1);
