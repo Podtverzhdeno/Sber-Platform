@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: IN_PROGRESS
+- status: REVIEW
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -46,5 +46,13 @@
   - Verification not completed: checked-out Python verifier and Playwright browser run on the exact branch, Figma/Sketch original frame measurement, genuine pixel-by-pixel comparison with Impulse.
   - PR #190 remains draft, independent acceptance pending; no main merge or deploy.
 - owner_resume_20261115_1927: owner requested further work; adding local, standalone pixel-difference comparison utility plus repeatable QA and related documentation entirely within the existing exclusive 14-precision-capture-46 scope.
+- owner_resume_20261115_pixel_qa:
+  - Added offline `pixel-compare.html`: local-only PNG/JPEG/WebP inputs, strict dimension match, RGBA MAE and changed ratio, split/overlay, heatmap, downloadable provenance-safe JSON.
+  - Added `test_pixel_compare.cjs`: seven deterministic numerical test cases and source safeguards; V8 executed the exact committed `differences()` function on 7 scenarios, all passed.
+  - Added `qa_pixel_compare.py`: optional Chromium/Playwright smoke with synthetic PNG fixtures, UI modes, download and no-network assertions. This script is committed but NOT executed in a checked-out browser.
+  - Added `PIXEL_COMPARE_WORKFLOW.md` and updated README, Python verifier and parent-spec link; all changes confined to 14-precision-capture-46 and this own claim.
+  - GitHub source readback: 8/8 selected files fetched; comparator JS syntax passed; 46 capture records and 24 official HIG chapter source records preserved; CSS/HTML contains no external scripts; source QA metadata preserves `pixel_parity_certified=false`.
+  - Precision limitations: this is raw RGBA pixel comparison, not perceptual/semantic similarity or an authorized Apple Figma frame export. No Apple screenshot/font/SF Symbol binary or actual React app code modified.
+  - Not verified: actual Chromium run on checked-out PR, real Figma/Sketch source frame geometry, comparison screenshot and independent reviewer acceptance. Do NOT merge or deploy from this author session.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
