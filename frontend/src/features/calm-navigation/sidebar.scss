@@ -215,11 +215,23 @@
 
 .calm-navigation__backdrop {
   position: fixed;
-  z-index: 110;
+  z-index: 150;
   inset: 0;
+  width: 100vw;
+  height: 100dvh;
   border: 0;
   background: rgb(13 20 22 / 45%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   cursor: pointer;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.calm-navigation__backdrop--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 @media (max-width: 767px) {
