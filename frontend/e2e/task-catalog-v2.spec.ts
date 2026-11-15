@@ -43,7 +43,12 @@ async function openCatalog(
   await page.route(`**/api/v1/me/task-recommendations/${catalogItem.task_id}/bookmark`, (route) => route.fulfill({ json: { task_id: catalogItem.task_id, saved: true } }));
   await page.goto("/");
   await page.locator('[data-persona="participant-synthetic"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
+  const drawer = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(drawer).toBeVisible();
+  const practice = drawer.getByRole("button", { name: "Практика", exact: true });
+  if (await practice.getAttribute("aria-expanded") !== "true") await practice.click();
+  await drawer.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   await page.getByRole("button", { name: "Карточки" }).click();
 }
