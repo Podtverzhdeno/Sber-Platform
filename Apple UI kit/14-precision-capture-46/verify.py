@@ -24,13 +24,9 @@ queue = re.search(
 assert queue is not None, "parent 46-item capture queue was renamed"
 parent_targets = re.findall(r"^(\d+)\.\s+(.+)$", queue.group(), flags=re.MULTILINE)
 assert len(parent_targets) == 46, "capture queue changed: reconcile IDs and cases"
-assert [
-    (int(number), title)
-    for number, title in parent_targets
-] == [
-    (index, entry["title"])
-    for index, entry in enumerate(items, 1)
-], "parent capture target titles or order diverged from the precision registry"
+for position, (raw_number, title) in enumerate(parent_targets, 1):
+    assert int(raw_number) == position, "capture case order changed"
+    assert title == items[position - 1]["title"], "capture target title changed"
 
 assert len({e["record_path"] for e in items}) == 46
 for e in items:
