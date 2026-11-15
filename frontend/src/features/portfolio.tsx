@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../api/client";
 import { Badge, SafeExternalLink, StatePanel } from "../components/ui";
 import { ParticipantRatingV2 } from "./rating-v2/page";
+import { authorizedMessagesRoute } from "./participant-results-hub/message-route";
 import { ResultsNavigation } from "./participant-results-hub/ResultsNavigation";
 
 type Contribution = { contribution_id: string; project_title: string; personal_summary: string; artifact_keys: string[]; grade: string | null; review_reason: string | null; verification_status: string };
@@ -92,5 +93,17 @@ export function ParticipantPortfolio() {
 /** Preserve the established participant route; the full UI is scoped to Rating V2. */
 export function ParticipantRating({ personId }: { personId?: string }) {
   const navigate = useNavigate();
-  return <div className="rating-results-entry" data-testid="rating-results-entry"><ResultsNavigation activeSection="Рейтинг" /><ParticipantRatingV2 currentPersonId={personId} onOpenMessages={() => { void navigate("/workspace/10"); }} /></div>;
+  const actorQuery = useQuery({
+    queryKey: ["me"],
+    queryFn: () => apiRequest<{ active_role: string; navigation: string[] }>("/api/v1/me"),
+    retry: false,
+  });
+  const messagesRoute = authorizedMessagesRoute(actorQuery.data);
+  return <div className="rating-results-entry" data-testid="rating-results-entry">
+    <ResultsNavigation activeSection="Рейтинг" />
+    <ParticipantRatingV2
+      currentPersonId={personId}
+      onOpenMessages={messagesRoute ? () => { void navigate(messagesRoute); } : undefined}
+    />
+  </div>;
 }
