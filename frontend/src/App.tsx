@@ -421,7 +421,7 @@ function Workspace({
           currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium navigation={actor.navigation} section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
-            searchParams.get("home") === "legacy" ? <ParticipantDashboard actor={actor} /> : <OwnerPixelHome
+            (searchParams.get("home") === "legacy" || searchParams.get("v2") === "0") ? <ParticipantDashboard actor={actor} /> : <OwnerPixelHome
               displayName={actor.display_name}
               navigation={navigation}
               buddyAvailable={navigation.some((name) => name === "AI Buddy" || name === "AI-Buddy")}
@@ -1345,7 +1345,7 @@ function ImpulseApp() {
   };
 
   return (
-    <main className={actor ? `page-shell page-shell--apple-overlay page-shell--owner-pixel${actor.active_role === "participant" && location.pathname === "/workspace/0" && !location.search.includes("home=legacy") ? " page-shell--owner-pixel-home" : ""}` : "page-shell"}>
+    <main className={actor ? `page-shell page-shell--apple-overlay page-shell--owner-pixel${actor.active_role === "participant" && location.pathname === "/workspace/0" && !location.search.includes("home=legacy") && !location.search.includes("v2=0") ? " page-shell--owner-pixel-home" : ""}` : "page-shell"}>
       <a className="skip-link" href="#workspace-main">
         Перейти к содержимому
       </a>
