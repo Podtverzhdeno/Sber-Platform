@@ -295,7 +295,8 @@
 }
 /* The sidebar shares a stacking context with its trigger. Raise that
    context above the portaled scrim, not only the aside's local z-index. */
-.page-shell--owner-pixel.page-shell--apple-overlay .calm-navigation:has(.calm-sidebar--open) {
+.page-shell--owner-pixel.page-shell--apple-overlay .workspace--apple > .calm-navigation:has(.calm-sidebar--open) {
+  position: relative;
   z-index: 220;
 }
 .page-shell--owner-pixel.page-shell--apple-overlay .calm-sidebar--open {
