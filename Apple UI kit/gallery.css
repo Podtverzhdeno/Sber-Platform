@@ -90,3 +90,6 @@ dialog p{line-height:1.5;color:var(--ak-secondary)}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 @media(prefers-reduced-transparency:reduce){.glass{background:var(--ak-surface);backdrop-filter:none;-webkit-backdrop-filter:none}}
 @media(forced-colors:active){.glass,.panel,.btn,.iconbtn{border:1px solid CanvasText;box-shadow:none}.badge{border:1px solid CanvasText}}
+
+/* Explicitly hide filtered sections whose layout uses CSS display:grid. */
+[hidden]{display:none!important}
