@@ -66,7 +66,7 @@ async def test_repeated_application_post_returns_same_record() -> None:
                 "problem": "Повторный запрос не должен создавать вторую запись.",
                 "deliverable": "Один отклик на участника и задачу.",
                 "acceptance_criteria": ["Повтор возвращает тот же отклик"],
-                "deadline_at": "2026-11-05T18:00:00Z",
+                "deadline_at": "2027-11-05T18:00:00Z",
                 "data_constraints": "Без персональных данных.",
                 "ip_terms": "Права передаются после приёмки.",
                 "nominated_mentor_id": None,
