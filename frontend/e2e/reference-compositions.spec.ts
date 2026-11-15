@@ -785,6 +785,72 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
   await expect(optional).toHaveAttribute("data-tone", "unselected");
 });
 
+test("R-PAR-02 opens the next course from the real roadmap detail drawer", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: overviewFixture.roles.map((role) => ({ ...role, completed_milestones: 0 })),
+      },
+    }),
+  );
+  const roadmap = {
+    track_key: "python",
+    policy_version: 2,
+    replacement_reason: null,
+    milestones: [
+      {
+        key: "foundation",
+        position: 1,
+        title: "Основы Python",
+        purpose: "Подготовиться к реальной практике",
+        skill: "Python",
+        target_kind: "course",
+        target_key: "python-base",
+        completed: false,
+        deliverable: null,
+        lab: null,
+        estimated_hours: null,
+      },
+      {
+        key: "first-practice",
+        position: 2,
+        title: "Первая практика",
+        purpose: "Собрать проверяемый артефакт",
+        skill: "Python",
+        target_kind: "task",
+        target_key: "task-market",
+        completed: false,
+        deliverable: null,
+        lab: null,
+        estimated_hours: null,
+      },
+    ],
+    next_step: {
+      key: "foundation", position: 1, title: "Основы Python", purpose: "Подготовиться к реальной практике",
+      skill: "Python", target_kind: "course", target_key: "python-base", completed: false,
+      deliverable: null, lab: null, estimated_hours: null,
+    },
+  };
+  await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [roadmap] }));
+  await page.route("**/api/v1/me/roadmap-catalog", (route) => route.fulfill({ json: [roadmap] }));
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  await expect(page.getByTestId("trajectory-stages")).toContainText("Основы Python");
+  await expect(page.getByTestId("trajectory-stages")).toContainText("Первая практика");
+  const details = page.getByTestId("trajectory-stage-detail");
+  await expect(details).toHaveAttribute("data-stage-key", "foundation");
+  await details.getByRole("button", { name: /Продолжить/ }).click();
+  const drawer = page.getByRole("dialog", { name: "Детали этапа" });
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toContainText("Подготовиться к реальной практике");
+  await drawer.getByRole("button", { name: "Открыть курс" }).click();
+  await expect(page).toHaveURL(/\/workspace\/2\?[^#]*course=python-base/);
+});
+
 test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
   const actor = actorOf("participant", participantBase.display_name, participantNavigation);
   await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
