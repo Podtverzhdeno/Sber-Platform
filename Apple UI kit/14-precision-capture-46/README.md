@@ -11,6 +11,7 @@ This follow-up to [Apple UI kit/](../README.md) covers **all 46 component target
 - `interactive-state-lab.html`: accessible, dependency-free visual study of all 46 case names using **14 distinct native-web pattern examples**; light/dark mode, 320/390px simulated containers, keyboard, local form and menu states. It intentionally does **not** reproduce 46 Apple source frames, and its demonstration data are never connected to Impulse API.
 - `verify.py`: Python 3 standard-library consistency check (case list, state lab and source metadata).
 - `qa_browser.py`: optional Playwright Chromium smoke that traverses all 46 cases, exercises form/chat/menu/dialog/segmented states and takes **6 screenshot captures** (1440×900, 390×844, 320×720 × dark/light). Local output is intentionally ignored by Git.
+- `impulse-integration-candidates.json` and `IMPULSE_INTEGRATION_CROSSWALK.md`: **46 rows mapped to 17 existing frontend file candidates**, not verified owning components; original Impulse production code remains unchanged.
 
 Run on a checkout: `python "Apple UI kit/14-precision-capture-46/verify.py"`.
 
