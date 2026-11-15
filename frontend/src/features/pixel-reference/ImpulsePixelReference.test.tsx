@@ -62,7 +62,7 @@ describe("Impulse pixel reference", () => {
 
   it("keeps an accessible home heading without showing the redundant visible title", () => {
     const { container } = render(<ImpulsePixelReference {...props()} />);
-    const heading = screen.getByRole("heading", { name: "Главная" });
+    const heading = screen.getByRole("heading", { name: "Обзор участника" });
     expect(heading).toHaveClass("sr-only");
     expect(heading).toHaveAttribute("id", "workspace-title");
     expect(container.querySelector(".impulse-pixel__heading h1:not(.sr-only)")).toBeNull();

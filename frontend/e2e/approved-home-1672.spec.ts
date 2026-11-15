@@ -18,7 +18,7 @@ async function openApprovedHome(page: Page): Promise<void> {
   await page.goto("/workspace/0");
   await expect(page.getByTestId("pixel-live-shell")).toBeVisible();
   // The page title remains accessible to screen readers, but owner removed it visually.
-  await expect(page.getByRole("heading", { name: "Главная" })).toHaveClass(/sr-only/);
+  await expect(page.getByRole("heading", { name: "Обзор участника" })).toHaveClass(/sr-only/);
 }
 
 function closeTo(value: number, expected: number, tolerance = 4): void {

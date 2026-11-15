@@ -17,3 +17,5 @@
 - acceptance: visible text "Главная" absent on active participant home, accessible h1 retained for aria-labelledby and screen readers, existing navigation unchanged, focused Vitest and lint/typecheck, deployed exact main SHA
 - progress: owner-pixel visible title was removed in a1201ed6 and validated 9/9 unit and 8/8 browser E2E; owner follow-up requests removing role label directly below the old title on live home, retaining the page's accessible hidden h1, role data in relevant work surfaces, and journey link; CSS and visual E2E pending on this revision.
 - blockers: visual screenshot diff requires browser verification
+
+- owner-collaboration: main 80c87e6 updated the accessible hidden h1 to «Обзор участника», retaining no visible role title. Synchronized owner E2E and focused test expectations with that source.
