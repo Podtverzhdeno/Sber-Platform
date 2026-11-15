@@ -225,12 +225,14 @@
   .page-shell--owner-pixel-home .topbar .owner-topbar-brand {flex:0 0 229px;gap:13px;}
   .page-shell--owner-pixel-home .topbar .owner-topbar-brand strong {font-size:24px;}
   .page-shell--owner-pixel-home .topbar .owner-topbar-star {font-size:43px;width:43px;height:43px;}
-  .page-shell--owner-pixel-home .topbar .global-search {
-    position:absolute;
+  .page-shell.page-shell--owner-pixel-home .topbar .global-search {
+    position:absolute !important;
     left:294px;
-    width:752px;
-    max-width:752px;
-    height:52px;
+    width:752px !important;
+    max-width:752px !important;
+    min-width:752px;
+    height:52px !important;
+    min-height:52px !important;
     border-radius:19px;
     padding:0 17px;
     gap:12px;
