@@ -2,9 +2,9 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T17:01:00+03:00
-- heartbeat_at: 2026-11-15T18:38:00+03:00
+- heartbeat_at: 2026-11-15T19:15:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
 - depends_on: []
 - source: owner-directed standalone repository reference task
@@ -58,3 +58,8 @@
 - Tests: source static/metadata checks from previous cycle were reported; **new Python audit unit tests and Chromium runner have NOT been executed on a checked-out repo here**. Official editable Apple 27 Figma/Sketch layers still not inspected. No source-measured or browser pixel parity claimed.
 - PR #181 remains draft, open and awaiting independent review; no application code, main, or Railway release modified.
 - status: REVIEW pending independent source, browser and code QA.
+
+## Focused continuation 2026-11-15 19:15 +03:00
+- Owner requested continuation of same reference-library task.
+- New work limited to `Apple UI kit/react-reference/**` and own claim status; no production integration, no release, no touching other agents' source files.
+- Next verification: fix keyboard/clear-focus edge cases, strengthen test cases, review exact resulting diff. GitHub branch updates use expected-head lease.
