@@ -17,6 +17,10 @@
 | 11 | [Settings](11-identity-and-settings/README.md) | Profile/theme | role and data constraints |
 | 12 | [Media](12-media-and-attachments/README.md) | Messages/tasks | secure previews |
 
+## Сравнить 12 SVG-кейсов
+
+Откройте [галерею с 12 превью непосредственно в GitHub](VISUAL_GALLERY.md), [HTML-галерею](visual-gallery.html) или [манифест](visual-manifest.json), содержащий происхождение и ограничения каждого изображения. Все SVG доступны по пути `<case>/reference-board.svg` и имеют **1600×900**. Это собственные векторные схемы IMPULSE, а не лицензированные Apple UI Kit материалы. Их не надо оценивать как pixel-perfect Apple без сравнения с первоисточником.
+
 ## Визуальная галерея
 
 Откройте [casebook.html](../04-web-reference/casebook.html) рядом с его CSS/JS и общими токенами. Это **рабочая интерактивная модель**, а не набор Apple-скриншотов. Внутри можно переключать темы, экраны, сегменты, беседы и увидеть диалог.
