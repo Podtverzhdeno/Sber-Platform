@@ -1,0 +1,22 @@
+# Claim APPLE-UI-KIT-REFERENCES-20261115
+
+- task_id: APPLE-UI-KIT-REFERENCES-20261115
+- session_id: gpt6-owner-apple-ui-kit-references-20261115
+- status: IN_PROGRESS
+- started_at: 2026-11-15T17:01:00+03:00
+- heartbeat_at: 2026-11-15T17:01:00+03:00
+- base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
+- depends_on: []
+- source: owner-directed standalone repository reference task
+- write_scope:
+  - Apple UI kit/**
+  - .agents/coordination/claims/APPLE-UI-KIT-REFERENCES-20261115.lock/status.md
+- shared_files: []
+- excluded: frontend/src/**, frontend/e2e/**, App.tsx, theme, backend, deployment, tasks.md, other agents' claims
+- coordination: isolated branch docs/apple-ui-kit-refs-20261115; no shared UI edits; existing Apple/style integration claims are left untouched
+- verification:
+  - Official Apple Design Resources and HIG source review
+  - Reference URL inspection, license/source distinctions, reference manifest consistency
+  - No application build required: source-only reference archive
+- progress: isolated branch and atomic fail-if-exists claim creation; reference bundle pending
+- blockers: official Figma/Sketch assets may require application access and separate Apple license; do not redistribute those binaries
