@@ -1,0 +1,24 @@
+# Claim IMPULSE-RESULTS-SUBSECTION-INTEGRATION-20261115
+- task_id: IMPULSE-RESULTS-SUBSECTION-INTEGRATION-20261115
+- session_id: gpt6-owner-results-subnav-20261115-2326
+- status: IN_PROGRESS
+- started_at: 2026-11-15T23:26:00+03:00
+- heartbeat_at: 2026-11-15T23:26:00+03:00
+- owner_instruction: sequential redesign, immediate main and Railway deploy after checks
+- base_revision: 9b1e45c602c9023ab53964762eb39405e2074b6c
+- depends_on: participant-five-section-content-first-20261115
+- write_scope:
+  - frontend/src/features/participant-results-hub/** (ResultsNavigation and CSS only)
+  - frontend/src/features/portfolio-v2.tsx (scoped nav insertion)
+  - frontend/src/features/analytics-v3/page.tsx (scoped nav insertion)
+  - frontend/src/features/achievements-v2/gallery-page.tsx (scoped nav insertion)
+  - frontend/src/features/portfolio.tsx (ParticipantRating shim only)
+  - frontend/e2e/participant-results-navigation.spec.ts
+  - .agents/coordination/claims/IMPULSE-RESULTS-SUBSECTION-INTEGRATION-20261115.lock/status.md
+- excluded:
+  - frontend/src/App.tsx claimed by active Practice worker
+  - backend, all data projections, services, auth/roles, Railway config, other participants/customer routes
+- plan: one server-authorized Results group switcher shown on each of four existing participant destinations without modifying their data or controls; preserve original route indexes and deep links
+- verification: unit, TypeScript, scoped ESLint, production build, Playwright 320/390/1440 and unauthorized access states, exact main CI, Railway deployment
+- progress: claim acquired; code work next
+- blockers: independent screenshot parity
