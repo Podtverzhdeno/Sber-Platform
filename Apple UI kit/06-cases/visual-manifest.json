@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "updated": "2026-11-15",
+  "description": "Original SVG study boards for IMPULSE. Not Apple screenshot or Apple Design Resource. The linked Apple HIG pages provide principles, not these exact SVG designs.",
+  "license": "Original IMPULSE reference artwork; third-party trademarks and Apple assets not included",
+  "cards": [
+    {
+      "id": "01-navigation",
+      "title": "Навигация",
+      "description": "Sidebar, selected navigation item, toolbar",
+      "image": "01-navigation/reference-board.svg",
+      "case_readme": "01-navigation/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "02-liquid-glass",
+      "title": "Liquid Glass",
+      "description": "Content layer and floating control surface",
+      "image": "02-liquid-glass/reference-board.svg",
+      "case_readme": "02-liquid-glass/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/materials",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "03-messaging",
+      "title": "Сообщения",
+      "description": "Conversation list, thread, input composer",
+      "image": "03-messaging/reference-board.svg",
+      "case_readme": "03-messaging/README.md",
+      "source": "https://developer.apple.com/design/resources/",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "04-inputs-and-controls",
+      "title": "Контролы и формы",
+      "description": "Primary and secondary actions, fields, switch, slider",
+      "image": "04-inputs-and-controls/reference-board.svg",
+      "case_readme": "04-inputs-and-controls/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "05-overlays-and-dialogs",
+      "title": "Диалоги и меню",
+      "description": "Modal confirmation and anchored menu",
+      "image": "05-overlays-and-dialogs/reference-board.svg",
+      "case_readme": "05-overlays-and-dialogs/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "06-data-and-dashboards",
+      "title": "Аналитика",
+      "description": "Opaque KPI cards, graph, status list",
+      "image": "06-data-and-dashboards/reference-board.svg",
+      "case_readme": "06-data-and-dashboards/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "07-mobile-adaptive",
+      "title": "Адаптивность",
+      "description": "Desktop, tablet and mobile layouts",
+      "image": "07-mobile-adaptive/reference-board.svg",
+      "case_readme": "07-mobile-adaptive/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/layout",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "08-accessibility",
+      "title": "Доступность",
+      "description": "Keyboard focus, contrast, reduced transparency",
+      "image": "08-accessibility/reference-board.svg",
+      "case_readme": "08-accessibility/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "09-search-and-command",
+      "title": "Поиск",
+      "description": "Keyboard command overlay, suggestions and results",
+      "image": "09-search-and-command/reference-board.svg",
+      "case_readme": "09-search-and-command/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "10-notifications-and-feedback",
+      "title": "Уведомления",
+      "description": "Success, warning, error, loading progress",
+      "image": "10-notifications-and-feedback/reference-board.svg",
+      "case_readme": "10-notifications-and-feedback/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/notifications",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "11-identity-and-settings",
+      "title": "Профиль и настройки",
+      "description": "Identity, preference groups and switches",
+      "image": "11-identity-and-settings/reference-board.svg",
+      "case_readme": "11-identity-and-settings/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/dark-mode",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    },
+    {
+      "id": "12-media-and-attachments",
+      "title": "Медиа и файлы",
+      "description": "Upload area, files, previews and errors",
+      "image": "12-media-and-attachments/reference-board.svg",
+      "case_readme": "12-media-and-attachments/README.md",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/materials",
+      "kind": "self-authored-web-approximation",
+      "measured_from_apple": false,
+      "verified_pixel_parity": false
+    }
+  ]
+}
