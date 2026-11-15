@@ -11,6 +11,8 @@ import "./participant-events.scss";
 import "./participant-events-fidelity.scss";
 import "./participant-events-compact.scss";
 import "./participant-events-detail-banner.scss";
+import { CommunityNavigation } from "./participant-community-hub/CommunityNavigation";
+import "./participant-community-hub/events-apple.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;
@@ -185,7 +187,8 @@ export function ParticipantEventCatalog() {
     setDraftFocus([]); setDraftType("all"); setFiltersOpen(false);
     setActiveCategory("for-you"); setSortBy("relevance"); setSearch("");
   };
-  return <div className="feature-stack participant-events" data-testid="events-v2">
+  return <div className="feature-stack participant-events participant-events--apple" data-testid="events-v2">
+    <CommunityNavigation activeSection="События" />
     <EventsHero events={allItems} onChoose={() => { document.getElementById("ev-results")?.scrollIntoView({behavior:"smooth",block:"start"}); }}/>
     <div className="ev-catalog ev-catalog--compact" id="ev-results">
       <div className="ev-catalog-results">

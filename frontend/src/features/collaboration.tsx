@@ -12,6 +12,7 @@ import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
 import "./collaboration.scss";
 import "./messenger/reference.scss";
+import { CommunityNavigation } from "./participant-community-hub/CommunityNavigation";
 
 import { ChatHistory } from "./messenger/chat-history";
 import type { PendingMessageOverlay } from "./messenger/chat-history";
@@ -554,11 +555,12 @@ export function MessagingWorkspace({
 
   return (
     <div
-      className="messenger-page sberchat-shell sberchat-reference"
+      className={`messenger-page sberchat-shell sberchat-reference${role === "participant" ? " messenger-page--community" : ""}`}
       data-reference={reference}
       data-visual-reference="R-MSG-01"
       data-message-state={selected === undefined ? "empty" : selected.kind === "community" ? "community" : "direct"}
     >
+      {role === "participant" && <CommunityNavigation activeSection="Сообщения" compact />}
       <header className="messenger-heading">
         <div>
           <h1 id="workspace-title">Сообщения</h1>

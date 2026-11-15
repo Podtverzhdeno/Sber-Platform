@@ -1,0 +1,218 @@
+/* Events Apple-minimal first fold: keep real content, counts and every action. */
+.participant-events--apple {
+  --events-apple-panel: #0b2437;
+  --events-apple-text: #eaf2fb;
+  --events-apple-muted: #adc0d0;
+  --events-apple-line: rgb(182 206 232 / 18%);
+  --events-apple-accent: #9fc8ff;
+  margin-top: 0;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* Local tab rails scroll independently; grid min-content cannot widen the page. */
+  grid-template-columns: minmax(0, 1fr);
+}
+.participant-events--apple > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.participant-events--apple .ev-result-header,
+.participant-events--apple .ev-result-tabs,
+.participant-events--apple .ev-compact-controls {
+  min-width: 0;
+  max-width: 100%;
+}
+:root[data-theme="light"] .participant-events--apple,
+[data-theme="light"] .participant-events--apple {
+  --events-apple-panel: #fff;
+  --events-apple-text: #1b2d40;
+  --events-apple-muted: #566778;
+  --events-apple-line: rgb(38 70 98 / 17%);
+  --events-apple-accent: #1859b1;
+}
+.participant-events--apple .ev-hero {
+  display: block;
+  min-height: 0;
+  height: auto;
+  padding: 7px 0 13px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.participant-events--apple .ev-hero-copy {
+  width: 100%;
+  max-width: 850px;
+  min-width: 0;
+}
+.participant-events--apple .ev-kicker {
+  min-height: 0;
+  padding: 0;
+  margin: 0 0 7px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: var(--events-apple-muted);
+  font-size: 11px;
+  letter-spacing: .025em;
+  text-transform: none;
+}
+.participant-events--apple .ev-hero h1 {
+  color: var(--events-apple-text);
+  max-width: 850px;
+  margin: 0 0 7px;
+  font-size: clamp(21px, 2.1vw, 30px);
+  font-weight: 690;
+  letter-spacing: -.028em;
+  line-height: 1.22;
+}
+.participant-events--apple .ev-hero h1 em {
+  color: var(--events-apple-text);
+  font-weight: inherit;
+}
+.participant-events--apple .ev-hero p {
+  color: var(--events-apple-muted);
+  max-width: 78ch;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+.participant-events--apple .ev-hero-art {
+  display: none;
+}
+.participant-events--apple .ev-hero-action {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+  display: inline-flex;
+  width: fit-content;
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 9px 14px;
+  border: 1px solid var(--events-apple-line);
+  border-radius: 10px;
+  background: var(--events-apple-panel);
+  color: var(--events-apple-text);
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 640;
+  transform: none;
+}
+.participant-events--apple .ev-hero-action:hover:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+  border-color: var(--events-apple-accent);
+}
+.participant-events--apple .ev-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 0 0 14px;
+  padding: 0 0 9px;
+  border-bottom: 1px solid var(--events-apple-line);
+}
+.participant-events--apple .ev-metrics > div {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 45px;
+  padding: 4px 0;
+  gap: 9px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.participant-events--apple .ev-metrics svg {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border-radius: 8px;
+  color: var(--events-apple-accent);
+  background: color-mix(in srgb, var(--events-apple-accent) 10%, transparent);
+}
+.participant-events--apple .ev-metrics strong {
+  color: var(--events-apple-text);
+  font-size: 19px;
+  line-height: 1;
+}
+.participant-events--apple .ev-metrics b {
+  color: var(--events-apple-text);
+  font-size: 11px;
+  font-weight: 650;
+}
+.participant-events--apple .ev-metrics small {
+  color: var(--events-apple-muted);
+  font-size: 10px;
+  margin-top: 2px;
+}
+.participant-events--apple .ev-result-header--compact {
+  gap: 10px;
+  padding: 3px 0 9px;
+}
+.participant-events--apple .ev-compact-search,
+.participant-events--apple .ev-compact-trigger {
+  min-height: 42px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.participant-events--apple .ev-result-tabs button {
+  min-height: 42px;
+  border-radius: 10px;
+}
+.participant-events--apple .ev-event-card.ev-event-card--compact {
+  border: 1px solid var(--events-apple-line);
+  border-radius: 14px;
+  background: var(--events-apple-panel);
+  box-shadow: none;
+}
+.participant-events--apple .ev-event-card.ev-event-card--compact:hover {
+  border-color: color-mix(in srgb, var(--events-apple-accent) 45%, var(--events-apple-line));
+  box-shadow: none;
+  transform: none;
+}
+.participant-events--apple .ev-event-card h3 {
+  color: var(--events-apple-text);
+  font-weight: 660;
+}
+.participant-events--apple .ev-event-meta,
+.participant-events--apple .ev-event-tags {
+  color: var(--events-apple-muted);
+}
+.participant-events--apple .ev-save {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 9px;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--events-apple-accent);
+}
+.participant-events--apple .ev-save:hover,
+.participant-events--apple .ev-save:focus-visible {
+  background: color-mix(in srgb, var(--events-apple-accent) 10%, transparent) !important;
+  outline-offset: 2px;
+}
+.participant-events--apple .ev-benefits-bottom {
+  border-top: 1px solid var(--events-apple-line);
+  border-bottom: 0;
+  background: transparent;
+  color: var(--events-apple-muted);
+  box-shadow: none;
+}
+@media (max-width: 700px) {
+  .participant-events--apple .ev-hero { padding: 6px 0 11px; }
+  .participant-events--apple .ev-hero h1 { font-size: 23px; }
+  .participant-events--apple .ev-metrics { gap: 5px 14px; }
+  .participant-events--apple .ev-metrics > div { min-height: 40px; }
+  .participant-events--apple .ev-metrics strong { font-size: 17px; }
+  .participant-events--apple .ev-result-header--compact .ev-result-tabs { max-width: 100%; }
+  .participant-events--apple .ev-compact-search { width: min(60vw, 225px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .participant-events--apple .ev-hero-action { transition: none; }
+}
