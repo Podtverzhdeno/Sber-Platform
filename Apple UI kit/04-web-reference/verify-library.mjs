@@ -44,7 +44,10 @@ const files = [
   "04-web-reference/casebook.css",
   "04-web-reference/casebook.js",
   "05-legal-and-sources/LICENSING.md",
-  "06-cases/README.md"
+  "06-cases/README.md",
+  "06-cases/case-matrix.json",
+  "04-web-reference/compare-screenshots.py",
+  "04-web-reference/visual-comparison.md"
 ];
 for (const file of files) check(text(file).length > 80, "Empty or too short: " + file);
 
@@ -79,6 +82,22 @@ for (const source of manifest.sources ?? []) {
   check(!ids.has(source.id), "Duplicate source id: " + source.id);
   ids.add(source.id);
 }
+const caseMatrix = JSON.parse(text("06-cases/case-matrix.json"));
+check(Array.isArray(caseMatrix.cases) && caseMatrix.cases.length === 12, "Case matrix must have 12 entries");
+const seenCaseIds = new Set();
+for (const row of caseMatrix.cases ?? []) {
+  check(cases.includes(row.id), "Unknown case ID: " + row.id);
+  check(!seenCaseIds.has(row.id), "Duplicate case: " + row.id);
+  seenCaseIds.add(row.id);
+  check(typeof row.readme === "string" && existsSync(join(libraryRoot, "06-cases", row.readme)),
+    "Missing case README mapping: " + row.id);
+  for (const sourceId of row.source_ids ?? []) {
+    check(ids.has(sourceId), "Unresolved source reference " + sourceId + " in " + row.id);
+  }
+  check(Array.isArray(row.required_states) && row.required_states.length > 0,
+    "Missing required state coverage: " + row.id);
+}
+
 const html = text("04-web-reference/casebook.html");
 for (const localHref of html.matchAll(/(?:href|src)="(\.\/[^"]+)"/g)) {
   const local = resolve(libraryRoot, "04-web-reference", localHref[1]);
