@@ -166,32 +166,6 @@
 :root[data-theme="dark"] .calm-home__primary,
 [data-theme="dark"] .calm-home__primary { color: #0b1522 !important; }
 
-/* Facts as quiet, inline rows instead of three equal KPI cards. */
-.calm-home__metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  margin: 20px 0 8px;
-  padding: 15px 0 20px;
-  border: 0;
-  border-bottom: 1px solid var(--calm-separator);
-  background: transparent;
-}
-.calm-home__metric {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-content: start;
-  align-items: baseline;
-  gap: 2px 10px;
-  padding: 8px 16px;
-}
-.calm-home__metric:first-child { padding-left: 0; }
-.calm-home__metric + .calm-home__metric { border-left: 1px solid var(--calm-separator); }
-.calm-home__metric-label { flex-basis: 100%; color: var(--calm-subtext); font-size: 12px; }
-.calm-home__metric strong { font-size: 24px; font-weight: 700; line-height: 1.25; letter-spacing: -.04em; }
-.calm-home__metric small { min-width: 0; color: var(--calm-subtext); font-size: 12px; line-height: 1.4; }
-
 /* Contextual progress is adjacent to facts and expands in-place on intent. */
 .calm-home__path {
   margin: 0 0 4px;
@@ -343,8 +317,6 @@
   .calm-home__focus { align-items: stretch; flex-direction: column; padding: 23px 20px; border-radius: 16px; }
   .calm-home__focus h2 { font-size: 23px; }
   .calm-home__primary { width: 100%; min-height: 48px; }
-  .calm-home__metric { padding: 8px 11px; }
-  .calm-home__metric strong { font-size: 22px; }
   .calm-home__path-main { flex-wrap: wrap; align-items: flex-start; }
   .calm-home__path-actions { flex-wrap: wrap; justify-content: flex-start; }
   .calm-home__course-list { padding-left: 0; }
@@ -355,9 +327,6 @@
   .calm-home__title, .workspace-content .calm-home__title { font-size: 30px; }
   .calm-home__header-link { padding-left: 5px; }
   .calm-home__focus { padding: 20px 17px; }
-  .calm-home__metric { padding: 8px; }
-  .calm-home__metric:first-child { padding-left: 0; }
-  .calm-home__metric-label, .calm-home__metric small { font-size: 11px; }
   .calm-home__secondary { font-size: 12px; }
   .calm-home__week-days { gap: 3px; }
   .calm-home__day { min-height: 54px; font-size: 11px; }
