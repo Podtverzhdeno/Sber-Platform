@@ -2,6 +2,19 @@
 
 **Checked:** 2026-11-15. Source version matters; prefer the exact Apple-provided package for the target platform (iOS/iPadOS **27**, macOS **27**, watchOS, tvOS, visionOS where offered). Official links may redirect to Figma/Sketch and can require acceptance/sign-in. **Do not infer layer measurements from previews.**
 
+## Verified direct downloads / current official kit editions
+
+The following destinations were obtained by following **Apple's own Design Resources page** as of 2026-11-15. Their Figma/Sketch contents may be gated by third-party login or tools; links verified, internal layers not inspected.
+
+| Target platform | Figma UI Kit | Sketch UI Kit |
+|---|---|---|
+| iOS / iPadOS 27 | [Official Figma](https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27) | [Official Sketch](https://www.sketch.com/s/04c24d8b-38fb-4afb-8836-36617e022f02) |
+| macOS 27 | [Official Figma](https://www.figma.com/community/file/1651309434229735362/macos-27) | [Official Sketch](https://www.sketch.com/s/57153a31-3379-4737-8ac6-dbfd6525f052) |
+| watchOS 26 | [Official Figma](https://www.figma.com/community/file/1540060090060216489/watchos-26) | [Apple resources index](https://developer.apple.com/design/resources/) |
+| visionOS 26 | [Official Figma](https://www.figma.com/community/file/1540071341298017505/visionos-26) | [Apple resources index](https://developer.apple.com/design/resources/) |
+
+[Apple Developer news, June 23, 2026](https://developer.apple.com/news/?id=e2lxw9l1) confirms the updated kits with additional Liquid Glass and Dark Mode component states.
+
 ## Downloadable kit and tools
 - **Apple Design Resources (master index, Figma and Sketch kits, templates, production resources):** https://developer.apple.com/design/resources/
 - **Human Interface Guidelines (master):** https://developer.apple.com/design/human-interface-guidelines/
