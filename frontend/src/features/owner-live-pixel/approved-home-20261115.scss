@@ -259,7 +259,16 @@
   }
   .page-shell--owner-pixel-home .topbar .owner-theme-switch,
   .page-shell--owner-pixel-home .topbar .notification-button {width:49px;min-width:49px;}
-  .page-shell--owner-pixel-home .topbar .streak-utility .streak-button {min-width:84px;font-size:17px;}
+  /* Reconcile the 1580px+ home overlay with the shared Apple compact chip:
+     visual <=80x43px while retaining the original accessible dialog action. */
+  .page-shell--owner-pixel-home .topbar .streak-utility .streak-button {
+    min-width:72px;
+    min-height:40px;
+    height:40px;
+    gap:5px;
+    padding:0 9px;
+    font-size:16px;
+  }
   .page-shell--owner-pixel-home .topbar .owner-profile::before {margin-right:23px;height:39px;}
   .page-shell--owner-pixel-home .topbar .owner-profile-trigger .mini-avatar {width:40px;height:40px;}
   .page-shell--owner-pixel-home .topbar .owner-profile-trigger {gap:15px;}
