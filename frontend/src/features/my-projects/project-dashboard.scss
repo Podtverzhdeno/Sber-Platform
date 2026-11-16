@@ -257,3 +257,165 @@
 
 /* Stage strip in the approved desktop screenshot occupies a full visual row. */
 @media(min-width:1500px){.mpd-page .mpd-stages{min-height:193px}}
+
+
+/* Calm light appearance of the immersive project workspace.
+   Preserve the dedicated blue/midnight art direction in dark modes.
+   Scope all surfaces, controls and copy to the dashboard so other roles
+   and the project list remain untouched. */
+html[data-theme="light"] .mpd-page {
+  --mpd-cyan:#0b716d;
+  --mpd-blue:#235fa7;
+  --mpd-text:#192b3e;
+  --mpd-muted:#526579;
+  --mpd-line:#dce5ef;
+  --mpd-card:#ffffff;
+  background:transparent;
+  color:var(--mpd-text);
+}
+html[data-theme="light"] .mpd-page .mpd-hero {
+  border-bottom-color:#e1e7ee;
+  background:radial-gradient(ellipse at 83% 49%,#dceefa83,transparent 58%);
+}
+html[data-theme="light"] .mpd-page :is(.mpd-head-copy>p,.mpd-head-meta,.mpd-edition,.mpd-hero-tags small) {color:#526579}
+html[data-theme="light"] .mpd-page .mpd-head-meta svg {color:#467393}
+html[data-theme="light"] .mpd-page .mpd-state {color:#0b716d}
+html[data-theme="light"] .mpd-page :is(.mpd-back,.mpd-section-back,.mpd-secondary) {
+  background:#fff;color:#234257;border-color:#d2dfe9;
+}
+html[data-theme="light"] .mpd-page :is(.mpd-back,.mpd-section-back,.mpd-secondary):hover {
+  background:#f2f7fb;color:#17465c;border-color:#86b6c9;
+}
+html[data-theme="light"] .mpd-page :is(.mpd-hero-tags span,.mpd-tags span) {
+  background:#ecf5fa;border-color:#cee0e9;color:#235b73;
+}
+html[data-theme="light"] .mpd-page .mpd-paper {
+  background:linear-gradient(150deg,#eaf3ff,#d9e7fa);
+  border-color:#acc9e5;
+  box-shadow:0 5px 24px #365b8414;
+}
+html[data-theme="light"] .mpd-page .mpd-tabs button {color:#53677c}
+html[data-theme="light"] .mpd-page .mpd-tabs button:hover {color:#183f56;background:#edf4f9}
+html[data-theme="light"] .mpd-page .mpd-tabs button.is-active {
+  color:#173b50;border-bottom-color:#117f82;background:#e9f3f7;
+}
+html[data-theme="light"] .mpd-page .mpd-tabs button.is-active svg {color:#117f82}
+html[data-theme="light"] .mpd-page :is(.mpd-metric,.mpd-panel) {
+  color:#1b3043;border-color:#dde6ee;background:#fff;
+  box-shadow:0 3px 18px #143c5e08;
+}
+html[data-theme="light"] .mpd-page :is(.mpd-metric-icon,.mpd-mini-icon,.mpd-artifact-symbol) {
+  color:#0d7583;background:#ebf7f7;
+}
+html[data-theme="light"] .mpd-page .mpd-metric :is(strong,b) {color:#183b51}
+html[data-theme="light"] .mpd-page .mpd-metric:first-child strong {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-metric small {color:#536579}
+html[data-theme="light"] .mpd-page .mpd-progress-ring {
+  box-shadow:0 0 0 1px #d7e4eb;
+}
+html[data-theme="light"] .mpd-page .mpd-progress-ring::before {background:#fff}
+html[data-theme="light"] .mpd-page .mpd-progress-ring>span {color:#183b51}
+html[data-theme="light"] .mpd-page .mpd-panel-head h2 {color:#1b3448}
+html[data-theme="light"] .mpd-page .mpd-panel-head h2 svg {color:#117f82}
+html[data-theme="light"] .mpd-page .mpd-panel-head>span {color:#52677a}
+html[data-theme="light"] .mpd-page .mpd-panel-head>span strong {color:#0d7373}
+html[data-theme="light"] .mpd-page .mpd-panel-head button {
+  color:#26516a;border-color:#d7e3ec;background:#f7fafc;
+}
+html[data-theme="light"] .mpd-page .mpd-panel-head button:hover {
+  color:#0b716d;border-color:#89c0bb;background:#eaf5f5;
+}
+html[data-theme="light"] .mpd-page .mpd-stage {color:#4c6277}
+html[data-theme="light"] .mpd-page .mpd-stage-node {
+  color:#4e6579;border-color:#ccdbe6;background:#f1f6fa;
+}
+html[data-theme="light"] .mpd-page .mpd-stage b {color:#273e51}
+html[data-theme="light"] .mpd-page .mpd-stage small {color:#52687b}
+html[data-theme="light"] .mpd-page .mpd-stage.is-current .mpd-stage-node {
+  color:#1c5a8f;border-color:#2884d8;background:#e8f3ff;
+}
+html[data-theme="light"] .mpd-page .mpd-stage.is-current small {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-stage-note {
+  color:#3c6174;border-color:#bfdde5;background:#f1f8fb;
+}
+html[data-theme="light"] .mpd-page .mpd-task-list>button {
+  color:#1b394e;border-color:#dce6ef;background:#f7f9fc;
+}
+html[data-theme="light"] .mpd-page .mpd-task-list>button:hover {
+  background:#edf6f8;border-color:#9acdcc;
+}
+html[data-theme="light"] .mpd-page .mpd-task-list>button>small {color:#0c7375}
+html[data-theme="light"] .mpd-page .mpd-task-list>button>svg {color:#5986a0}
+html[data-theme="light"] .mpd-page .mpd-artifact-grid article {
+  border-color:#dce7ef;background:#f7f9fc;color:#243b50;
+}
+html[data-theme="light"] .mpd-page .mpd-artifact-grid article small {color:#526a7e}
+html[data-theme="light"] .mpd-page .mpd-artifact-state {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-team-person {
+  border-bottom-color:#e2e9f0;color:#1d394e;
+}
+html[data-theme="light"] .mpd-page .mpd-team-person:hover {background:#f2f8fa}
+html[data-theme="light"] .mpd-page .mpd-team-person small {color:#51697d}
+html[data-theme="light"] .mpd-page .mpd-team-person svg {color:#4c7f9c}
+html[data-theme="light"] .mpd-page .mpd-about>p {color:#4f6174}
+html[data-theme="light"] .mpd-page .mpd-about-facts b {color:#213d52}
+html[data-theme="light"] .mpd-page .mpd-about-facts small {color:#536c80}
+html[data-theme="light"] .mpd-page .mpd-next>div:not(.mpd-panel-head) {
+  border-color:#dce6ed;background:#f5f9fc;
+}
+html[data-theme="light"] .mpd-page .mpd-next strong {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-next p {color:#50697a}
+html[data-theme="light"] .mpd-page .mpd-why {
+  background:#f2f9fb;border-color:#c8e5e5;
+}
+html[data-theme="light"] .mpd-page .mpd-why h3 {color:#163f54}
+html[data-theme="light"] .mpd-page .mpd-why p {color:#4f6879}
+html[data-theme="light"] .mpd-page .mpd-activity-line strong {color:#183d52}
+html[data-theme="light"] .mpd-page .mpd-activity-line small {color:#52677a}
+html[data-theme="light"] .mpd-page .mpd-empty {color:#51697b}
+html[data-theme="light"] .mpd-page .mpd-history {border-bottom-color:#e0e7ed}
+html[data-theme="light"] .mpd-page .mpd-history b {color:#263e50}
+html[data-theme="light"] .mpd-page .mpd-history p {color:#52687a}
+html[data-theme="light"] .mpd-page .mpd-history span {color:#0b716d}
+/* The detail dialog shares the dashboard's theme, even though it overlays
+   the rest of the page. Its dark backdrop remains deliberate for focus. */
+html[data-theme="light"] .mpd-page .mpd-info-modal {
+  color:#1c3447;border-color:#dae5ed;background:#fff;
+  box-shadow:0 24px 65px #1d395b30;
+}
+html[data-theme="light"] .mpd-page .mpd-modal-head,
+html[data-theme="light"] .mpd-page .mpd-modal-footer {border-color:#e1e8ef}
+html[data-theme="light"] .mpd-page .mpd-overline {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-modal-head h2 {color:#1b354a}
+html[data-theme="light"] .mpd-page .mpd-modal-head p {color:#526b7e}
+html[data-theme="light"] .mpd-page .mpd-close {
+  background:#f3f7fa;color:#365970;border-color:#d3e0e9;
+}
+html[data-theme="light"] .mpd-page .mpd-close:hover {background:#e5f0f5;color:#16475c}
+html[data-theme="light"] .mpd-page :is(.mpd-info-lead,.mpd-info-columns>section,.mpd-info-bottom,.mpd-info-checkpoints,.mpd-info-feedback) {
+  background:#f7fafd;color:#213b50;border-color:#dbe7ef;
+}
+html[data-theme="light"] .mpd-page :is(.mpd-info-lead h3,.mpd-info-columns h3,.mpd-info-bottom h3,.mpd-info-checkpoints__heading h3,.mpd-info-feedback>h3) {
+  color:#1c3b51;
+}
+html[data-theme="light"] .mpd-page :is(.mpd-info-lead p,.mpd-info-columns p,.mpd-info-bottom p,.mpd-info-feedback p) {color:#4c6175}
+html[data-theme="light"] .mpd-page .mpd-info-columns h4 {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-criteria li {color:#334d61}
+html[data-theme="light"] .mpd-page .mpd-facts>div {border-bottom-color:#dce5ed}
+html[data-theme="light"] .mpd-page .mpd-facts dt {color:#52697c}
+html[data-theme="light"] .mpd-page .mpd-facts dd {color:#19364e}
+html[data-theme="light"] .mpd-page .mpd-info-checkpoints li {
+  color:#233e52;border-color:#d7e5ed;background:#fff;
+}
+html[data-theme="light"] .mpd-page .mpd-info-checkpoints li>span {
+  color:#325a70;border-color:#a9c8d8;
+}
+html[data-theme="light"] .mpd-page .mpd-info-checkpoints li strong {color:#233e52}
+html[data-theme="light"] .mpd-page .mpd-info-checkpoints li small,
+html[data-theme="light"] .mpd-page .mpd-info-checkpoints__heading>small {color:#536b7d}
+html[data-theme="light"] .mpd-page .mpd-info-feedback strong {color:#0b716d}
+html[data-theme="light"] .mpd-page .mpd-modal-footer>span {color:#576c7c}
+@media (max-width:390px) {
+  .mpd-page :is(.mpd-metric,.mpd-panel) {min-width:0}
+  .mpd-page .mpd-panel-head {flex-wrap:wrap}
+}

@@ -670,3 +670,62 @@ test("checkpoint popup validates attachments and supports Escape on a narrow scr
   await page.keyboard.press("Escape");
   await expect(popup).toHaveCount(0);
 });
+
+
+// Guard the real project workspace, not just the lightweight project list,
+// against dark card remnants in the light theme and against mobile overflow.
+for (const mode of ["light", "blue", "midnight"] as const) {
+  for (const width of [320, 390, 1440]) {
+    test(`Project workspace surfaces and details follow ${mode} at ${String(width)}px`, async ({page}) => {
+      await page.setViewportSize({width,height:844});
+      await page.addInitScript((value: string) => {
+        localStorage.setItem("impulse-visual-mode",value);
+        localStorage.setItem("impulse-theme",value==="light"?"light":"dark");
+      },mode);
+      await fixture(page);
+      await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+      await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
+      await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
+      const dashboard=page.locator('[data-project-screen="dashboard"]');
+      await expect(dashboard).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("data-theme",mode==="light"?"light":"dark");
+      const sample=await dashboard.evaluate((node)=>{
+        const rgb=(value: string) => value.match(/\d+(?:\.\d+)?/g)?.slice(0,3).map(Number)??[];
+        const style=(selector:string)=>{
+          const element=node.querySelector<HTMLElement>(selector);
+          if(!element)throw new Error("Element missing: "+selector);
+          const computed=getComputedStyle(element);
+          const bounds=element.getBoundingClientRect();
+          return {rgb:rgb(computed.backgroundColor),text:rgb(computed.color),x:bounds.left,right:bounds.right};
+        };
+        const hero=style(".mpd-head-copy");
+        const metric=style(".mpd-metric");
+        const panel=style(".mpd-panel");
+        const title=style(".mpd-panel-head h2");
+        const small=style(".mpd-metric small");
+        const overflow=document.documentElement.scrollWidth-document.documentElement.clientWidth;
+        return {hero,metric,panel,title,small,overflow};
+      });
+      if(mode==="light"){
+        expect(sample.metric.rgb.slice(0,3).every(channel=>channel>=240)).toBe(true);
+        expect(sample.panel.rgb.slice(0,3).every(channel=>channel>=240)).toBe(true);
+        expect(sample.title.text.slice(0,3).every(channel=>channel<100)).toBe(true);
+        expect(sample.small.text.length).toBe(3);
+      } else {
+        expect(sample.metric.rgb[3]??0).toBeLessThanOrEqual(80);
+      }
+      expect(sample.overflow).toBeLessThanOrEqual(2);
+      expect(sample.panel.x).toBeGreaterThanOrEqual(-1);
+      expect(sample.panel.right).toBeLessThanOrEqual(width+1);
+      await dashboard.getByRole("button",{name:"Подробнее",exact:true}).click();
+      const modal=page.getByRole("dialog",{name:"Подробнее о проекте"});
+      await expect(modal).toBeVisible();
+      if(mode==="light"){
+        const surface=await modal.evaluate(node=>getComputedStyle(node).backgroundColor);
+        expect(surface).toBe("rgb(255, 255, 255)");
+      }
+      await page.keyboard.press("Escape");
+      await expect(modal).toHaveCount(0);
+    });
+  }
+}
