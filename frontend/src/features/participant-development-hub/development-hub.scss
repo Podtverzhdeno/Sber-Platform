@@ -311,3 +311,29 @@
     font-size: 12px;
   }
 }
+
+/* Calm Apple-inspired progress indicators: native values, predictable themes. */
+.development-hub__progress-block { margin-top: 18px; }
+.development-hub__progress-label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; color: var(--dh-secondary); font-size: 12px; }
+.development-hub__progress-label strong { color: var(--dh-text); font-variant-numeric: tabular-nums; font-weight: 650; }
+.development-hub__progress {
+  display: block;
+  width: 100%;
+  height: 7px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--dh-muted-panel);
+  color: var(--dh-accent);
+  accent-color: var(--dh-accent);
+}
+.development-hub__progress::-webkit-progress-bar { background: var(--dh-muted-panel); border-radius: 999px; }
+.development-hub__progress::-webkit-progress-value { background: var(--dh-accent); border-radius: 999px; }
+.development-hub__progress::-moz-progress-bar { background: var(--dh-accent); border-radius: 999px; }
+.development-hub__progress--practice { margin: 0 0 18px; }
+.development-hub__practice-explanation { border-top: 1px solid var(--dh-line); padding-top: 12px; margin-top: 4px; }
+.development-hub__practice-explanation summary { color: var(--dh-text); font-size: 13px; font-weight: 600; min-height: 44px; display: list-item; padding: 12px 0; cursor: pointer; }
+.development-hub__practice-explanation summary:focus-visible { outline: 2px solid var(--dh-accent); outline-offset: 2px; border-radius: 4px; }
+.development-hub__practice-explanation p { margin: 0 0 12px; }
