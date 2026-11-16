@@ -165,6 +165,8 @@ export function Composer({
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    // IME candidate confirmation must never select a mention or send a message.
+    if (event.key === "Enter" && (event.nativeEvent.isComposing || event.nativeEvent.code === "Process")) return;
     if (mentionCandidates.length > 0 && event.key === "Enter") {
       event.preventDefault();
       const first = mentionCandidates[0];
@@ -178,6 +180,8 @@ export function Composer({
     }
     if (event.key !== "Enter") return;
     if (event.shiftKey) return;
+    // On touch keyboards Enter is a newline. A deliberate Ctrl/Meta+Enter still sends.
+    if (!event.ctrlKey && !event.metaKey && (typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches)) return;
     event.preventDefault();
     submit();
   };
@@ -312,6 +316,7 @@ export function Composer({
             id={`composer-draft-${channelId}`}
             ref={textareaRef}
             value={draft}
+            enterKeyHint="enter"
             onChange={(event) => {
               updateDraft(event.target.value);
             }}

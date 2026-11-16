@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
 
 import { Composer } from "./composer";
@@ -90,6 +90,10 @@ beforeEach(() => {
   resetDialogDrafts();
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe("Composer", () => {
   it("восстанавливает черновик диалога из реестра", () => {
     const props = baseProps();
@@ -131,6 +135,38 @@ describe("Composer", () => {
       body: "Текст задачи",
       artifact_refs: ["artifact:mvp"],
     });
+  });
+
+  it("на сенсорном устройстве Enter не отправляет текст: отправка только кнопкой или Ctrl+Enter", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(pointer: coarse)" }));
+    const { onSend, storage } = renderComposer();
+    const area = textarea();
+    fireEvent.change(area, { target: { value: "Текст для телефона" } });
+    expect(area).toHaveAttribute("enterkeyhint", "enter");
+    expect(fireEvent.keyDown(area, { key: "Enter" })).toBe(true);
+    expect(onSend).not.toHaveBeenCalled();
+    expect(savedDrafts(storage)["ch-demo"]).toBe("Текст для телефона");
+
+    fireEvent.click(screen.getByRole("button", { name: "Отправить" }));
+    expect(onSend).toHaveBeenCalledTimes(1);
+    expect(onSend).toHaveBeenLastCalledWith({ body: "Текст для телефона", artifact_refs: [] });
+
+    fireEvent.keyDown(area, { key: "Enter", ctrlKey: true });
+    expect(onSend).toHaveBeenCalledTimes(2);
+  });
+
+  it("подтверждение IME-кандидата Enter не выбирает упоминание и не отправляет сообщение", () => {
+    const { onSend } = renderComposer();
+    const area = textarea();
+    fireEvent.change(area, { target: { value: "@ме" } });
+    expect(screen.getByRole("listbox", { name: "Упоминания" })).toBeInTheDocument();
+    fireEvent.keyDown(area, { key: "Enter", isComposing: true });
+    expect(onSend).not.toHaveBeenCalled();
+    expect(area).toHaveValue("@ме");
+
+    fireEvent.keyDown(area, { key: "Enter", code: "Process" });
+    expect(onSend).not.toHaveBeenCalled();
+    expect(area).toHaveValue("@ме");
   });
 
   it("Shift+Enter добавляет перевод строки вместо отправки", () => {

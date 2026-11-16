@@ -1,0 +1,35 @@
+# OWNER-MESSENGER-TOUCH-COMPOSER-20261116
+
+- task_id: OWNER-MESSENGER-TOUCH-COMPOSER-20261116
+- session_id: gpt6-20261116-1130-touch-keyboard
+- status: REVIEW
+- started_at: 2026-11-16T11:35:00+03:00
+- heartbeat_at: 2026-11-16T11:35:00+03:00
+- base_revision: 7265b04738043a8140b141fc6cb395da9989c016
+- owner_instruction: continue Messages refinement, especially real mobile behavior
+- write_scope:
+  - frontend/src/features/messenger/composer.tsx (touch keyboard Enter and IME handling only)
+  - frontend/src/features/messenger/composer.test.tsx (focused keyboard/input tests only)
+  - frontend/e2e/messenger-touch-input-20261116.spec.ts (new Chromium touch/desktop regression)
+  - frontend/playwright.touch-temp.config.ts (uncommitted local test-port isolation only)
+  - .agents/coordination/claims/OWNER-MESSENGER-TOUCH-COMPOSER-20261116.lock/status.md
+- excluded:
+  - frontend/src/features/messenger/reference.scss (pending PR #214)
+  - frontend/e2e/customer-visual.spec.ts (pending PR #221)
+  - frontend/src/features/collaboration.tsx, App.tsx, main.tsx and shared shell
+  - backend, API, auth, permissions, deployment configuration, other agents' files
+- dependencies: PR #219 merged; current main includes mobile layout and three themes
+- acceptance:
+  - On coarse-pointer phone/tablet Enter creates newline, explicit send button sends, Ctrl/Meta+Enter remains available.
+  - Desktop Enter sends, Shift+Enter inserts newline.
+  - Composing IME Enter never sends or selects a mention.
+  - Draft remains preserved and existing API/RBAC unchanged.
+  - Verify unit, TypeScript, ESLint, Vite, Playwright in Chromium 320/390 touch and desktop.
+- progress: mobile Enter now creates newline for coarse pointer devices, Ctrl/Meta+Enter and explicit Send submit; desktop Enter unchanged; IME composition cannot submit or select mention; enterkeyhint=enter.
+- verification_evidence:
+  - Vitest composer tests: 18/18 PASS on exact touch/IME implementation.
+  - TypeScript typecheck PASS; scoped ESLint PASS; frontend production Vite build PASS (2195 modules).
+  - Chromium touch E2E: 3/3 PASS (390px newline/button; 320px Ctrl+Enter and no horizontal overflow; desktop Enter).
+  - Browser tests use fixture auth and API; no claim of real production typing or mobile OS keyboard E2E.
+- notes: isolated Playwright config uses 4227 for local tests only, excluded from publication. One earlier cold Vite browser run exceeded the default 30s timeout; final focused run passed with bounded 90s mobile test timeout.
+- next: publish scoped PR, exact file SHA review, mandatory checks and independent review before production merge.
