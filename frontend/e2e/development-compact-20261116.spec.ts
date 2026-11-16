@@ -126,11 +126,11 @@ for(const mode of ["light","blue","midnight"] as const){
             return rgb;
           };
           const luminance = ([red, green, blue]: number[]) => {
-            const channels = [red, green, blue].map(value => {
+            const normalized = (value: number) => {
               const c = value / 255;
               return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-            });
-            return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+            };
+            return 0.2126 * normalized(red) + 0.7152 * normalized(green) + 0.0722 * normalized(blue);
           };
           const contrast = (foreground: string, background: string) => {
             const a = luminance(toRgb(foreground));
@@ -138,9 +138,11 @@ for(const mode of ["light","blue","midnight"] as const){
             return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
           };
           const bg = getComputedStyle(node).backgroundColor;
+          const title = node.querySelector<HTMLElement>(".trajectory-v2-role-modal-heading h2");
+          if (!title) throw new Error("Role details heading missing");
           return {
             contrasts: tabs.map(tab => contrast(getComputedStyle(tab).color, bg)),
-            headingContrast: contrast(getComputedStyle(node.querySelector<HTMLElement>(".trajectory-v2-role-modal-heading h2")!).color, bg),
+            headingContrast: contrast(getComputedStyle(title).color, bg),
             tileBackgrounds: tiles.map(tile => toRgb(getComputedStyle(tile).backgroundColor)),
             tabBounds: tabs.map(tab => {
               const rect = tab.getBoundingClientRect();
@@ -154,8 +156,8 @@ for(const mode of ["light","blue","midnight"] as const){
           };
         });
         expect(roleAppearance.headingContrast).toBeGreaterThanOrEqual(4.5);
-        roleAppearance.contrasts.forEach(ratio => expect(ratio).toBeGreaterThanOrEqual(4.5));
-        roleAppearance.tileBackgrounds.forEach(rgb => expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220));
+        for (const ratio of roleAppearance.contrasts) expect(ratio).toBeGreaterThanOrEqual(4.5);
+        for (const rgb of roleAppearance.tileBackgrounds) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220);
         if (width <= 560) {
           expect(roleAppearance.layout).toBe("grid");
           roleAppearance.tabBounds.forEach(tab => {
