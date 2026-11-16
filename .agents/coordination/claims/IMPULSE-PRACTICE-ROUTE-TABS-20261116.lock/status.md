@@ -12,7 +12,7 @@
 - write_scope:
   - frontend/src/features/participant-practice-navigation/** (new isolated component and tests)
   - frontend/src/features/task-catalog-v2/page.tsx (only component import and local tabs in first fold)
-  - frontend/src/features/my-projects/page.tsx (only component import and local tabs in list first fold)
+  - frontend/src/features/my-projects/page.tsx (component import, local tabs and existing empty-state CTA authorized-route fix only)
   - frontend/e2e/participant-practice-navigation.spec.ts (new integration test)
   - .agents/coordination/claims/IMPULSE-PRACTICE-ROUTE-TABS-20261116.lock/status.md
 - excluded: participant-practice-hub/**, App.tsx, backend/data/contracts, active assignment/submission/payment logic, existing task catalog and project filters/drawers, user local dirty worktrees, Railway configuration
@@ -20,3 +20,5 @@
 - verification: Vitest, lint, typecheck, build, focused Playwright on exact head; independent review and production exact SHA required
 - progress: read-only source/claim preflight and branch creation; no product modifications yet
 - blockers: full CI has unrelated Apple UI kit Ruff formatting and existing legacy E2E regressions; do not claim all-green CI or pixel parity
+
+- discovered_regression: the pre-existing «Перейти к задачам» empty-state button hardcodes /workspace/3 even when server actor.navigation assigns a different index; owner follow-up scope includes replacing that fixed URL with the same server-authorized destination already used by tabs.
