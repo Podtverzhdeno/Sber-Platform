@@ -27,3 +27,66 @@
   font-weight:650; }
 .learning-progress-bridge__practice-link:hover,
 .learning-progress-bridge__practice-link:focus-visible { background:#0e525c; outline-offset:2px; }
+
+
+/* Shared persisted-learning panel: actual light material in Analytics and Bootcamp.
+   Trajectory may refine these tokens in its own scoped stylesheet.
+   Do not alter the existing blue / midnight reference artwork. */
+:root[data-theme="light"] .learning-progress-bridge {
+  --learning-ink: #1a344b;
+  --learning-muted: #50677a;
+  --learning-border: #d6e2ee;
+  --learning-accent: #0d5f9d;
+
+  color: var(--learning-ink);
+  color-scheme: light;
+  background: #fff;
+  border-color: var(--learning-border);
+  box-shadow: 0 1px 3px rgb(30 65 98 / 5%);
+}
+:root[data-theme="light"] .learning-progress-bridge h3,
+:root[data-theme="light"] .learning-progress-bridge__courses strong {
+  color: var(--learning-ink);
+}
+:root[data-theme="light"] .learning-progress-bridge__eyebrow,
+:root[data-theme="light"] .learning-progress-bridge__metrics strong {
+  color: #086b63;
+}
+:root[data-theme="light"] .learning-progress-bridge header a,
+:root[data-theme="light"] .learning-progress-bridge__practice-link,
+:root[data-theme="light"] .learning-progress-bridge p[role="alert"] button {
+  color: var(--learning-accent);
+}
+:root[data-theme="light"] .learning-progress-bridge header a:hover,
+:root[data-theme="light"] .learning-progress-bridge p[role="alert"] button:hover {
+  color: #084b80;
+}
+:root[data-theme="light"] .learning-progress-bridge__metrics > div {
+  color: var(--learning-ink);
+  background: #f4f8fc;
+  border-color: var(--learning-border);
+}
+:root[data-theme="light"] .learning-progress-bridge__metrics span,
+:root[data-theme="light"] .learning-progress-bridge__courses li span,
+:root[data-theme="light"] .learning-progress-bridge__courses li small,
+:root[data-theme="light"] .learning-progress-bridge > small,
+:root[data-theme="light"] .learning-progress-bridge__empty,
+:root[data-theme="light"] .learning-progress-bridge p[role="status"] {
+  color: var(--learning-muted);
+}
+:root[data-theme="light"] .learning-progress-bridge p[role="alert"] {
+  color: #a12c35;
+}
+:root[data-theme="light"] .learning-progress-bridge__practice-link {
+  background: #eff6ff;
+  border-color: #b4d1e9;
+}
+:root[data-theme="light"] .learning-progress-bridge__practice-link:hover,
+:root[data-theme="light"] .learning-progress-bridge__practice-link:focus-visible {
+  color: #084b80;
+  background: #e1effe;
+  outline-color: #0d5f9d;
+}
+:root[data-theme="light"] .learning-progress-bridge__courses progress {
+  accent-color: #107b72;
+}
