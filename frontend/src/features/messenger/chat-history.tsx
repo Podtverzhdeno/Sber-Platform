@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowDown,
+  ArrowLeft,
   BellOff,
   CloudOff,
   Info,
@@ -77,6 +78,7 @@ export type ChatHistoryProps = {
   ariaLabel?: string;
   contextOpen?: boolean;
   onToggleContext?: () => void;
+  onBack?: () => void;
   headerExtra?: ReactNode;
   className?: string;
 };
@@ -107,6 +109,7 @@ export function ChatHistory({
   ariaLabel,
   contextOpen,
   onToggleContext,
+  onBack,
   headerExtra = null,
   className,
 }: ChatHistoryProps) {
@@ -240,6 +243,16 @@ export function ChatHistory({
       aria-label={ariaLabel ?? `Чат «${channelTitle}»`}
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
+        {onBack && (
+          <button
+            type="button"
+            className="msg-chat__header-action msg-chat__mobile-back"
+            aria-label="К списку диалогов"
+            onClick={onBack}
+          >
+            <ArrowLeft size={20} aria-hidden="true" />
+          </button>
+        )}
         <DialogAvatar title={channelTitle} kind={channel?.kind} className="msg-chat__avatar" />
         <button
           type="button"
@@ -300,7 +313,7 @@ export function ChatHistory({
           {onToggleContext !== undefined && contextOpen !== undefined && (
             <button
               type="button"
-              className="msg-chat__header-action"
+              className="msg-chat__header-action msg-chat__header-action--context-toggle"
               aria-expanded={contextOpen}
               aria-controls="messenger-context-panel"
               onClick={onToggleContext}

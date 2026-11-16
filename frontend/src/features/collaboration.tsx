@@ -476,18 +476,6 @@ export function MessagingWorkspace({
 
   const headerExtra = selected ? (
     <>
-      {isNarrow && (
-        <button
-          type="button"
-          className="msg-chat__header-action"
-          onClick={() => {
-            setMobilePane("list");
-          }}
-        >
-          ←
-          <span className="sr-only">К списку диалогов</span>
-        </button>
-      )}
       <button
         type="button"
         aria-pressed={selected.muted}
@@ -550,7 +538,6 @@ export function MessagingWorkspace({
   };
 
   const chatVisible = !isNarrow || mobilePane === "chat";
-  const listVisible = !isNarrow || mobilePane === "list";
   const contextVisible = selected ? (!isNarrow ? contextOpen : mobilePane === "context") : false;
 
   return (
@@ -580,7 +567,7 @@ export function MessagingWorkspace({
         className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}${!isNarrow && !contextVisible && selected !== undefined ? " messenger-shell--no-context" : ""}`}
         data-pane={isNarrow ? mobilePane : "desktop"}
       >
-        {listVisible && (
+        {(
           <DialogList
             channels={channels}
             directoryContacts={contactsQuery.data ?? []}
@@ -588,6 +575,7 @@ export function MessagingWorkspace({
             onCreateGroup={createGroup}
             viewerId={personId}
             selectedId={selected?.id ?? null}
+            preserveSearchOnSelection={isNarrow}
             createSignal={createSignal}
             findSignal={findSignal}
             onSelect={selectChannel}
@@ -618,7 +606,8 @@ export function MessagingWorkspace({
               storage={storage}
               ariaLabel={`Текущий чат · ${channelTitleFallback(selected, personId)}`}
               contextOpen={contextVisible}
-              onToggleContext={() => {
+              onBack={isNarrow ? () => { setMobilePane("list"); } : undefined}
+               onToggleContext={() => {
                 if (isNarrow) {
                   setMobilePane((current) => (current === "context" ? "chat" : "context"));
                   return;

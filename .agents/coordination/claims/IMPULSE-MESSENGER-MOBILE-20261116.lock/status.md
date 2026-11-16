@@ -1,0 +1,31 @@
+# Claim IMPULSE-MESSENGER-MOBILE-20261116
+
+- task_id: IMPULSE-MESSENGER-MOBILE-20261116
+- session_id: gpt6-20261116-messenger-mobile-a11y
+- status: REVIEW
+- started_at: 2026-11-16T10:20:00+03:00
+- heartbeat_at: 2026-11-16T10:26:00+03:00
+- base_revision: 5816e9dede
+- depends_on: []
+- write_scope:
+  - frontend/src/features/collaboration.tsx (mobile pane state / back and context return only; NOT CommunityNavigation)
+  - frontend/src/features/messenger/chat-history.tsx (optional mobile back control only)
+  - frontend/src/features/messenger/dialogs.tsx (mobile-only selection search preservation)
+  - frontend/src/features/messenger/reference.scss (mobile responsive + theme compatibility only)
+  - frontend/src/features/collaboration.test.tsx (mobile back navigation tests only)
+  - frontend/e2e/messenger-mobile-owner-20261116.spec.ts (new scoped mobile tests)
+  - frontend/e2e/customer-visual.spec.ts (update exactly three messaging nav assertions for CalmSidebar grouping)
+  - .agents/coordination/claims/IMPULSE-MESSENGER-MOBILE-20261116.lock/status.md
+- excluded:
+  - frontend/src/App.tsx and app shell (other active owners)
+  - participant-community-hub/** and collaboration.tsx CommunityNavigation (active Community claim)
+  - messaging API, privacy/RBAC, backend and migrations
+  - other agents' files, production release before validation
+- verification:
+  - focused Vitest, TypeScript, ESLint, production build
+  - Chromium 320/390/768/959/1024 viewport navigation and overflow, mobile keyboard and focus accessibility
+  - independent review before main integration
+- progress: mobile back action moved before title; dialog list remains mounted; mobile-only search preservation; context display fixed at 801–959 px; responsive composer/touch actions and light palette.
+- verification_result: TypeScript PASS, scoped ESLint PASS, frontend production build PASS; Vitest 32/32 PASS; new Chromium mobile E2E 6/6 PASS at 320/390/768/959/1024; existing messages-reference Chromium E2E 17/17 PASS.
+- customer_regression_fix: legacy Customer SberChat CI expected a flat visible navigation link; updated three message-specific tests to open the current CalmSidebar drawer and expand Общение. Browser validations: 2 message tests PASS, separate histories PASS on rerun (first attempt timed out at 30s on Windows).
+- verification_limits: Browser tests used deterministic fixture API, not authorized live Railway account; unrelated development endpoints were unavailable locally (vite ECONNREFUSED). Independent review and production smoke pending.
