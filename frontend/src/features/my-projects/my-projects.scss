@@ -1461,6 +1461,8 @@
   /* Metadata keeps an explicit dark-theme foreground in legacy rules. */
   .mp-key-facts > span,
   .mp-team-member small { color: var(--mp-ref-muted); }
+  /* Task review activity uses a separate legacy neon foreground. */
+  .mp-ref-activity > span { color: #086d60; }
   .mp-overview-checkpoint small,
   .mp-mini-stat span,
   .mp-progress-stage small,
