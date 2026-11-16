@@ -1166,3 +1166,285 @@
     grid-template-columns:295px minmax(0,1fr);
   }
 }
+
+
+/* Owner light-mode regression repair (2026-11-16).
+   R-MSG-01 originally shipped with fixed midnight colors. Keep the branded dark
+   reference intact, but map every reading surface to the app's light tokens. */
+:root[data-theme="light"] .page-shell:has(.sberchat-reference) {
+  background: var(--color-bg);
+}
+:root[data-theme="light"] .sberchat-reference {
+  --msg-panel: #fff;
+  --msg-panel-elevated: #f6f8fc;
+  --msg-text: #17283b;
+  --msg-muted: #586b80;
+  --msg-line: #dce4ed;
+  --msg-active: #e9f2ff;
+  --msg-hover: #f1f6fc;
+  --msg-chat-bg: #f8fafd;
+  --msg-bubble-in: #fff;
+  --msg-bubble-out: #eaf3ff;
+  --msg-bubble-border: #dce4ed;
+  color: var(--msg-text);
+  background: #fff;
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .messenger-shell {
+  background: var(--msg-chat-bg);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list, .msg-context) {
+  background: #fff;
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .chat-thread {
+  background: #f8fafd;
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__heading h2, .msg-dialog-list__row-title strong, .msg-chat__header-title strong, .msg-context__title, .msg-context__section-title, .msg-context__facts dd, .msg-context__people li span) {
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__heading p, .msg-dialog-list__preview, .msg-dialog-list__meta, .msg-chat__header-title small, .msg-context__eyebrow, .msg-context__role, .msg-context__facts dt, .msg-context__no-files, .msg-chat__meta) {
+  color: #586b80;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__row-item,
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__tabs,
+:root[data-theme="light"] .sberchat-reference .msg-context__section,
+:root[data-theme="light"] .sberchat-reference .msg-context__eyebrow {
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: #e9f2ff;
+  border-left-color: #0066cc;
+  box-shadow: inset 1px 0 #92bce8;
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__row:hover, .msg-dialog-list__row:focus-visible) {
+  background: #f1f6fc;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__tabs button {
+  color: #586b80;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__tabs button.active {
+  color: #005bb7;
+  border-bottom-color: #0066cc;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__count,
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__unread {
+  background: #0066cc;
+  color: #fff;
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__search-field, .msg-dialog-list__create-button--header, .msg-dialog-list__create-menu, .msg-composer__panel) {
+  background: #f6f8fc;
+  border-color: #ccd9e7;
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__search-field input,
+:root[data-theme="light"] .sberchat-reference .msg-composer__textarea {
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__search-field input::placeholder,
+:root[data-theme="light"] .sberchat-reference .msg-composer__textarea::placeholder {
+  color: #66788b;
+  opacity: 1;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__header,
+:root[data-theme="light"] .sberchat-reference .msg-composer {
+  background: #fff;
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__header-action {
+  color: #37506a;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__header-action:hover,
+:root[data-theme="light"] .sberchat-reference .msg-composer__tool:hover {
+  background: #eaf3ff;
+  color: #005bb7;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__bubble,
+:root[data-theme="light"] .sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-in);
+  border-color: #dbe4ed;
+  box-shadow: 0 3px 12px rgb(23 40 59 / 5%);
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-out);
+  border-color: #cadef5;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__bubble-body {
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__group-author,
+:root[data-theme="light"] .sberchat-reference .msg-chat__pinned strong {
+  color: #005bb7;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__divider,
+:root[data-theme="light"] .sberchat-reference .msg-chat__pinned {
+  color: #475d73;
+  background: #f1f6fc;
+  border-color: #d6e2ed;
+}
+:root[data-theme="light"] .sberchat-reference .msg-composer__input-shell,
+:root[data-theme="light"] .sberchat-reference .msg-composer__textarea {
+  background: #f6f8fc;
+  border-color: #cbd9e8;
+}
+:root[data-theme="light"] .sberchat-reference .msg-composer__tool {
+  color: #48637d;
+}
+:root[data-theme="light"] .sberchat-reference .msg-composer__send {
+  color: #fff;
+  border-color: #0066cc;
+  background: #0066cc;
+  box-shadow: none;
+}
+:root[data-theme="light"] .sberchat-reference .msg-context__badge,
+:root[data-theme="light"] .sberchat-reference .msg-context__section-title > span {
+  background: #e9f2ff;
+  color: #24527e;
+}
+:root[data-theme="light"] .sberchat-reference .msg-context__action,
+:root[data-theme="light"] .sberchat-reference .msg-context__notification-action,
+:root[data-theme="light"] .sberchat-reference .msg-context__file-list li {
+  color: #17283b;
+  background: #f6f8fc;
+  border-color: #d6e2ed;
+}
+:root[data-theme="light"] .sberchat-reference .msg-context__file-list button:hover {
+  background: #e9f2ff;
+}
+:root[data-theme="light"] .sberchat-reference .msg-context__people li small,
+:root[data-theme="light"] .sberchat-reference .msg-context__section-title .msg-context__show-all {
+  color: #005bb7;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__artifact-ref {
+  background: #f6f8fc;
+  border-color: #d6e2ed;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__artifact-icon {
+  background: #e4eef9;
+  color: #24527e;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__artifact-label strong {
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__artifact-label small {
+  color: #586b80;
+}
+/* The empty-state panels are part of Messages, not dark illustrations pasted
+   on top of the white light theme. Decorative orbits stay decorative. */
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty {
+  color: #17283b;
+  background: #f8fafd;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty > p {
+  color: #586b80;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty__actions button,
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty__actions button:is(.community,.new) {
+  color: #17283b;
+  background: #fff;
+  border-color: #d6e2ed;
+  box-shadow: 0 4px 16px rgb(23 40 59 / 5%);
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty__actions button small {
+  color: #586b80;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty__actions button > svg {
+  color: #24527e;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty {
+  color: #17283b;
+  background: #fff;
+  border-color: #d6e2ed;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty :is(h2, .msg-reference-context-empty__blocks strong) {
+  color: #17283b;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty :is(.msg-reference-context-empty__inner > p, .msg-reference-context-empty__blocks section > svg) {
+  color: #586b80;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty__blocks section {
+  background: #f6f8fc;
+  border-color: #d6e2ed;
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty__blocks i {
+  background: #dbe6f1;
+}
+:root[data-theme="light"] .sberchat-reference :where(button,input,textarea):focus-visible {
+  outline-color: #0066cc;
+}
+/* Mobile: one pane at a time, no horizontal scroll, compact composer and
+   accessible control sizes even at 320 CSS pixels. */
+@media (max-width: 959px) {
+  .messenger-page.sberchat-reference,
+  .page-shell:has(.sberchat-reference) .workspace-content > .sberchat-reference {
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    height: calc(100dvh - 105px);
+    overflow: hidden;
+  }
+  .messenger-page.sberchat-reference > .messenger-shell,
+  .messenger-page.sberchat-reference > .messenger-shell--chat,
+  .messenger-page.sberchat-reference > .messenger-shell--context,
+  .messenger-page.sberchat-reference > .messenger-shell--list {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+  }
+  .sberchat-reference .msg-dialog-list,
+  .sberchat-reference .chat-thread,
+  .sberchat-reference .msg-context {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .sberchat-reference .msg-dialog-list__row-text,
+  .sberchat-reference .msg-chat__header-title,
+  .sberchat-reference .msg-composer__input-shell {
+    min-width: 0;
+  }
+  .sberchat-reference .msg-chat__group {
+    max-width: min(90%, 680px);
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 420px) {
+  .sberchat-reference .msg-dialog-list__heading {
+    gap: 6px;
+    padding-inline: 10px;
+  }
+  .sberchat-reference .msg-dialog-list__create-button--header {
+    min-width: 106px;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+  .sberchat-reference .msg-dialog-list__tabs {
+    gap: 8px;
+    padding-inline: 8px;
+  }
+  .sberchat-reference .msg-dialog-list__tabs button {
+    min-width: 0;
+    padding-inline: 4px;
+  }
+  .sberchat-reference .msg-chat__header {
+    padding-inline: 7px;
+  }
+  .sberchat-reference .msg-chat__header-actions {
+    gap: 1px;
+  }
+  .sberchat-reference .msg-composer {
+    padding-inline: 5px;
+  }
+  .sberchat-reference .msg-composer__fieldset {
+    gap: 4px;
+  }
+  .sberchat-reference .msg-composer__tools {
+    gap: 1px;
+  }
+  .sberchat-reference .msg-composer__input-shell {
+    flex: 1 1 75px;
+  }
+}
