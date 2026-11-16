@@ -454,3 +454,62 @@
    their regular interactive popover. */
 .participant-guide .pg-coachmark--passive { pointer-events: none; }
 .participant-guide .pg-coachmark--passive button { pointer-events: auto; }
+
+/* Mobile help navigation: one discoverable category control replaces a long
+   horizontally-scrolled row of hidden categories. Desktop sidebar stays intact. */
+.pg-help-mobile-filter { display: none; }
+
+@media (max-width: 600px) {
+  .pg-help-sidebar { display: none; }
+  .pg-help-mobile-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    min-width: 0;
+    border-bottom: 1px solid #29495b;
+    background: #0b2333;
+  }
+  .pg-help-mobile-filter label {
+    flex: 0 0 auto;
+    color: #bdd5e4;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .pg-help-mobile-filter select {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 230px;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #31576b;
+    border-radius: 10px;
+    background: #10293c;
+    color: #f2faff;
+    color-scheme: dark;
+    font: inherit;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .pg-help-mobile-filter select:focus-visible {
+    outline: 3px solid #54e8d6;
+    outline-offset: 2px;
+  }
+  .pg-help-head-mark, .pg-help-heading p { display: none; }
+  .pg-help-close { flex: 0 0 44px; width: 44px; height: 44px; }
+  .pg-help-search input { font-size: 16px; }
+  .pg-help-lead { flex-wrap: wrap; }
+  .pg-help-back, .pg-help-article-actions button, .pg-help-bottom button {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) and (max-width: 600px) {
+  .pg-help-mobile-filter select {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+  }
+}
