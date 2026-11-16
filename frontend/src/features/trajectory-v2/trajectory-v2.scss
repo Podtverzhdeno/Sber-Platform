@@ -2704,4 +2704,29 @@
   .trajectory-v2-role-dialog .trajectory-v2-role-tabs > button:focus-visible {
     outline-color: #095eaa !important;
   }
+
+  /* Real introduction headings and "next step" subtitle have fixed night ink. */
+  .trajectory-v2-role-intro-hero h3,
+  .trajectory-v2-role-intro-card h3,
+  .trajectory-v2-role-intro-grid h3,
+  .trajectory-v2-next-task-description strong {
+    color: var(--trj-text);
+  }
+  .trajectory-v2-next-task-description small,
+  .trajectory-v2-role-intro-hero p,
+  .trajectory-v2-role-intro-card p { color: var(--trj-muted); }
+
+  /* The links to levels and passport remain plain text buttons in light mode. */
+  .trajectory-v2-all-grades-link,
+  .trajectory-v2-passport-panel > header button {
+    color: #095eaa;
+  }
+  .trajectory-v2-all-grades-link:hover,
+  .trajectory-v2-passport-panel > header button:hover { color: #07477f; }
+
+  /* Once a course cycle is eligible to advance, its readiness text must not
+     inherit the important neon cyan from the original midnight reference. */
+  .trajectory-v2-cycle-ready {
+    color: #086d61 !important;
+  }
 }
