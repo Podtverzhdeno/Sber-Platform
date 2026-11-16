@@ -2656,4 +2656,52 @@
   .trajectory-v2-statistics-section strong { color: var(--trj-text); }
   .trajectory-v2-statistics-section ul { color: var(--trj-muted); }
   .trajectory-v2-stats-caveat { color: var(--trj-muted) !important; }
+
+  /* Review follow-up: drawer has explicit pale children, unlike inherited text. */
+  .trajectory-v2-drawer-section {
+    color: var(--trj-text);
+    border-top-color: var(--trj-line);
+  }
+  .trajectory-v2-drawer-section h3,
+  .trajectory-v2-drawer-section p,
+  .trajectory-v2-drawer-section p strong,
+  .trajectory-v2-drawer-activities ol,
+  .trajectory-v2-drawer-activities li,
+  .trajectory-v2-drawer-metrics strong {
+    color: var(--trj-text);
+  }
+  .trajectory-v2-drawer-section small,
+  .trajectory-v2-drawer-metrics small,
+  .trajectory-v2-drawer-footer > p {
+    color: var(--trj-muted);
+  }
+  .trajectory-v2-drawer-activities li::marker { color: #096d7d; }
+  .trajectory-v2-drawer-heading .trajectory-v2-drawer-tag {
+    color: #095eaa;
+    background: #e8f3ff;
+    border-color: #b9d5ec;
+  }
+  .trajectory-v2-drawer-section.trajectory-v2-learning-content {
+    color: var(--trj-text);
+    background: #f5f8fc;
+    border-color: #d7e3ef;
+  }
+
+  /* Statistics are rendered with dt/dd, not strong/small. */
+  .trajectory-v2-statistics summary { color: #096d7d; }
+  .trajectory-v2-statistics-grid dt { color: var(--trj-muted); }
+  .trajectory-v2-statistics-grid dd { color: var(--trj-text); }
+
+  /* Original role tabs declared !important dark-mode ink. Override both layers. */
+  .trajectory-v2-role-dialog .trajectory-v2-role-tabs > button {
+    color: #4d6278 !important;
+    border-bottom-color: transparent !important;
+  }
+  .trajectory-v2-role-dialog .trajectory-v2-role-tabs > button[aria-selected="true"] {
+    color: #075f5a !important;
+    border-bottom-color: #09877c !important;
+  }
+  .trajectory-v2-role-dialog .trajectory-v2-role-tabs > button:focus-visible {
+    outline-color: #095eaa !important;
+  }
 }
