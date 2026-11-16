@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, type RuntimeApiPath } from "../../api/client";
 import { useSearchParams } from "react-router-dom";
@@ -62,6 +62,8 @@ const benefits: Benefit[] = [
     perks: ["Приглашение в закрытое сообщество", "Пакеты токенов GitVerse, GigaAgent, GigaCowork", "Нетворкинг с экспертами и участниками", "Участие в закрытых событиях"] },
 ];
 
+const profileSections = ["Обзор", "Достижения", "Проекты", "Оценки", "Награды"] as const;
+
 const levels = [
   { label: "ТОП 30", benefit: "GigaCode Premium", icon: Gem },
   { label: "ТОП 1", benefit: "Skill Passport", icon: Crown },
@@ -99,14 +101,43 @@ function BenefitTile({ benefit, onOpen, compact = false }: { benefit: Benefit; o
 }
 
 function RewardDialog({ benefit, onClose }: { benefit: Benefit; onClose: () => void }) {
+  const dialogRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    const onEsc = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onEsc);
-    return () => { window.removeEventListener("keydown", onEsc); };
-  }, [onClose]);
+    const previousFocus = document.activeElement;
+    dialogRef.current?.querySelector<HTMLButtonElement>(".ir-close")?.focus();
+    return () => {
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+    };
+  }, []);
   const Icon = benefit.Icon;
   return <div className="ir-overlay" role="presentation" onClick={onClose}>
-    <section className={"ir-modal ir-modal--" + benefit.key} role="dialog" aria-modal="true" aria-label={benefit.place + ": " + benefit.title} onClick={event => {event.stopPropagation();}}>
+    <section
+      ref={dialogRef}
+      className={"ir-modal ir-modal--" + benefit.key}
+      role="dialog"
+      aria-modal="true"
+      aria-label={benefit.place + ": " + benefit.title}
+      onClick={event => { event.stopPropagation(); }}
+      onKeyDown={event => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          onClose();
+          return;
+        }
+        if (event.key !== "Tab") return;
+        const focusables = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'));
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (!first || !last) return;
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }}
+    >
       <button type="button" className="ir-close" aria-label="Закрыть описание награды" onClick={onClose}>×</button>
       <div className="ir-modal-icon"><Icon size={42} /></div>
       <span className="ir-eyebrow">Награды сезона · условия программы</span>
@@ -258,7 +289,32 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
           <div className="ir-profile-stats"><span><Crown size={19}/><strong>{person.place}</strong><small>Место в рейтинге</small></span><span><Flame size={19}/><strong>{person.points}</strong><small>Всего баллов</small></span><span><BriefcaseBusiness size={19}/><strong>{person.projects}</strong><small>Проектов</small></span></div></aside>
       </header>}
       {person === null && <p role="status" className="ir-disclaimer">Профиль недоступен или скрыт настройками приватности. Вернитесь в список участников.</p>}
-      {person !== null && <div className="ir-profile-tabs" role="tablist" aria-label="Разделы профиля">{["Обзор","Достижения","Проекты","Оценки","Награды"].map(value=><button key={value} type="button" role="tab" aria-selected={tab===value} onClick={() => {setTab(value);}}>{value}</button>)}</div>}
+      {person !== null && <div className="ir-profile-tabs" role="tablist" aria-label="Разделы профиля">{profileSections.map((value, index) => (
+        <button
+          key={value}
+          type="button"
+          role="tab"
+          id={`ir-profile-tab-${String(index)}`}
+          aria-controls="ir-profile-tab-panel"
+          aria-selected={tab === value}
+          tabIndex={tab === value ? 0 : -1}
+          onClick={() => { setTab(value); }}
+          onKeyDown={event => {
+            let next = index;
+            if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % profileSections.length;
+            else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + profileSections.length) % profileSections.length;
+            else if (event.key === "Home") next = 0;
+            else if (event.key === "End") next = profileSections.length - 1;
+            else return;
+            event.preventDefault();
+            const target = profileSections[next];
+            if (!target) return;
+            setTab(target);
+            event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+          }}
+        >{value}</button>
+      ))}</div>}
+      {person !== null && <div className="ir-profile-tab-panel" id="ir-profile-tab-panel" role="tabpanel" aria-labelledby={`ir-profile-tab-${String(profileSections.indexOf(tab as (typeof profileSections)[number]))}`} tabIndex={0}>}
       {person !== null && feedback && <div className="ir-feedback" role="status"><CircleCheck size={18}/>{feedback}<button type="button" onClick={()=>{setFeedback("");}} aria-label="Закрыть уведомление">×</button></div>}
       {person !== null && (tab==="Обзор"||tab==="Награды")&&<section className="ir-unlocks"><h2><LockKeyhole size={20}/> Открытые возможности</h2><div className="ir-unlock-grid">{levels.map((item)=>{const qualifies=item.label==="ТОП 1"?person.place===1:item.label==="ТОП 30"?person.place<=30:person.place<=50;const reward=benefits.find(benefit => benefit.place === item.label);if (!reward) return null;return <button type="button" key={item.label} className={"ir-unlock ir-unlock--"+reward.key} onClick={() => {setSelectedBenefit(reward);}}><item.icon size={25}/><strong>{item.label}</strong><span>{item.benefit}</span><small>{qualifies?<><Check size={15}/> В призовой зоне</>:<><LockKeyhole size={15}/> Пока недоступно</>}</small></button>;})}</div><p>Попадание в призовую зону не подтверждает фактическую выдачу награды. Организаторы проверяют результаты и утверждают условия.</p></section>}
       {person !== null && <div className="ir-profile-grid">
@@ -267,6 +323,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
         {(tab==="Обзор"||tab==="Оценки")&&<section className="ir-profile-panel ir-evaluation"><h2><Star size={19}/> Оценки и вклад</h2><p className="ir-small-note">Оценки компетенций не выводятся из позиции в рейтинге. Требуется отдельная подтверждённая оценка.</p></section>}
         {(tab==="Обзор"||tab==="Достижения"||tab==="Награды")&&<section className="ir-profile-panel"><h2><BadgeCheck size={19}/> Skill Passport и признание</h2><div className="ir-skill-passport"><FileBadge2 size={35}/><div><strong>Skill Passport</strong><span>Данные о результатах и достижениях</span><small>Награды проверяются отдельно от таблицы рейтинга</small></div></div><button type="button" className="ir-subtle-action" onClick={viewBenefits}>Условия признания <ArrowRight size={16}/></button></section>}
       </div>}
+      {person !== null && </div>}
       <button type="button" className="ir-back-button" onClick={backToList}><ArrowLeft size={18}/> Вернуться в рейтинг</button>
     </>}
     {selectedBenefit && <RewardDialog benefit={selectedBenefit} onClose={() => {setSelectedBenefit(null);}} />}
