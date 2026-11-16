@@ -71,7 +71,7 @@ describe("participant settings", () => {
     });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(<QueryClientProvider client={client}><ParticipantSettings actorName="Алекс Речной" consentScopes={[]} /></QueryClientProvider>);
-    fireEvent.click(screen.getByRole("button", { name: "Безопасность" }));
+    fireEvent.click(screen.getByRole("button", { name: /Безопасность/ }));
     expect(screen.getByText("Двухфакторная аутентификация")).toBeInTheDocument();
     expect(screen.getByText("Провайдер входа")).toBeInTheDocument();
     expect(screen.getByText("Подключённые устройства")).toBeInTheDocument();
