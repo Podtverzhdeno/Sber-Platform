@@ -68,7 +68,7 @@ test("light Messages has white surfaces and legible text at 390 and 320 px", asy
     document.documentElement.scrollWidth - document.documentElement.clientWidth
   )).toBeLessThanOrEqual(1);
   await expect(page.getByRole("complementary", { name: "Контекст диалога" })).toBeVisible();
-  await page.getByRole("button", { name: "Скрыть контекст" }).click();
+  await page.getByRole("button", { name: "К чату" }).click();
   await expect(page.locator(".chat-thread")).toBeVisible();
   await page.getByRole("button", { name: /К списку диалогов/ }).click();
   await expect(dialogPane).toBeVisible();
