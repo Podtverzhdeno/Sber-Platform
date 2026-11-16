@@ -163,3 +163,30 @@ test("dark trajectory preserves midnight reference visuals", async ({ page }) =>
   }));
   expect(stageSurface.image !== "none" || luminance(stageSurface.color) < 0.2).toBe(true);
 });
+
+
+test("mobile light role details and grade dialogs remain bright", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.getByRole("button", { name: /^О роли/ }).click();
+  const roleDialog = page.locator(".trajectory-v2-role-dialog");
+  await expect(roleDialog).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-role-dialog");
+  await lightSurface(page, ".trajectory-v2-role-intro-grid > section");
+  await contrast(page, ".trajectory-v2-role-dialog h2", ".trajectory-v2-role-dialog");
+  await roleDialog.getByRole("button", { name: "Закрыть" }).click();
+
+  await page.getByRole("button", { name: /Все уровни/ }).click();
+  const grades = page.locator(".trajectory-v2-grades-dialog");
+  await expect(grades).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-grades-dialog");
+  await lightSurface(page, ".trajectory-v2-grade-option");
+  await lightSurface(page, ".trajectory-v2-grade-explanation");
+  await contrast(page, ".trajectory-v2-grades-dialog h2", ".trajectory-v2-grades-dialog");
+  const box = await grades.boundingBox();
+  expect(box).not.toBeNull();
+  if (box) {
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(391);
+  }
+});
