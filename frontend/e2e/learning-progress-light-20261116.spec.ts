@@ -80,13 +80,12 @@ for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: width < 500 ? 844 : 900 });
     const panel = await showLearning(page, "light");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-    const selectors = [".learning-progress-bridge", ".learning-progress-bridge__metrics > div"];
-    for (const selector of selectors) {
-      const bg = await panel.locator(selector === ".learning-progress-bridge" ? ":scope" : selector).first()
-        .evaluate(el => getComputedStyle(el).backgroundColor);
-      expect(brightness(bg), selector + " should use a light opaque surface").toBeGreaterThan(0.84);
-    }
-    const root = ".av3 .learning-progress-bridge";
+    const rootBackground = await panel.evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(brightness(rootBackground), "learning panel should be opaque white").toBeGreaterThan(0.84);
+    const metricBackground = await panel.locator(".learning-progress-bridge__metrics > div").first()
+      .evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(brightness(metricBackground), "learning metrics should be light cards").toBeGreaterThan(0.84);
+    const root = ".analytics-v3 .learning-progress-bridge";
     await checkContrast(page, root + " h3", root);
     await checkContrast(page, root + " header a", root);
     await checkContrast(page, root + " .learning-progress-bridge__eyebrow", root);
@@ -115,7 +114,11 @@ test("midnight learning panel retains original gradient and dark metric cards", 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const appearance = await panel.evaluate(el => ({
     background: getComputedStyle(el).backgroundImage,
-    metric: getComputedStyle(el.querySelector(".learning-progress-bridge__metrics > div")!).backgroundColor,
+    metric: (() => {
+      const metric = el.querySelector(".learning-progress-bridge__metrics > div");
+      if (!metric) throw new Error("Learning metric missing");
+      return getComputedStyle(metric).backgroundColor;
+    })(),
   }));
   expect(appearance.background).toContain("linear-gradient");
   expect(brightness(appearance.metric)).toBeLessThan(0.2);
