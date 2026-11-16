@@ -106,6 +106,64 @@ for(const mode of ["light","blue","midnight"] as const){
         await expect(gradeDialog).toHaveCSS("background-color", "rgb(255, 255, 255)");
         await gradeDialog.getByRole("button", {name: "Закрыть"}).click();
         await expect(gradeDialog).toBeHidden();
+
+        // Role details are a second layer of the Development journey. Validate
+        // real computed foreground/background contrast, not just theme tokens.
+        const roleTrigger = screen.getByRole("button", {name: /О роли/}).first();
+        await roleTrigger.click();
+        const roleDialog = page.locator(".trajectory-v2-role-dialog");
+        await expect(roleDialog).toBeVisible();
+        await expect(roleDialog).toHaveCSS("background-color", "rgb(255, 255, 255)");
+        const roleAppearance = await roleDialog.evaluate(node => {
+          const tablist = node.querySelector<HTMLElement>(".trajectory-v2-role-tabs");
+          if (!tablist) throw new Error("Role details tabs missing");
+          const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('button[role="tab"]'));
+          const tiles = Array.from(node.querySelectorAll<HTMLElement>(".trajectory-v2-role-intro-grid > section"));
+          if (tabs.length !== 6 || tiles.length < 3) throw new Error("Role details contents missing");
+          const toRgb = (value: string) => {
+            const rgb = value.match(/[0-9]+/g)?.slice(0, 3).map(Number);
+            if (!rgb || rgb.length !== 3) throw new Error("Unexpected color: " + value);
+            return rgb;
+          };
+          const luminance = ([red, green, blue]: number[]) => {
+            const channels = [red, green, blue].map(value => {
+              const c = value / 255;
+              return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+          };
+          const contrast = (foreground: string, background: string) => {
+            const a = luminance(toRgb(foreground));
+            const b = luminance(toRgb(background));
+            return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+          };
+          const bg = getComputedStyle(node).backgroundColor;
+          return {
+            contrasts: tabs.map(tab => contrast(getComputedStyle(tab).color, bg)),
+            headingContrast: contrast(getComputedStyle(node.querySelector<HTMLElement>(".trajectory-v2-role-modal-heading h2")!).color, bg),
+            tileBackgrounds: tiles.map(tile => toRgb(getComputedStyle(tile).backgroundColor)),
+            tabBounds: tabs.map(tab => tab.getBoundingClientRect()),
+            listBounds: tablist.getBoundingClientRect(),
+            layout: getComputedStyle(tablist).display,
+          };
+        });
+        expect(roleAppearance.headingContrast).toBeGreaterThanOrEqual(4.5);
+        roleAppearance.contrasts.forEach(ratio => expect(ratio).toBeGreaterThanOrEqual(4.5));
+        roleAppearance.tileBackgrounds.forEach(rgb => expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220));
+        if (width <= 560) {
+          expect(roleAppearance.layout).toBe("grid");
+          roleAppearance.tabBounds.forEach(tab => {
+            expect(tab.left).toBeGreaterThanOrEqual(roleAppearance.listBounds.left - 1);
+            expect(tab.right).toBeLessThanOrEqual(roleAppearance.listBounds.right + 1);
+          });
+        }
+        const roleTabs = roleDialog.getByRole("tablist", {name: "Разделы роли"});
+        await roleTabs.getByRole("tab").first().focus();
+        await page.keyboard.press("ArrowRight");
+        await expect(roleTabs.getByRole("tab").nth(1)).toHaveAttribute("aria-selected", "true");
+        await page.keyboard.press("Escape");
+        await expect(roleDialog).toBeHidden();
+        await expect(roleTrigger).toBeFocused();
       }
       await page.getByRole("button",{name:"Impulse — открыть разделы"}).click();
       const menu=page.getByRole("dialog",{name:"Главное меню"});
