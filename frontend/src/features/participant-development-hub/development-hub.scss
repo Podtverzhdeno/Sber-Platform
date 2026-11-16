@@ -282,13 +282,16 @@
   }
 }
 
-@media (max-width: 360px) {
-  /* The compact global-search icon can wrap below the mobile toolbar at 320px.
-   * Preserve a readable first-fold label without shifting 390px+ layouts. */
+/* Below 600px the compact global-search icon still occupies a second
+ * mobile toolbar row. Reserve that real height on 320/390px so the first
+ * Development label and level badge stay visible instead of being covered. */
+@media (max-width: 600px) {
   .development-hub {
-    padding-top: 40px;
+    padding-top: 44px;
   }
+}
 
+@media (max-width: 360px) {
   .development-hub__header {
     flex-wrap: wrap;
   }
