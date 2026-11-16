@@ -108,12 +108,32 @@ for (const width of [320, 390, 1440]) {
       const card = dialog.locator(".mp-ref-card, .mp-detail-panel").first();
       await expect(card).toBeVisible();
       await expectLight(page, ".mpv2 .mp-detail[data-project-screen=detail] .mp-ref-card, .mpv2 .mp-detail[data-project-screen=detail] .mp-detail-panel");
-      if (name === "Задачи") await expectLight(page, ".mpv2 .mp-ref-task-row");
+      if (name === "Обзор") {
+        await expectLight(page, ".mpv2 .mp-overview-next");
+        await expectContrast(page, ".mp-overview-next > header h2", ".mp-overview-next");
+      }
+      if (name === "Задачи") {
+        await expectLight(page, ".mpv2 .mp-ref-task-row");
+        await expectContrast(page, ".mp-ref-task-copy strong", ".mp-ref-task-row");
+      }
+      if (name === "Прогресс") {
+        await expectLight(page, ".mpv2 .mp-ref-skill");
+        await expectContrast(page, ".mp-ref-skill strong", ".mp-ref-skill");
+      }
       if (name === "Мой вклад") {
         await expectLight(page, ".mpv2 .mp-ref-contrib-head");
         await expectLight(page, ".mpv2 .mp-ref-contrib-metrics > div");
+        await expectContrast(page, ".mp-ref-contrib-metrics strong", ".mp-ref-contrib-metrics > div");
+        await expectLight(page, ".mpv2 .mp-contribute-form textarea");
       }
-      if (name === "Бонусы и выгоды") await expectLight(page, ".mpv2 .mp-ref-rewards button");
+      if (name === "Команда") {
+        await expectLight(page, ".mpv2 .mp-ref-responsibility > div");
+        await expectContrast(page, ".mp-ref-person strong", ".mp-ref-card");
+      }
+      if (name === "Бонусы и выгоды") {
+        await expectLight(page, ".mpv2 .mp-ref-rewards button");
+        await expectContrast(page, ".mp-ref-rewards button strong", ".mp-ref-rewards button");
+      }
     }
     if (width < 500) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
