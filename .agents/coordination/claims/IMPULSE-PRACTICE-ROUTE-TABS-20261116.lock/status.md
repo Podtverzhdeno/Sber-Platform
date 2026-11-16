@@ -1,0 +1,22 @@
+# Owner follow-up: Practice subsection navigation (2026-11-16)
+
+- task_id: IMPULSE-PRACTICE-ROUTE-TABS-20261116
+- session_id: gpt6-owner-practice-local-tabs-20261116-0952
+- status: IN_PROGRESS
+- started_at: 2026-11-16T09:52:00+03:00
+- heartbeat_at: 2026-11-16T09:52:00+03:00
+- base_revision: 5816e9dedeb9303b0454876f094acb0938164134
+- owner_instruction: continue sequential Apple-minimal redesign of five participant sections with subnavigation; publish accepted UI to main and production
+- dependency: participant-five-section-content-first-20261115 specification, authorized server /api/v1/me navigation
+- coordination: IMPULSE-PRACTICE-REDESIGN-20261115 IN_PROGRESS owns participant-practice-hub/** and App.tsx, expressly EXCLUDES task-catalog-v2/page.tsx and my-projects/page.tsx. This follow-up avoids the claimed Practice hub entirely and only adds local tabs to the existing rendered routes, similar to Results/Community.
+- write_scope:
+  - frontend/src/features/participant-practice-navigation/** (new isolated component and tests)
+  - frontend/src/features/task-catalog-v2/page.tsx (only component import and local tabs in first fold)
+  - frontend/src/features/my-projects/page.tsx (only component import and local tabs in list first fold)
+  - frontend/e2e/participant-practice-navigation.spec.ts (new integration test)
+  - .agents/coordination/claims/IMPULSE-PRACTICE-ROUTE-TABS-20261116.lock/status.md
+- excluded: participant-practice-hub/**, App.tsx, backend/data/contracts, active assignment/submission/payment logic, existing task catalog and project filters/drawers, user local dirty worktrees, Railway configuration
+- acceptance: server-authorized task/projects route indexes, missing-route and foreign-role denied, Back/Forward, compact first fold, no horizontal overflow at 320/390/1440, light/dark keyboard focus and no additional confirmation barriers
+- verification: Vitest, lint, typecheck, build, focused Playwright on exact head; independent review and production exact SHA required
+- progress: read-only source/claim preflight and branch creation; no product modifications yet
+- blockers: full CI has unrelated Apple UI kit Ruff formatting and existing legacy E2E regressions; do not claim all-green CI or pixel parity
