@@ -79,3 +79,94 @@
 @media(max-width:900px){.ac-heading{flex-direction:column;gap:13px}.ac-calendar-card{padding:15px}.ac-heading h2{font-size:20px!important}.ac-summary{width:100%}.ac-summary span{flex:1}}
 @media(max-width:520px){.ac-day-dialog{padding:15px;gap:13px}.ac-day-metrics{grid-template-columns:1fr}.ac-footer{align-items:flex-start}.ac-heading{margin-bottom:15px}}
 @media(prefers-reduced-motion:reduce){.ac-calendar-card *{transition:none!important}}
+
+/* Impulse Analytics calendar: HIG-style grouped data, visible state and legible
+   day details in light mode. Portal-based tooltip and dialog need root selectors. */
+:root[data-theme="light"] .analytics-v3 .ac-calendar-card {
+  --ac-bg:#fff;
+  --ac-line:#dce6ed;
+  color:#243d50;
+  background:#fff;
+  background-image:none;
+  border-color:var(--ac-line);
+  box-shadow:none;
+}
+:root[data-theme="light"] .analytics-v3 .ac-heading h2 {
+  color:#203b50!important;
+}
+:root[data-theme="light"] .analytics-v3 .ac-heading h2 svg,
+:root[data-theme="light"] .analytics-v3 .ac-eyebrow {color:#147e85}
+:root[data-theme="light"] .analytics-v3 :is(.ac-heading p,.ac-weekdays,.ac-month-name,.ac-footer p,.ac-legend) {color:#536d7e}
+:root[data-theme="light"] .analytics-v3 .ac-summary span {
+  color:#456278;
+  background:#f4f8fb;
+  border-color:#d8e5ed;
+}
+:root[data-theme="light"] .analytics-v3 .ac-summary strong {color:#126e7a}
+:root[data-theme="light"] .analytics-v3 :is(.ac-day.ac-level-0,.ac-legend .ac-level-0) {
+  background:#e6edf3;
+  border-color:#d2e0e8;
+}
+:root[data-theme="light"] .analytics-v3 .ac-day.ac-unknown {
+  background:repeating-linear-gradient(45deg,#edf1f5,#edf1f5 3px,#e1e9ef 3px,#e1e9ef 6px);
+  border-color:#cbd9e2;
+}
+:root[data-theme="light"] .analytics-v3 :is(.ac-day.ac-level-4,.ac-legend .ac-level-4) {box-shadow:none}
+:root[data-theme="light"] .analytics-v3 .ac-day:focus-visible {outline-color:#167a96}
+:root[data-theme="light"] .ac-hover-card {
+  color:#243f53;
+  background:#fff;
+  border-color:#d8e4ec;
+  box-shadow:0 12px 30px #15334e25;
+}
+:root[data-theme="light"] .ac-hover-card span {color:#0b727b}
+:root[data-theme="light"] .ac-hover-card small {color:#486477}
+:root[data-theme="light"] .ac-hover-card em {color:#647a89}
+:root[data-theme="light"] .ac-day-dialog {
+  color:#234056;
+  background:#fff;
+  background-image:none;
+  border-color:#d9e6ee;
+  box-shadow:0 24px 60px #162e4929;
+}
+:root[data-theme="light"] .ac-day-dialog h2 {
+  color:#1c384e!important;
+}
+:root[data-theme="light"] .ac-close {
+  color:#365970;
+  background:#f0f5f8;
+  border-color:#d8e5ed;
+}
+:root[data-theme="light"] .ac-day-metrics>div,
+:root[data-theme="light"] .ac-day-events article {
+  color:#233f53;
+  background:#f7fafc;
+  border-color:#dce7ee;
+}
+:root[data-theme="light"] .ac-day-metrics strong {color:#116f79}
+:root[data-theme="light"] .ac-day-metrics span,
+:root[data-theme="light"] .ac-day-events time,
+:root[data-theme="light"] .ac-day-events article small,
+:root[data-theme="light"] .ac-day-note,
+:root[data-theme="light"] .ac-empty-day {
+  color:#526b7e;
+}
+:root[data-theme="light"] .ac-day-events h3,
+:root[data-theme="light"] .ac-day-events article strong {color:#254156}
+:root[data-theme="light"] .ac-day-events button {
+  color:#126a81;
+  background:#eaf4f7;
+  border-color:#cce1e8;
+}
+:root[data-theme="light"] .ac-event-kind {
+  color:#0e6e63;
+  background:#e8f6f1;
+  border-color:#badcd2;
+}
+:root[data-theme="light"] .ac-kind-projects {color:#245da2;background:#e9f1fd}
+:root[data-theme="light"] .ac-kind-practice {color:#67489e;background:#f0ecfa}
+:root[data-theme="light"] .ac-kind-community {color:#985070;background:#fbedf3}
+:root[data-theme="light"] .ac-kind-certification {color:#92601d;background:#fff5df}
+:root[data-theme="light"] .ac-close:hover,
+:root[data-theme="light"] .ac-day-events button:hover {color:#1d536f;background:#e1eff5}
+:root[data-theme="light"] .ac-day-dialog button:focus-visible {outline-color:#167aa0}
