@@ -19,7 +19,8 @@ const work = items.map(item => ({
   task: { id: item.taskId, title: item.title, status: item.status, competency_tags: ["Аналитика", "Python"] },
   terms: { version: 1, deadline_at: item.deadline, deliverable: "Рабочий прототип", acceptance_criteria: ["Код", "Демонстрация", "Отчёт"] },
   contributions: [{ id: "contribution-1", version: 1, personal_summary: "Подготовлен модуль рекомендаций", artifact_keys: ["report"], status: "reported" }],
-  decisions: [], allowed_artifacts: ["report", "git-commit"],
+  decisions: [{ id: "review-1", contribution_id: "contribution-1", decision: "accepted", reason: "Результат проверен", deadline_at: null }],
+  allowed_artifacts: ["report", "git-commit"],
 }));
 const tabs = ["Обзор", "Задачи", "Прогресс", "Мой вклад", "Команда", "Бонусы и выгоды"] as const;
 
@@ -123,6 +124,8 @@ for (const width of [320, 390, 1440]) {
       if (name === "Задачи") {
         await expectLight(page, ".mpv2 .mp-ref-task-row");
         await expectContrast(page, ".mp-ref-task-copy strong", ".mp-ref-task-row");
+        await expect(dialog.locator(".mp-ref-activity > span")).toContainText(["Ревью"]);
+        await expectContrast(page, ".mp-ref-activity > span", ".mp-ref-card");
       }
       if (name === "Прогресс") {
         await expectLight(page, ".mpv2 .mp-ref-skill");
