@@ -1188,3 +1188,219 @@
   .mp-panel-inset > p, .mp-mini-reward small { color: var(--mp-list-muted); }
   .mp-mini-reward strong { color: var(--mp-list-text); }
 }
+
+
+/* My Projects: light appearance for the full-screen project detail.
+   Previous list/card fixes do not cover this independently styled modal.
+   Keep geometric layout, cover artwork and all non-light palettes unchanged. */
+:root[data-theme="light"] .mpv2 .mp-detail[data-project-screen="detail"] {
+  --mp-ref-ink: #173047;
+  --mp-ref-muted: #536b80;
+  --mp-ref-border: #d7e2ee;
+  --mp-ref-panel: #fff;
+  --mp-detail-subtle: #f3f7fb;
+  --mp-detail-active: #e8f2ff;
+  --mp-detail-accent: #095eae;
+
+  color: var(--mp-ref-ink);
+  background: #f7fafc;
+  border-color: var(--mp-ref-border);
+  scrollbar-color: #afc5d9 #f5f8fc;
+  box-shadow: 0 0 0 100vmax rgb(245 248 252 / 96%), 0 12px 44px rgb(22 45 71 / 14%);
+
+  .mp-ref-hero {
+    background: #eff5fb;
+    border-color: var(--mp-ref-border);
+  }
+  .mp-ref-hero-art { opacity: .14; }
+  .mp-ref-hero-art::after { opacity: .25; }
+  .mp-ref-hero h1,
+  .mp-ref-kicker strong { color: var(--mp-ref-ink); }
+  .mp-ref-hero p { color: var(--mp-ref-muted); }
+  .mp-ref-kicker span,
+  .mp-ref-hero .mp-chip-row em {
+    color: #075b53;
+    background: #d8f3eb;
+    border-color: #b2ddce;
+  }
+  .mp-ref-close {
+    color: var(--mp-ref-ink);
+    background: #fff;
+    border-color: #b7cde1;
+  }
+  .mp-ref-close:hover {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+  }
+
+  .mp-ref-tabs {
+    background: #fff;
+    border-color: var(--mp-ref-border);
+  }
+  .mp-ref-tabs button,
+  .mp-ref-tabs button svg { color: var(--mp-ref-muted); }
+  .mp-ref-tabs button:is(:hover,[aria-selected="true"]) {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+    border-color: #9fc3e9;
+    box-shadow: inset 0 -3px #438fd5;
+  }
+  .mp-ref-tabs button[aria-selected="true"] svg { color: var(--mp-detail-accent); }
+
+  .mp-ref-card,
+  .mp-detail-panel,
+  .mp-ref-tip {
+    color: var(--mp-ref-ink);
+    background: #fff;
+    border-color: var(--mp-ref-border);
+    box-shadow: none;
+  }
+  .mp-ref-title,
+  .mp-ref-card-head h2,
+  .mp-ref-card-head > strong,
+  .mp-ref-subtitle,
+  .mp-detail-panel h2,
+  .mp-detail-panel > header h2,
+  .mp-ref-tip strong {
+    color: var(--mp-ref-ink);
+  }
+  .mp-ref-card-head h2 span,
+  .mp-ref-card-head > small,
+  .mp-ref-muted,
+  .mp-ref-card p.mp-ref-muted,
+  .mp-ref-empty,
+  .mp-ref-tip small,
+  .mp-ref-feature p,
+  .mp-detail-panel p,
+  .mp-panel-caption {
+    color: var(--mp-ref-muted);
+  }
+  .mp-ref-title-icon,
+  .mp-ref-blue-square {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+  }
+  .mp-ref-pill,
+  .mp-ref-outline,
+  .mp-ref-empty button,
+  .mp-ref-tip button,
+  .mp-ref-filters button {
+    color: var(--mp-detail-accent);
+    background: #f1f7fe;
+    border-color: #bdd3e9;
+  }
+  .mp-ref-filters button:is(.is-active,:hover),
+  .mp-ref-task-row:is(.is-selected,:hover) {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+    border-color: #90bce5;
+  }
+  .mp-ref-task-row,
+  .mp-ref-requirements > div,
+  .mp-ref-skill,
+  .mp-ref-responsibility > div,
+  .mp-ref-rewards button,
+  .mp-ref-contrib-metrics > div,
+  .mp-ref-contrib-head,
+  .mp-overview-next,
+  .mp-ref-chart-empty,
+  .mp-history-item {
+    color: var(--mp-ref-ink);
+    background: var(--mp-detail-subtle);
+    border-color: var(--mp-ref-border);
+    box-shadow: none;
+  }
+  .mp-ref-task-copy strong,
+  .mp-ref-task-state b,
+  .mp-ref-task-copy em,
+  .mp-ref-skill strong,
+  .mp-ref-stage strong,
+  .mp-ref-person strong,
+  .mp-ref-responsibility b,
+  .mp-ref-team-count strong,
+  .mp-ref-rewards button strong,
+  .mp-ref-contrib-head > h2,
+  .mp-ref-contrib-metrics strong,
+  .mp-overview-next > header h2,
+  .mp-overview-next-body strong,
+  .mp-ref-evidence-list > div strong,
+  .mp-history-item strong {
+    color: var(--mp-ref-ink);
+  }
+  .mp-ref-task-copy small,
+  .mp-ref-task-state b,
+  .mp-ref-skill small,
+  .mp-ref-stage small,
+  .mp-ref-person small,
+  .mp-ref-responsibility small,
+  .mp-ref-team-count small,
+  .mp-ref-team-count p,
+  .mp-ref-rewards button small,
+  .mp-ref-reward-when,
+  .mp-ref-contrib-head > h2 span,
+  .mp-ref-contrib-metrics small,
+  .mp-ref-progress-facts p,
+  .mp-ref-activity,
+  .mp-ref-evidence-list > div small,
+  .mp-overview-next-body p {
+    color: var(--mp-ref-muted);
+  }
+  .mp-ref-task-copy em,
+  .mp-ref-task-state b,
+  .mp-ref-index,
+  .mp-ref-stage > span,
+  .mp-ref-person > button {
+    background: var(--mp-detail-active);
+    border-color: #b6d2e9;
+    color: var(--mp-detail-accent);
+  }
+  .mp-ref-index.is-done,
+  .mp-ref-stage > span.is-done {
+    background: #d6f4e8;
+    border-color: #a8dccc;
+    color: #08674f;
+  }
+  .mp-ref-separator,
+  .mp-ref-bar,
+  .mp-ref-stage,
+  .mp-ref-person,
+  .mp-ref-activity,
+  .mp-ref-evidence-list > div,
+  .mp-detail-footer {
+    border-color: var(--mp-ref-border);
+  }
+  .mp-ref-bar,
+  .mp-ref-task-state i::after { background: #dce9f4; }
+  .mp-ref-ring::before { background: #fff; }
+  .mp-ref-ring strong { color: var(--mp-ref-ink); }
+  .mp-ref-chart-empty span { color: var(--mp-ref-muted); }
+  .mp-ref-rewards button:is(:hover,.is-selected) {
+    background: var(--mp-detail-active);
+    border-color: #91bde3;
+  }
+  .mp-ref-reward-note { color: #075b53; background: #e9faf4; border-color: #b4ded0; }
+  .mp-ref-contrib-head > h2 { color: var(--mp-ref-ink); }
+  .mp-ref-contrib-metrics > div { background: #fff; }
+  .mp-ref-accent { color: #086a64 !important; }
+
+  .mp-contribute-form label { color: var(--mp-ref-ink); }
+  .mp-contribute-form :is(input,textarea,select) {
+    color: var(--mp-ref-ink);
+    background: #fff;
+    border-color: #b9cede;
+    color-scheme: light;
+  }
+  .mp-contribute-form :is(input,textarea)::placeholder { color: var(--mp-ref-muted); }
+  .mp-overview-next-body li {
+    color: var(--mp-ref-muted);
+    background: #fff;
+    border-color: var(--mp-ref-border);
+  }
+  .mp-overview-next-count { background: #d7f4e9; color: #08674f; }
+  .mp-detail-panel .mp-secondary,
+  .mp-detail-footer .mp-secondary {
+    color: var(--mp-detail-accent);
+    background: #fff;
+    border-color: #b9cfe6;
+  }
+}
