@@ -5,12 +5,18 @@ on:
     paths:
       - "frontend/src/features/participant-practice-navigation/**"
       - "frontend/e2e/participant-practice-apple-20261116.spec.ts"
+      - "frontend/src/features/task-catalog-v2/page.tsx"
+      - "frontend/src/features/task-catalog-v2/catalog-v2.scss"
+      - "frontend/e2e/task-catalog-v2.spec.ts"
       - ".github/workflows/practice-apple-ui-20261116.yml"
   push:
     branches: [main]
     paths:
       - "frontend/src/features/participant-practice-navigation/**"
       - "frontend/e2e/participant-practice-apple-20261116.spec.ts"
+      - "frontend/src/features/task-catalog-v2/page.tsx"
+      - "frontend/src/features/task-catalog-v2/catalog-v2.scss"
+      - "frontend/e2e/task-catalog-v2.spec.ts"
       - ".github/workflows/practice-apple-ui-20261116.yml"
 
 permissions:
@@ -38,7 +44,7 @@ jobs:
       - name: TypeScript
         run: npm run typecheck
       - name: ESLint — changed React and E2E
-        run: npx eslint src/features/participant-practice-navigation/PracticeNavigation.tsx src/features/participant-practice-navigation/PracticeNavigation.test.tsx e2e/participant-practice-apple-20261116.spec.ts --max-warnings 0
+        run: npx eslint src/features/participant-practice-navigation/PracticeNavigation.tsx src/features/participant-practice-navigation/PracticeNavigation.test.tsx src/features/task-catalog-v2/page.tsx e2e/participant-practice-apple-20261116.spec.ts e2e/task-catalog-v2.spec.ts --max-warnings 0
       - name: Unit tests
         run: npm test -- src/features/participant-practice-navigation/PracticeNavigation.test.tsx
       - name: Production build
@@ -58,7 +64,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
       - name: Original task catalog consent and filter regression
-        run: npx playwright test e2e/task-catalog-v2.spec.ts --project=chromium --workers=1 --trace=off --grep "catalog filters, view parity and one idempotent apply|stale terms require a new version and fresh consent"
+        run: npx playwright test e2e/task-catalog-v2.spec.ts --project=chromium --workers=1 --trace=off --grep "catalog filters, view parity and one idempotent apply|stale terms require a new version and fresh consent|task workflow tabs remain accessible"
       - name: Upload practice screenshots and errors
         if: always()
         uses: actions/upload-artifact@v4
