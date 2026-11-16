@@ -218,6 +218,13 @@ function TaskSummary(props: {
   );
 }
 
+const TASK_WORKFLOW_TABS = [
+  ["overview", "О задаче"],
+  ["criteria", "Критерии"],
+  ["solution", "Решение"],
+  ["review", "Результат"],
+] as const;
+
 function TaskDetail(props: {
   item: CatalogItem;
   withdrawPending: boolean;
@@ -275,16 +282,40 @@ function TaskDetail(props: {
         <section className="catalog-v2-stage-section catalog-v2-workflow-section">
           <div className="catalog-v2-section-heading"><h3>Работа над задачей</h3><ParticipantHelpTrigger topicId="task-brief" label="Как устроена задача" /></div>
           <div className="catalog-v2-workflow-tabs" role="tablist" aria-label="Разделы задачи">
-            {([
-              ["overview", "О задаче"],
-              ["criteria", "Критерии"],
-              ["solution", "Решение"],
-              ["review", "Результат"],
-            ] as const).map(([key, label]) => (
-              <button key={key} type="button" role="tab" id={`catalog-tab-${key}`} aria-controls="catalog-workflow-panel" aria-selected={detailTab === key} className={detailTab === key ? "is-active" : ""} onClick={() => { setDetailTab(key); }}>{label}</button>
+            {TASK_WORKFLOW_TABS.map(([key, label], index) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                id={`catalog-tab-${key}`}
+                aria-controls="catalog-workflow-panel"
+                aria-selected={detailTab === key}
+                tabIndex={detailTab === key ? 0 : -1}
+                className={detailTab === key ? "is-active" : ""}
+                onClick={() => { setDetailTab(key); }}
+                onKeyDown={(event) => {
+                  let next = index;
+                  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+                    next = (index + 1) % TASK_WORKFLOW_TABS.length;
+                  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+                    next = (index - 1 + TASK_WORKFLOW_TABS.length) % TASK_WORKFLOW_TABS.length;
+                  } else if (event.key === "Home") {
+                    next = 0;
+                  } else if (event.key === "End") {
+                    next = TASK_WORKFLOW_TABS.length - 1;
+                  } else {
+                    return;
+                  }
+                  event.preventDefault();
+                  const nextTab = TASK_WORKFLOW_TABS[next];
+                  if (!nextTab) return;
+                  setDetailTab(nextTab[0]);
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+                }}
+              >{label}</button>
             ))}
           </div>
-          <div id="catalog-workflow-panel" role="tabpanel" aria-labelledby={`catalog-tab-${detailTab}`} className="catalog-v2-workflow-panel">
+          <div id="catalog-workflow-panel" role="tabpanel" tabIndex={0} aria-labelledby={`catalog-tab-${detailTab}`} className="catalog-v2-workflow-panel">
             {detailTab === "overview" && <>
               <h4>Задача и ожидаемый результат</h4>
               <p>{item.brief_summary}</p>
