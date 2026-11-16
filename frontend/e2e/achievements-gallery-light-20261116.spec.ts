@@ -27,11 +27,20 @@ for(const mode of ["light","blue","midnight"] as const)for(const width of [320,3
       else expect(luminance(x.bg),selector).toBeLessThan(.14);
       expect(x.left).toBeGreaterThanOrEqual(-2);expect(x.right).toBeLessThanOrEqual(width+2);
     }
-    if(mode==="light"){const x=await surface(page,".ach-gallery-card"),y=await surface(page,".ach-gallery-card h3");expect(contrast(x.bg,y.fg)).toBeGreaterThanOrEqual(4.5);}
+    if(mode==="light"){
+      const x=await surface(page,".ach-gallery-card"),y=await surface(page,".ach-gallery-card h3");
+      expect(contrast(x.bg,y.fg),"Card title must meet WCAG AA").toBeGreaterThanOrEqual(4.5);
+      const art=await surface(page,".ach-gallery-card--project .ach-gallery-art");
+      expect(luminance(art.bg),"Art canvas must be pale, not navy").toBeGreaterThan(.65);
+    }
     await page.getByRole("button",{name:"Подробнее: Проверенный проект"}).click();
     const drawer=page.getByRole("dialog",{name:"Подробности достижения"});await expect(drawer).toBeVisible();
     const d=await surface(page,".ach-gallery-drawer");
-    if(mode==="light")expect(d.bg).toBe("rgb(255, 255, 255)");
+    if(mode==="light"){
+      expect(d.bg).toBe("rgb(255, 255, 255)");
+      const art=await surface(page,".ach-gallery-drawer-art");
+      expect(luminance(art.bg),"Detail art canvas must be pale").toBeGreaterThan(.65);
+    }
     else expect(luminance(d.bg)).toBeLessThan(.14);
     await drawer.getByRole("tab",{name:"Материалы"}).click();
     await expect(drawer.getByRole("tabpanel")).toBeVisible();
