@@ -4,12 +4,18 @@ on:
   pull_request:
     paths:
       - "frontend/src/features/participant-development-hub/development-hub.scss"
+      - "frontend/src/features/participant-development-hub/DevelopmentHub.tsx"
+      - "frontend/src/features/participant-development-hub/DevelopmentHub.test.tsx"
+      - "frontend/e2e/development-compact-20261116.spec.ts"
       - "frontend/e2e/development-mobile-touch.spec.ts"
       - ".github/workflows/development-mobile-touch-qa.yml"
   push:
     branches: [main]
     paths:
       - "frontend/src/features/participant-development-hub/development-hub.scss"
+      - "frontend/src/features/participant-development-hub/DevelopmentHub.tsx"
+      - "frontend/src/features/participant-development-hub/DevelopmentHub.test.tsx"
+      - "frontend/e2e/development-compact-20261116.spec.ts"
       - "frontend/e2e/development-mobile-touch.spec.ts"
       - ".github/workflows/development-mobile-touch-qa.yml"
 
@@ -38,12 +44,14 @@ jobs:
         run: |
           npm run lint
           npm run typecheck
+      - name: Verify Development component behavior
+        run: npm test -- src/features/participant-development-hub/DevelopmentHub.test.tsx
       - name: Build production frontend
         run: npm run build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Verify mobile Development course actions
-        run: npx playwright test e2e/development-mobile-touch.spec.ts e2e/participant-development-hub.spec.ts --project=chromium --workers=1
+        run: npx playwright test e2e/development-mobile-touch.spec.ts e2e/development-compact-20261116.spec.ts e2e/participant-development-hub.spec.ts --project=chromium --workers=1
       - name: Upload mobile screenshots and traces
         if: always()
         uses: actions/upload-artifact@v4
