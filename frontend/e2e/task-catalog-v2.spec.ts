@@ -302,3 +302,68 @@ test("mobile collapses secondary filters and reveals opened task detail", async 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   expect(overflow).toBe(false);
 });
+
+
+/* task workflow tabs preserve roving keyboard focus and readable touch targets. */
+for (const mode of ["light", "blue", "midnight"] as const) {
+  for (const width of [320, 390, 1440]) {
+    test(`task workflow tabs remain accessible in ${mode} at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((value: string) => {
+        localStorage.setItem("impulse-visual-mode", value);
+        localStorage.setItem("impulse-theme", value === "light" ? "light" : "dark");
+      }, mode);
+      await openCatalog(page);
+      await page.getByRole("button", { name: "Подробнее" }).first().click();
+      const detail = page.locator(".catalog-v2-detail");
+      await expect(detail).toBeVisible();
+      const tablist = detail.getByRole("tablist", { name: "Разделы задачи" });
+      await expect(tablist.getByRole("tab")).toHaveCount(4);
+      const overview = tablist.getByRole("tab", { name: "О задаче" });
+      const criteria = tablist.getByRole("tab", { name: "Критерии" });
+      const result = tablist.getByRole("tab", { name: "Результат" });
+
+      await expect(overview).toHaveAttribute("aria-selected", "true");
+      await expect(overview).toHaveAttribute("tabindex", "0");
+      await overview.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(criteria).toHaveAttribute("aria-selected", "true");
+      await expect(criteria).toHaveAttribute("tabindex", "0");
+      await expect(criteria).toBeFocused();
+      await expect(page.getByRole("tabpanel", { name: "Критерии" })).toBeVisible();
+      await expect(overview).toHaveAttribute("tabindex", "-1");
+
+      await page.keyboard.press("End");
+      await expect(result).toBeFocused();
+      await expect(result).toHaveAttribute("aria-selected", "true");
+      await page.keyboard.press("Home");
+      await expect(overview).toBeFocused();
+      await page.keyboard.press("ArrowLeft");
+      await expect(result).toBeFocused();
+      await page.keyboard.press("ArrowDown");
+      await expect(overview).toBeFocused();
+
+      const metrics = await detail.evaluate((node) => {
+        const tabs = [...node.querySelectorAll<HTMLButtonElement>('.catalog-v2-workflow-tabs [role="tab"]')];
+        const buttons = [...node.querySelectorAll<HTMLButtonElement>(".catalog-v2-workflow-action")];
+        const disclosure = node.querySelector<HTMLElement>(".catalog-v2-workflow-extra summary");
+        return {
+          tabHeights: tabs.map((tab) => tab.getBoundingClientRect().height),
+          actionHeights: buttons.map((button) => button.getBoundingClientRect().height),
+          disclosureHeight: disclosure?.getBoundingClientRect().height ?? 44,
+          pageWidth: document.documentElement.scrollWidth,
+          viewportWidth: document.documentElement.clientWidth,
+        };
+      });
+      expect(Math.min(...metrics.tabHeights)).toBeGreaterThanOrEqual(44);
+      expect(metrics.actionHeights.every((height) => height >= 44)).toBe(true);
+      expect(metrics.disclosureHeight).toBeGreaterThanOrEqual(44);
+      expect(metrics.pageWidth - metrics.viewportWidth).toBeLessThanOrEqual(2);
+
+      if (mode === "light") {
+        await expect(overview).toHaveCSS("background-color", "rgb(234, 243, 255)");
+        await expect(detail.locator(".catalog-v2-workflow-panel")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+      }
+    });
+  }
+}
