@@ -87,3 +87,154 @@
 .mpc-previous-files>a>span{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .mpc-previous-files>a>small{flex:none;color:#93b9ca}
 .mpc-previous-files>a:hover,.mpc-previous-files>a:focus-visible{border-color:#2af5d6;background:#0b3d50}
+
+/* Checkpoint solution dialog: the light Impulse mode uses calm content surfaces
+   instead of the midnight-only colors. The dimmed overlay remains modal chrome.
+   No dark/blue rules and no submission controls or state are changed. */
+html[data-theme="light"] .mpc-backdrop {color:#1d3448}
+html[data-theme="light"] .mpc-dialog {
+  border-color:#d7e3ed;
+  background:#fff;
+  box-shadow:0 22px 75px #112b4933;
+}
+html[data-theme="light"] .mpc-header {
+  border-bottom-color:#e2e9f0;
+  background:#f9fbfd;
+}
+html[data-theme="light"] .mpc-kicker {color:#0b716d}
+html[data-theme="light"] .mpc-indicator {
+  color:#116449;
+  background:#e9f7f1;
+  border-color:#b1d9c6;
+}
+html[data-theme="light"] .mpc-heading h2 {color:#193348}
+html[data-theme="light"] .mpc-heading p {color:#53697b}
+html[data-theme="light"] .mpc-close {
+  color:#355870;
+  background:#f1f6fa;
+  border-color:#d4e1eb;
+}
+html[data-theme="light"] .mpc-close:hover,
+html[data-theme="light"] .mpc-close:focus-visible {
+  color:#1b4960;
+  background:#e6f1f5;
+  border-color:#9ccbcf;
+}
+html[data-theme="light"] .mpc-scroll {scrollbar-color:#bdcddc #f8fafc}
+html[data-theme="light"] .mpc-card {
+  color:#243d50;
+  border-color:#dae5ed;
+  background:#f8fafc;
+  box-shadow:none;
+}
+html[data-theme="light"] .mpc-submission {border-color:#b8d9d7}
+html[data-theme="light"] .mpc-card-heading h3,
+html[data-theme="light"] .mpc-action-lead,
+html[data-theme="light"] .mpc-guide-list strong,
+html[data-theme="light"] .mpc-previous-files>strong {color:#18384e}
+html[data-theme="light"] .mpc-icon {
+  color:#0a7f82;
+  background:#e6f4f4;
+}
+html[data-theme="light"] .mpc-description,
+html[data-theme="light"] .mpc-muted,
+html[data-theme="light"] .mpc-guide-list small,
+html[data-theme="light"] .mpc-previous-files>a>small {color:#52697d}
+html[data-theme="light"] .mpc-outcome {
+  color:#1d3b50;
+  background:#edf6f9;
+  border-color:#cbdfe9;
+}
+html[data-theme="light"] .mpc-outcome strong {color:#0b716d}
+html[data-theme="light"] .mpc-outcome span {color:#284457}
+html[data-theme="light"] .mpc-criteria li {
+  color:#284459;
+  background:#fff;
+  border-color:#dae5ed;
+}
+html[data-theme="light"] .mpc-criteria li span,
+html[data-theme="light"] .mpc-guide-list b {
+  color:#0b716d;
+  background:#e6f4f2;
+  border-color:#c4dbd9;
+}
+html[data-theme="light"] .mpc-form label,
+html[data-theme="light"] .mpc-field-title {color:#213d53}
+html[data-theme="light"] .mpc-form label small,
+html[data-theme="light"] .mpc-field-title small {color:#536b7d}
+html[data-theme="light"] .mpc-form em {color:#0b716d}
+html[data-theme="light"] .mpc-form :is(textarea,input,select) {
+  color:#1c364c;
+  background:#fff;
+  border-color:#c4d4e0;
+}
+html[data-theme="light"] .mpc-form :is(textarea,input,select)::placeholder {color:#687d90}
+html[data-theme="light"] .mpc-form :is(textarea,input,select):focus {
+  border-color:#147f89;
+  box-shadow:0 0 0 3px #147f891e;
+}
+html[data-theme="light"] .mpc-dropzone {
+  background:#f1f7fb;
+  border-color:#9cbfd0;
+}
+html[data-theme="light"] .mpc-dropzone:is(:hover,.is-dragging,:focus-visible) {
+  background:#e7f3f7;
+  border-color:#258d91;
+}
+html[data-theme="light"] .mpc-dropzone :is(strong,span) {color:#28516b}
+html[data-theme="light"] .mpc-dropzone :is(svg,u) {color:#0d7c85}
+html[data-theme="light"] .mpc-dropzone small,
+html[data-theme="light"] .mpc-security {color:#526b7d}
+html[data-theme="light"] .mpc-files>div {
+  color:#253e52;
+  background:#fff;
+  border-color:#d6e2ea;
+}
+html[data-theme="light"] .mpc-files small {color:#587082}
+html[data-theme="light"] .mpc-files button {
+  color:#536b7c;
+  background:#f5f8fa;
+  border-color:#d4dfe8;
+}
+html[data-theme="light"] .mpc-restricted,
+html[data-theme="light"] .mpc-submitted {
+  background:#edf6f9;
+  border-color:#c6dfe7;
+}
+html[data-theme="light"] .mpc-restricted>strong,
+html[data-theme="light"] .mpc-submitted>strong {color:#1b4054}
+html[data-theme="light"] .mpc-restricted>p,
+html[data-theme="light"] .mpc-submitted>p {color:#52697c}
+html[data-theme="light"] .mpc-restricted>small {color:#0b716d}
+html[data-theme="light"] .mpc-submitted button {
+  color:#0d644f;
+  background:#e1f6ea;
+  border-color:#aad5bf;
+}
+html[data-theme="light"] .mpc-error {
+  color:#952c46;
+  background:#fff0f2;
+  border-color:#edb9c4;
+}
+html[data-theme="light"] .mpc-facts>div:not(.mpc-card-heading) {border-bottom-color:#dce7ed}
+html[data-theme="light"] .mpc-facts>div:not(.mpc-card-heading)>span,
+html[data-theme="light"] .mpc-facts p {color:#526a7d}
+html[data-theme="light"] .mpc-facts strong {color:#213f55}
+html[data-theme="light"] .mpc-footer {border-top-color:#e2e9ef}
+html[data-theme="light"] .mpc-footer>span {color:#556c7d}
+html[data-theme="light"] .mpc-footer button {
+  color:#2b536a;
+  background:#f3f7fa;
+  border-color:#d2e0e9;
+}
+html[data-theme="light"] .mpc-previous-files>a {
+  color:#106d72;
+  background:#fff;
+  border-color:#d1e1e8;
+}
+html[data-theme="light"] .mpc-previous-files>a:hover,
+html[data-theme="light"] .mpc-previous-files>a:focus-visible {
+  color:#0b716d;
+  background:#edf7f7;
+  border-color:#80bcb9;
+}
