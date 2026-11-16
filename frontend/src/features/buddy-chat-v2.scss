@@ -152,3 +152,145 @@ color:var(--b2-fg);font:inherit;isolation:isolate;box-shadow:0 18px 45px #000000
 :root[data-theme="light"] .buddy2 :is(.buddy2-live,.buddy2-live-result,.buddy2-live-metrics>div){background:#eaf5fb;color:#19465c;border-color:#bfd9e6}
 :root[data-theme="light"] .buddy2 :is(.buddy2-live-record strong,.buddy2-live-heading,.buddy2-live-note strong){color:#103952}
 :root[data-theme="light"] .buddy2 .buddy2-live-metrics span{color:#48677b}
+
+/* Actual AI-Buddy: Apple HIG Messages / Inputs / Mobile local reference packs.
+   The previous light theme changed parent panels but left white labels and
+   midnight gradients in the conversation, history, suggestions and composer.
+   Keep source-backed messages and blue/midnight modes untouched. */
+:root[data-theme="light"] .buddy-page .buddy2 {
+  --b2-dark:#f7fafc;
+  --b2-panel:#fff;
+  --b2-edge:#d8e5ee;
+  --b2-cyan:#176f86;
+  --b2-fg:#223b51;
+  --b2-dim:#536c7e;
+  color:var(--b2-fg);
+  background:#fff;
+  border-color:#d8e5ee;
+  box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-sidebar,.buddy2-main,.buddy2-bottom) {
+  color:#243f55;
+  background:#fff;
+  background-image:none;
+  border-color:#dce7ee;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-sidebar {background:#f4f8fa}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-sidehead h2,.buddy2-history-head,.buddy2-sidebottom strong,.buddy2-empty-chat strong,.buddy2-section-label,.buddy2-bubble strong,.buddy2-file strong,.buddy2-course-copy>strong,.buddy2-analysis-grid strong) {
+  color:#233f54;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-sidehead p,.buddy2-history-head small,.buddy2-dialog-open small,.buddy2-history-empty,.buddy2-sidebottom p,.buddy2-demo-tag,.buddy2-section-label small,.buddy2-file small,.buddy2-course-copy>p,.buddy2-analysis-grid small,.buddy2-composer-note,.buddy2-live-note,.buddy2-live-empty,.buddy2-live-unavailable,.buddy2-live-record small) {
+  color:#526b7d;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-sidehead h2 span {
+  color:#8a6324;background:#fff5df;border-color:#ecddb9;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-bot-logo,.buddy2-sideicon,.buddy2-empty-chat-icon,.buddy2-avatar,.buddy2-analysis-icon) {
+  color:#277e94;background:#e8f5f8;background-image:none;border-color:#cce2e8;box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-dialog,.buddy2-sidebottom,.buddy2-empty-chat,.buddy2-file,.buddy2-course,.buddy2-analysis-grid button,.buddy2-grounding,.buddy2-live,.buddy2-live-result,.buddy2-live-metrics>div) {
+  color:#29475c;
+  background:#fff;
+  background-image:none;
+  border-color:#d6e4ed;
+  box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-dialog.active {
+  background:#e8f3f9;
+  border-color:#abcbdc;
+  box-shadow:inset 3px 0 #217f9a;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-dialog-open {color:#2a465a}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-dialog-open>svg,
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-show-more {color:#207f97}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-dialog-remove {color:#536c7e}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-new {
+  color:#176b83;
+  background:#e6f3f8;
+  background-image:none;
+  border-color:#b9d7e1;
+  box-shadow:none;
+  min-height:44px;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-hero {
+  color:#243f57;
+  background:#f0f6fc;
+  background-image:none;
+  border-color:#d6e5f1;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-hero::after {opacity:0}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-hero h1 {color:#203b55}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-hero h1 span {color:#176c98}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-overline {color:#296d90}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-hero p {color:#526a80}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-hero-close,.buddy2-prompt-row button) {
+  color:#2d526a;
+  background:#fff;
+  background-image:none;
+  border-color:#cddfeb;
+  box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-prompt-row button svg {color:#277b99}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-prompt-row button {min-height:40px}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-bubble {
+  color:#2d4c60;
+  background:#f4f8fb;
+  background-image:none;
+  border-color:#dce8f0;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-message-user .buddy2-bubble,.buddy2-example-user>span) {
+  color:#24465b;
+  background:#e9f3fb;
+  background-image:none;
+  border-color:#c9dfea;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-avatar-user {
+  color:#176b8a;background:#e6f3f9;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-file button {
+  color:#26657f;background:#eef6fa;border-color:#d2e4ec;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-course-copy>small {color:#176f82}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-course-visual,
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-course-visual-1 {
+  color:#4f68aa;
+  background:#edf2fb;
+  background-image:none;
+  box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-no-courses {
+  color:#536b7c;background:#f6f9fb;border-color:#d7e6ef;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-no-courses button,.buddy2-live-record button,.buddy2-live-unavailable button) {
+  color:#176a82;background:#eef7fa;border-color:#c6dfe8;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-grounding {color:#28675f;background:#f0f8f4;border-color:#cde6d7}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-live-metrics strong,
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-live-heading {color:#166d86}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-composer {
+  color:#27465b;
+  background:#fff;
+  border-color:#bed4e3;
+  box-shadow:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-composer input {color:#243f53}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-composer input::placeholder {color:#677f8e;opacity:1}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-attach {color:#456a7f;border-right-color:#dce7ef}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-send {
+  color:#fff!important;background:#176f97;background-image:none;
+}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-notice {color:#71541f}
+:root[data-theme="light"] .buddy-page .buddy2 .buddy2-composer-note span:first-child {color:#276a63}
+:root[data-theme="light"] .buddy-page .buddy2 :is(button,input):focus-visible {
+  outline:2px solid #247eac;outline-offset:2px;
+}
+:root[data-theme="light"] .buddy-page .buddy2 button:hover:not(:disabled) {
+  color:#145e84;
+  border-color:#8bbbd2;
+}
+:root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-dialog-open small,.buddy2-sidehead p,.buddy2-analysis-grid small,.buddy2-composer-note) {font-size:11px}
+@media(max-width:700px){
+  :root[data-theme="light"] .buddy-page .buddy2 :is(.buddy2-hero-close,.buddy2-dialog-remove,.buddy2-file button,.buddy2-attach,.buddy2-send) {min-width:44px;min-height:44px}
+  :root[data-theme="light"] .buddy-page .buddy2 .buddy2-prompt-row button {min-height:44px}
+  :root[data-theme="light"] .buddy-page .buddy2 .buddy2-new {width:100%;max-width:none}
+}

@@ -1,0 +1,60 @@
+name: AI-Buddy light messaging independent QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/buddy-chat-v2.scss"
+      - "frontend/e2e/ai-buddy-light-materials-20261116.spec.ts"
+      - "frontend/playwright.ai-buddy-light-20261116.config.mjs"
+      - ".github/workflows/ai-buddy-light-messaging-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/buddy-chat-v2.scss"
+      - "frontend/e2e/ai-buddy-light-materials-20261116.spec.ts"
+      - ".github/workflows/ai-buddy-light-messaging-qa.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-buddy-light-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ai-buddy-light:
+    name: Light chat/controls AA, 320/390/1440, dark isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact PR commit
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Lint and typecheck
+        run: |
+          npx eslint e2e/ai-buddy-light-materials-20261116.spec.ts playwright.ai-buddy-light-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Production build
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser acceptance
+        run: npx playwright test --config=playwright.ai-buddy-light-20261116.config.mjs --project=chromium
+      - name: Diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-buddy-light-debug
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
