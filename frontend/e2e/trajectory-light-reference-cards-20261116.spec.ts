@@ -35,6 +35,7 @@ const milestones = [
   target_kind: "task",
   target_key: "task-" + String(i + 1),
   completed: i < 3,
+  ...(i === 3 ? { activities: ["Собрать вызов инструмента", "Обработать ошибку вызова"], deliverable: "Рабочий агент" } : {}),
 }));
 const baseline = overviewFixture.next_outcome;
 if (baseline === null) throw new Error("Missing expected next outcome in fixture");
@@ -189,4 +190,17 @@ test("mobile light role details and grade dialogs remain bright", async ({ page 
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(391);
   }
+});
+
+
+test("light milestone activity plan uses readable foreground for actual list items", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.locator(".trajectory-v2-stage").nth(3).click();
+  const activities = page.getByTestId("trajectory-stage-activities");
+  await expect(activities).toBeVisible();
+  await expect(activities.locator("li")).toHaveCount(2);
+  await lightSurface(page, ".trajectory-v2-activities");
+  await contrast(page, ".trajectory-v2-activities li > span:last-child", ".trajectory-v2-activities");
+  await contrast(page, ".trajectory-v2-deliverable strong", ".trajectory-v2-activities");
 });
