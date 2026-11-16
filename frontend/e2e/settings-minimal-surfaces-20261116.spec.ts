@@ -40,9 +40,9 @@ async function openSettings(page: Page, mode: Mode) {
     hr_basic:true,hr_skills:true,hr_projects:true,hr_achievements:true,
     hr_learning:true,hr_contacts:false,
   }}}));
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="settings-synthetic"]').click();
-  await page.goto("/workspace/2");
+  await page.goto("/workspace/2", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".participant-settings.additional-page")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-impulse-visual-mode",mode);
   await expect(page.getByRole("heading",{name:"Настройки",exact:true})).toBeVisible();
