@@ -1404,3 +1404,64 @@
     border-color: #b9cfe6;
   }
 }
+
+
+/* Review follow-up: explicitly colored descendants must not retain white
+   text or neon-cyan links after their containing panels become light. */
+:root[data-theme="light"] .mpv2 .mp-detail[data-project-screen="detail"] {
+  .mp-explain-steps li > strong,
+  .mp-progress-stage strong,
+  .mp-contact-card strong,
+  .mp-permanent-benefit strong,
+  .mp-reward-notice strong,
+  .mp-history-item > strong,
+  .mp-key-facts strong,
+  .mp-outcome-band > strong {
+    color: var(--mp-ref-ink);
+  }
+  .mp-inline-action,
+  .mp-inline-action:hover,
+  .mp-inline-action:focus-visible {
+    color: var(--mp-detail-accent);
+    text-decoration-color: currentColor;
+  }
+  .mp-inline-action:hover,
+  .mp-inline-action:focus-visible {
+    background: var(--mp-detail-active);
+    border-radius: 5px;
+  }
+  .mp-explain-steps li { border-color: var(--mp-ref-border); }
+  .mp-explain-steps li::before,
+  .mp-criteria-list li > span,
+  .mp-overview-checkpoint > span,
+  .mp-progress-stage > span {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+    border-color: #b7d0e6;
+  }
+  .mp-criteria-list li,
+  .mp-overview-checkpoint,
+  .mp-mini-stat {
+    background: var(--mp-detail-subtle);
+    border-color: var(--mp-ref-border);
+  }
+  .mp-criteria-list li > p,
+  .mp-overview-checkpoint strong,
+  .mp-summary-lead { color: var(--mp-ref-ink); }
+  .mp-outcome-band > span,
+  .mp-skill-tags > span,
+  .mp-mini-stat strong { color: #096c69; }
+  .mp-skill-tags > em {
+    color: var(--mp-detail-accent);
+    background: var(--mp-detail-active);
+    border-color: #b7d0e6;
+  }
+  .mp-overview-checkpoint small,
+  .mp-mini-stat span,
+  .mp-progress-stage small,
+  .mp-history-item > small,
+  .mp-contact-card small { color: var(--mp-ref-muted); }
+  .mp-contribute-form :is(input,textarea,select):focus-visible {
+    outline-color: var(--mp-detail-accent);
+  }
+}
