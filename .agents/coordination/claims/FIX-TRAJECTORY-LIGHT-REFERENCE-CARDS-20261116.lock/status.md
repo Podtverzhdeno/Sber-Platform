@@ -22,7 +22,7 @@
 
 
 - source_verified_head: a74f02cfa1825127164228c28e93ab1d9ac7793f
-- independent_hosted_QA: `Trajectory reference light mode QA` run 43883422660 — SUCCESS on Linux, Node 24 npm ci, ESLint, TypeScript, Vite build, Chromium 4/4 PASS, exact source/test/config revision
+- independent_hosted_QA: `Trajectory reference light mode QA` run 43883422660 — SUCCESS on Linux for previous 4/4 E2E head; **5/5 final E2E head requires new GitHub run**
 - local_QA:
   - Chromium 4/4 PASS on 320/390/1440 light plus 390 dark (job d70c0078d0e2423e9a1bc82073d15e6c, latest light CSS).
   - Scoped ESLint PASS, zero warnings (job 45a56748fb9d45c284bbae102102d583).
@@ -31,3 +31,5 @@
 - scope_completed: CSS light-only and QA files. Original dark reference visuals/route data untouched. Canonical/reference geometry unchanged.
 - constraints: tested with synthetic API fixture; actual authenticated production Railway screenshot and independent reviewer sign-off NOT verified. Post-handoff status commit requires new exact-head QA check.
 - final_handoff: independent reviewer to inspect new CSS specificity, screenshots and exact SHA, integrator to merge under AGENTS.md gate and verify Railway deployment.
+
+- final_manual_QA: Scoped ESLint PASS for 5-test revision, job 51ad5d8fbeac45838483f42c36b9d8ad; 5/5 Chromium PASS, job 61d421053da04814ab816ee0ad7190cb. Dark reference and modal routes unchanged.
