@@ -1,0 +1,21 @@
+# FIX-PROJECT-DETAIL-LIGHT-SURFACES-20261116
+
+- task_id: FIX-PROJECT-DETAIL-LIGHT-SURFACES-20261116
+- session_id: gpt6-project-detail-light-20261116
+- status: IN_PROGRESS
+- started_at: 2026-11-16T16:44:00+03:00
+- heartbeat_at: 2026-11-16T16:44:00+03:00
+- base_revision: main at claim creation
+- user_request: continue repairing dark panels on Impulse light theme and open a verified PR; preceding PR #245 merged/production SUCCESS
+- write_scope:
+  - frontend/src/features/my-projects/my-projects.scss (only light-theme detail workspace selector)
+  - frontend/e2e/project-detail-light-theme-20261116.spec.ts (new regression)
+  - frontend/playwright.project-detail-light-20261116.config.mjs (new)
+  - .github/workflows/project-detail-light-20261116-qa.yml (new independent QA gate)
+  - .agents/coordination/claims/FIX-PROJECT-DETAIL-LIGHT-SURFACES-20261116.lock/status.md
+- excluded: page.tsx, existing e2e/tests, shared App.tsx/global theme, backend, project data, auth, Railway deploy until integration verification
+- conflict_review: prior FIX-PROJECTS-LIGHT-LIST-CARD-20261116 merged (PR #245). Only isolated light full-screen detail refinement, no list/card CSS or global layer
+- evidence: my-projects.scss full-screen detail still hardcodes navy #031325/#07192d with #030d19 overlay and light text, and 6 tab panels have dark local backgrounds
+- acceptance: light surface for modal/hero/tab strip, panels across 6 tabs, readable text AA, 320/390/1440 without viewport overflow, keyboard close and navigation preserved; dark mode unchanged
+- test_strategy: synthetic authenticated fixture and Chromium Playwright across six tabs; scoped lint, TS, build, Linux exact PR SHA workflow
+- next_step: implement scoped CSS, run QA, move claim REVIEW
