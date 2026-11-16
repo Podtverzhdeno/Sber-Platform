@@ -10,6 +10,7 @@ const personas = [
 ] as const;
 
 test.beforeEach(async ({ page }) => {
+  let authenticatedActor: Record<string, unknown> | null = null;
   await page.route("**/api/v1/config", async (route) => {
     await route.fulfill({ json: { honor_board_enabled: false } });
   });
@@ -23,7 +24,9 @@ test.beforeEach(async ({ page }) => {
     });
   });
   await page.route("**/api/v1/me", async (route) => {
-    await route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } });
+    await route.fulfill(authenticatedActor
+      ? { json: authenticatedActor }
+      : { status: 401, json: { code: "AUTH_REQUIRED" } });
   });
   await page.route("**/api/v1/auth/demo-login", async (route) => {
     const body = route.request().postDataJSON() as { persona_key: string };
@@ -33,8 +36,7 @@ test.beforeEach(async ({ page }) => {
       return;
     }
     const [key, display_name, role, navigation] = persona;
-    await route.fulfill({
-      json: {
+    authenticatedActor = {
         person_id: "00000000-0000-0000-0000-000000000001",
         display_name,
         active_role: role,
@@ -43,8 +45,8 @@ test.beforeEach(async ({ page }) => {
         consent_scopes: [],
         navigation,
         csrf_token: "csrf-token",
-      },
-    });
+      };
+    await route.fulfill({ json: authenticatedActor });
   });
   await page.route("**/api/v1/development/tracks", async (route) => {
     await route.fulfill({
@@ -96,21 +98,45 @@ test("picker shows one persona per role and disables secondary demo roles", asyn
   }
 });
 
-for (const [key, , , navigation] of personas.filter(([personaKey]) => personaKey === "participant-alex" || personaKey === "customer-roman")) {
-  test(`persona ${key} sees only assigned navigation`, async ({ page }) => {
+for (const [key, displayName, , navigation] of personas.filter(
+  ([personaKey]) => personaKey === "participant-alex" || personaKey === "customer-roman",
+)) {
+  test("persona " + key + " can navigate only server-authorized sections via grouped menu", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await page.locator(`[data-persona="${key}"]`).click();
+    await page.locator('[data-persona="' + key + '"]').click();
+    await expect(page).toHaveURL(/\/workspace\/0(?:[?#]|$)/);
 
-    await expect(page.getByRole("heading", { name: new RegExp(`Добро пожаловать, ${key === "participant-alex" ? "Алекс" : key === "mentor-elena" ? "Елена" : key === "customer-roman" ? "Роман" : key === "manager-olga" ? "Ольга" : key === "hr-nina" ? "Нина" : "Павел"}`) })).toBeVisible();
-    const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
-    await expect(links).toHaveCount(navigation.length);
+    // The minimal shell uses grouped navigation. Old welcome headings are removed.
+    await page.getByRole("button", { name: "Меню профиля" }).click();
+    await expect(page.locator(".owner-profile-identity strong")).toHaveText(displayName);
+    await page.getByRole("button", { name: "Меню профиля" }).click();
+
+    const mobileMenu = page.getByRole("button", { name: "Меню", exact: true });
+    await mobileMenu.click();
+    const navigationTree = page.getByRole("navigation", { name: "Навигация роли" });
+    await expect(navigationTree).toBeVisible();
+
+    // Do not allow UI grouping to grant extra routes or rewrite server-side indices.
+    const allLinks = navigationTree.locator('a[href^="/workspace/"]');
+    await expect(allLinks).toHaveCount(navigation.length);
+    const actualLabels = (await allLinks.allTextContents()).map((label) => label.trim()).sort();
+    expect(actualLabels).toEqual([...navigation].sort());
+
     for (const [index, label] of navigation.entries()) {
-      await expect(links.nth(index)).toHaveAccessibleName(label);
-    }
-    for (const [index, label] of navigation.entries()) {
-      await links.nth(index).click();
-      await expect(page).toHaveURL(new RegExp(`/workspace/${String(index)}$`));
-      await expect(page.getByRole("link", { name: label })).toHaveClass(/active/);
+      if (index > 0) await mobileMenu.click();
+      const link = navigationTree.locator('a[href="/workspace/' + String(index) + '"]');
+      await expect(link).toHaveCount(1);
+      if (!(await link.isVisible())) {
+        const groupToggle = link.locator("xpath=ancestor::ul[1]/preceding-sibling::button");
+        await expect(groupToggle).toHaveAttribute("aria-expanded", "false");
+        await groupToggle.click();
+        await expect(groupToggle).toHaveAttribute("aria-expanded", "true");
+      }
+      await expect(link).toHaveAccessibleName(label);
+      await link.click();
+      await expect(page).toHaveURL(new RegExp("/workspace/" + String(index) + "(?:[?#]|$)"));
+      await expect(mobileMenu).toHaveAttribute("aria-expanded", "false");
     }
   });
 }
