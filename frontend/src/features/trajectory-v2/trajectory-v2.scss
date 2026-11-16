@@ -2647,4 +2647,13 @@
   .trajectory-v2-hero-graphic::before {
     background: linear-gradient(145deg, #a4c8e8, #dfeaf7);
   }
+
+  /* Real StageDetail renders activity labels as plain spans inside list items. */
+  .trajectory-v2-activities li,
+  .trajectory-v2-activities li > span:last-child { color: var(--trj-text); }
+  .trajectory-v2-activities > small { color: var(--trj-muted); }
+  .trajectory-v2-deliverable strong { color: #086e67; }
+  .trajectory-v2-statistics-section strong { color: var(--trj-text); }
+  .trajectory-v2-statistics-section ul { color: var(--trj-muted); }
+  .trajectory-v2-stats-caveat { color: var(--trj-muted) !important; }
 }
