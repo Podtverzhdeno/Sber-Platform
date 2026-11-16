@@ -1,0 +1,58 @@
+name: Persona grouped authorized navigation QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/e2e/personas.spec.ts"
+      - "frontend/playwright.personas-grouped-20261116.config.mjs"
+      - ".github/workflows/personas-grouped-20261116-qa.yml"
+      - ".agents/coordination/claims/CI-PERSONA-GROUPED-NAV-20261116.lock/status.md"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/personas.spec.ts"
+      - "frontend/playwright.personas-grouped-20261116.config.mjs"
+      - ".github/workflows/personas-grouped-20261116-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  grouped-persona-navigation:
+    name: Role authorization — participant + customer, 390px
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact tested revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Lint and typecheck
+        run: |
+          npx eslint e2e/personas.spec.ts playwright.personas-grouped-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Production build
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Authorized grouped navigation E2E
+        run: npx playwright test --config=playwright.personas-grouped-20261116.config.mjs --project=chromium
+      - name: Upload failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: personas-grouped-mobile-QA
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
