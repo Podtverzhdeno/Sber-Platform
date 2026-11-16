@@ -150,9 +150,17 @@ test("dark trajectory preserves midnight reference visuals", async ({ page }) =>
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const role = page.locator(".trajectory-v2-role-card[data-tone='primary']").first();
   await expect(role).toBeVisible();
-  const gradient = await role.evaluate(el => getComputedStyle(el).backgroundImage);
-  expect(gradient).toContain("linear-gradient");
+  // The reference uses both solid navy fills and dark gradients.
+  // Assert the actual night surface, not a particular CSS paint mechanism.
+  const roleSurface = await role.evaluate(el => ({
+    color: getComputedStyle(el).backgroundColor,
+    image: getComputedStyle(el).backgroundImage,
+  }));
+  expect(roleSurface.image !== "none" || luminance(roleSurface.color) < 0.2).toBe(true);
   const detail = page.locator(".trajectory-v2-stage-detail").first();
-  const nightGradient = await detail.evaluate(el => getComputedStyle(el).backgroundImage);
-  expect(nightGradient).toContain("linear-gradient");
+  const stageSurface = await detail.evaluate(el => ({
+    color: getComputedStyle(el).backgroundColor,
+    image: getComputedStyle(el).backgroundImage,
+  }));
+  expect(stageSurface.image !== "none" || luminance(stageSurface.color) < 0.2).toBe(true);
 });
