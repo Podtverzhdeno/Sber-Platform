@@ -52,9 +52,11 @@ async function enterProjects(page: Page, mode: "light" | "dark") {
 }
 
 function parseRgb(value: string): number[] {
-  const match = value.match(/rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
-  if (!match) throw new Error("Unsupported computed color: " + value);
-  return match.slice(1, 4).map(Number);
+  const srgb = value.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  if (srgb) return srgb.slice(1, 4).map(n => Number(n) * 255);
+  const rgb = value.match(/^rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  if (rgb) return rgb.slice(1, 4).map(Number);
+  throw new Error("Unsupported computed color: " + value);
 }
 function luminance(value: string) {
   const rgb = parseRgb(value).map(n => n / 255).map(n =>
