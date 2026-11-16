@@ -180,10 +180,35 @@ describe("SberChat-style messenger shell", () => {
     if (!mobileRow) throw new Error("диалоговая строка не найдена");
     fireEvent.click(mobileRow);
     await screen.findByRole("region", { name: "Текущий чат" });
-    expect(screen.queryByRole("complementary", { name: "Список диалогов" })).toBeNull();
-    fireEvent.click(screen.getAllByRole("button", { name: /К списку диалогов/ })[0] as Element);
+    // Keep the list mounted (CSS hides it) so search, tab and scroll survive Back.
+    expect(screen.getByRole("complementary", { name: "Список диалогов" })).toBeInTheDocument();
+    expect(document.querySelector(".messenger-shell")).toHaveAttribute("data-pane", "chat");
+    const back = screen.getByRole("button", { name: "К списку диалогов" });
+    expect(back).toBe(document.querySelector(".msg-chat__header")?.firstElementChild);
+    fireEvent.click(back);
     await screen.findByRole("complementary", { name: "Список диалогов" });
+    expect(document.querySelector(".messenger-shell")).toHaveAttribute("data-pane", "list");
     state.narrow = false;
+  });
+
+  it("mobile Back preserves the dialog search query and panel identity", async () => {
+    narrowMode({ narrow: true });
+    mockMessagingApi([channelFixture, personalChannelFixture]);
+    renderWorkspace();
+    const list = await screen.findByRole("complementary", { name: "Список диалогов" });
+    const search = within(list).getByRole("searchbox", { name: "Поиск диалогов" });
+    fireEvent.change(search, { target: { value: "Альфа" } });
+    expect(search).toHaveValue("Альфа");
+    const row = within(list).getAllByRole("button", { name: /Команда проекта Альфа/ })
+      .find((element) => element.classList.contains("msg-dialog-list__row"));
+    if (!row) throw new Error("dialog row missing");
+    fireEvent.click(row);
+    await screen.findByRole("button", { name: "К списку диалогов" });
+    expect(document.querySelector(".messenger-shell")).toHaveAttribute("data-pane", "chat");
+    fireEvent.click(screen.getByRole("button", { name: "К списку диалогов" }));
+    expect(document.querySelector(".messenger-shell")).toHaveAttribute("data-pane", "list");
+    expect(within(list).getByRole("searchbox", { name: "Поиск диалогов" })).toHaveValue("Альфа");
+    expect(within(list).getByRole("tab", { name: /Все/ })).toHaveAttribute("aria-selected", "true");
   });
 
   it("выбор диалога сохраняется в sessionStorage (Back и theme switch не теряют состояние)", async () => {
