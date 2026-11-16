@@ -538,3 +538,81 @@
   min-width: 44px;
   min-height: 44px;
 }
+
+/* Remaining light-mode nested surfaces from the legacy TrajectoryV2 skin. */
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-task-row,
+  .trajectory-v2-stage-more dl > div,
+  .trajectory-v2-drawer-metrics > div,
+  .trajectory-v2-role-intro-grid > section,
+  .trajectory-v2-role-skill-chips span,
+  .trajectory-v2-grade-callout,
+  .trajectory-v2-next-task
+) {
+  background: #f7f9fc;
+  background-image: none;
+  color: #1c2938;
+  border-color: #dfe5ed;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-task-row[data-state="completed"] {
+  background: #eff8f4;
+  border-color: #bcded1;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-task-copy strong,
+  .trajectory-v2-drawer-heading h2,
+  .trajectory-v2-drawer-section h3,
+  .trajectory-v2-drawer-metrics strong
+) { color: #1c2938; }
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-task-copy small,
+  .trajectory-v2-stage-more,
+  .trajectory-v2-stage-more dt,
+  .trajectory-v2-stage-more dd,
+  .trajectory-v2-drawer-section p,
+  .trajectory-v2-drawer-section small,
+  .trajectory-v2-drawer-metrics small,
+  .trajectory-v2-role-intro-grid p,
+  .trajectory-v2-role-intro-grid li,
+  .trajectory-v2-role-modal-heading p
+) { color: #526474; }
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-task-action:not(.is-primary),
+  .trajectory-v2-drawer-footer > button:not(:last-child),
+  .trajectory-v2-drawer-close
+) {
+  background: #ffffff;
+  color: #245d96;
+  border-color: #bcd1e4;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage-state {
+  background: #fff5e5;
+  border-color: #ead29d;
+  color: #835b10;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage-state[data-state="completed"] {
+  background: #e8f6f0;
+  border-color: #aed8c6;
+  color: #176447;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage-state[data-state="locked"] {
+  background: #f0f3f6;
+  border-color: #d9e1e9;
+  color: #526474;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-milestone-node {
+  background: #f0f4fa;
+  border-color: #b5c7d7;
+  color: #466477;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-card progress::-webkit-progress-bar,
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-study-summary progress::-webkit-progress-bar {
+  background: #e1e8f0;
+}
+.development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-drawer-close,
+  .trajectory-v2-drawer-footer > button
+) {
+  min-width: 44px;
+  min-height: 44px;
+}
