@@ -112,8 +112,11 @@ for (const [key, displayName, , navigation] of personas.filter(
     await expect(page.locator(".owner-profile-identity strong")).toHaveText(displayName);
     await page.getByRole("button", { name: "Меню профиля" }).click();
 
-    const mobileMenu = page.getByRole("button", { name: "Меню", exact: true });
-    await mobileMenu.click();
+    // Approved shell hides the native Menu button; topbar brand opens the same drawer.
+    const brand = page.getByRole("button", { name: "Impulse — открыть разделы" });
+    const drawerState = page.locator(".calm-navigation__mobile-trigger");
+    await expect(drawerState).toBeHidden();
+    await brand.click();
     const navigationTree = page.getByRole("navigation", { name: "Навигация роли" });
     await expect(navigationTree).toBeVisible();
 
@@ -124,7 +127,7 @@ for (const [key, displayName, , navigation] of personas.filter(
     expect(actualLabels).toEqual([...navigation].sort());
 
     for (const [index, label] of navigation.entries()) {
-      if (index > 0) await mobileMenu.click();
+      if (index > 0) await brand.click();
       const link = navigationTree.locator('a[href="/workspace/' + String(index) + '"]');
       await expect(link).toHaveCount(1);
       if (!(await link.isVisible())) {
@@ -136,7 +139,7 @@ for (const [key, displayName, , navigation] of personas.filter(
       await expect(link).toHaveAccessibleName(label);
       await link.click();
       await expect(page).toHaveURL(new RegExp("/workspace/" + String(index) + "(?:[?#]|$)"));
-      await expect(mobileMenu).toHaveAttribute("aria-expanded", "false");
+      await expect(drawerState).toHaveAttribute("aria-expanded", "false");
     }
   });
 }
