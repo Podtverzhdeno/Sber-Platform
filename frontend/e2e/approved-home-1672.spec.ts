@@ -107,7 +107,9 @@ for (const width of [1448, 1024, 820, 570, 390, 320]) {
       const bar = await page.locator(".topbar").boundingBox();
       expect(search && heading && bar).toBeTruthy();
       if (search && heading && bar) {
-        expect(heading.y, "Home journey action must clear the mobile search").toBeGreaterThanOrEqual(search.y + search.height + 12);
+        await expect(page.locator("#global-search")).toHaveCSS("opacity", "0");
+        expect(search.width, "Mobile search must be a compact icon until focused").toBeLessThanOrEqual(44);
+        expect(heading.y, "Home journey action must clear the one-row topbar").toBeGreaterThanOrEqual(bar.y + bar.height + 12);
         expect(search.x).toBeGreaterThanOrEqual(0);
         expect(search.x + search.width).toBeLessThanOrEqual(width + 1);
         expect(bar.width, "Mobile chrome must cover the real viewport").toBeGreaterThanOrEqual(width - 1);
