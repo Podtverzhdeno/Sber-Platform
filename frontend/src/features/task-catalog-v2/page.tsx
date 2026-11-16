@@ -12,6 +12,7 @@ import { Award, Bookmark, ChartNoAxesColumnIncreasing, CircleHelp, ChevronDown, 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
+import { PracticeNavigation } from "../participant-practice-navigation/PracticeNavigation";
 import { trackCatalogEvent } from "./analytics";
 import {
   catalogErrorMessage,
@@ -574,6 +575,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   }
   return (
     <div className="catalog-v2" data-reference="R-PAR-03">
+      <PracticeNavigation activePage="tasks" />
       <header className="catalog-v2-heading">
         <div>
           <p className="eyebrow">ЗАДАЧИ</p>
