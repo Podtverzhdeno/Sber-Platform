@@ -86,8 +86,13 @@ for(const mode of ["light","blue","midnight"] as const){
       }else{
         expect(brightness(modal.bg)).toBeLessThan(.3);
       }
-      await detail.getByRole("button",{name:"Закрыть описание награды"}).click();
+      const modalClose = detail.getByRole("button",{name:"Закрыть описание награды"});
+      await expect(modalClose).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      await expect(detail.getByRole("button",{name:/Понятно/})).toBeFocused();
+      await page.keyboard.press("Escape");
       await expect(detail).toHaveCount(0);
+      await expect(firstReward).toBeFocused();
       await root.getByRole("button",{name:/Подробнее о рейтинге и наградах/}).click();
       await expect(root).toHaveAttribute("data-screen","benefits");
       await expect(root.locator(".ir-top-card")).toHaveCount(3);
@@ -107,6 +112,43 @@ for(const mode of ["light","blue","midnight"] as const){
       if(mode==="light"){
         for(const x of [profile,panel,unlock])expect(brightness(x.bg)).toBeGreaterThan(.8);
       }else expect(brightness(profile.bg)).toBeLessThan(.3);
+
+      const tabs = root.getByRole("tablist",{name:"Разделы профиля"});
+      await expect(tabs.getByRole("tab")).toHaveCount(5);
+      const overview = tabs.getByRole("tab",{name:"Обзор"});
+      const achievements = tabs.getByRole("tab",{name:"Достижения"});
+      const rewards = tabs.getByRole("tab",{name:"Награды"});
+      await expect(overview).toHaveAttribute("tabindex","0");
+      await overview.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(achievements).toBeFocused();
+      await expect(achievements).toHaveAttribute("aria-selected","true");
+      await expect(root.getByRole("tabpanel",{name:"Достижения"})).toBeVisible();
+      await page.keyboard.press("End");
+      await expect(rewards).toBeFocused();
+      await page.keyboard.press("Home");
+      await expect(overview).toBeFocused();
+      await page.keyboard.press("ArrowLeft");
+      await expect(rewards).toBeFocused();
+
+      const tabMetrics=await tabs.evaluate(node=>{
+        const links=Array.from(node.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+        const bounds=node.getBoundingClientRect();
+        return {
+          layout:getComputedStyle(node).display,
+          width:node.clientWidth,
+          scrollWidth:node.scrollWidth,
+          heights:links.map(link=>link.getBoundingClientRect().height),
+          inside:links.every(link=>{
+            const rect=link.getBoundingClientRect();
+            return rect.left>=bounds.left-1 && rect.right<=bounds.right+1;
+          }),
+        };
+      });
+      expect(tabMetrics.scrollWidth-tabMetrics.width).toBeLessThanOrEqual(2);
+      expect(tabMetrics.inside).toBe(true);
+      expect(Math.min(...tabMetrics.heights)).toBeGreaterThanOrEqual(44);
+      if(width<=560)expect(tabMetrics.layout).toBe("grid");
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       expect(overflow,"document horizontal overflow").toBeLessThanOrEqual(2);
     });
