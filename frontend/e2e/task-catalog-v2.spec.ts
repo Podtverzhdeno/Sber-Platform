@@ -137,6 +137,80 @@ test("light theme keeps catalog contrast accessible", async ({ page }) => {
   expect(result.violations).toEqual([]);
 });
 
+// Regression for the light-theme evidence cards reported on 16 November.
+// Compare actual computed surfaces and text contrast, not just CSS tokens.
+for (const mode of ["light", "blue", "midnight"] as const) {
+  for (const width of [320, 390, 1440]) {
+    test(`skill evidence cards honor ${mode} theme at ${String(width)}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((visualMode) => {
+        localStorage.setItem("impulse-visual-mode", visualMode);
+        localStorage.setItem("impulse-theme", visualMode === "light" ? "light" : "dark");
+      }, mode);
+      await openCatalog(page);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", mode === "light" ? "light" : "dark");
+
+      const area = page.locator(".catalog-skill-stats");
+      await expect(area.locator(".catalog-skill-stats__list > li")).toHaveCount(1);
+      const appearance = await area.evaluate((root) => {
+        const pick = (selector: string) => {
+          const node = root.querySelector<HTMLElement>(selector);
+          if (!node) throw new Error(`Missing evidence element ${selector}`);
+          const style = getComputedStyle(node);
+          const background = style.backgroundColor.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+          const foreground = style.color.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+          return { background, foreground, bounds: node.getBoundingClientRect(), fontSize: Number.parseFloat(style.fontSize) };
+        };
+        const overview = pick(".catalog-skill-stats__overview > div");
+        const card = pick(".catalog-skill-stats__list > li");
+        const fact = pick(".catalog-skill-stats__facts > div");
+        const label = pick(".catalog-skill-stats__facts small");
+        const note = pick(".catalog-skill-stats__list > li p");
+        const tag = pick(".catalog-skill-stats__tag");
+        const average = (rgb: number[]) => rgb.reduce((sum, channel) => sum + channel, 0) / 3;
+        const luminance = (rgb: number[]) => rgb.map(channel => {
+          const value = channel / 255;
+          return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+        const contrast = (one: number[], two: number[]) => {
+          const a = luminance(one), b = luminance(two);
+          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        };
+        return {
+          overviewBrightness: average(overview.background),
+          cardBrightness: average(card.background),
+          factBrightness: average(fact.background),
+          noteContrast: contrast(note.foreground, card.background),
+          labelContrast: contrast(label.foreground, fact.background),
+          tagContrast: contrast(tag.foreground, card.background),
+          noteFontSize: note.fontSize,
+          labelFontSize: label.fontSize,
+          cardRight: card.bounds.right,
+          cardLeft: card.bounds.left,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      if (mode === "light") {
+        expect(appearance.overviewBrightness).toBeGreaterThan(225);
+        expect(appearance.cardBrightness).toBeGreaterThan(240);
+        expect(appearance.factBrightness).toBeGreaterThan(230);
+      } else {
+        expect(appearance.overviewBrightness).toBeLessThan(80);
+        expect(appearance.cardBrightness).toBeLessThan(80);
+        expect(appearance.factBrightness).toBeLessThan(80);
+      }
+      expect(appearance.noteContrast).toBeGreaterThanOrEqual(4.5);
+      expect(appearance.labelContrast).toBeGreaterThanOrEqual(4.5);
+      expect(appearance.tagContrast).toBeGreaterThanOrEqual(4.5);
+      expect(appearance.noteFontSize).toBeGreaterThanOrEqual(11);
+      expect(appearance.labelFontSize).toBeGreaterThanOrEqual(11);
+      expect(appearance.cardLeft).toBeGreaterThanOrEqual(-1);
+      expect(appearance.cardRight).toBeLessThanOrEqual(width + 1);
+      expect(appearance.overflow).toBeLessThanOrEqual(2);
+    });
+  }
+}
+
 test("conditions footer remains reachable at text zoom and reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openCatalog(page);
