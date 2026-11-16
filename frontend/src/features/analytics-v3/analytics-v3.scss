@@ -526,6 +526,44 @@
   .ref-radar-skill > text {
     fill: #34566c;
   }
+  /* WCAG non-text contrast: the old neon data lines disappear on white. */
+  .ref-radar svg line[stroke="#2ce8b5"],
+  .ref-trend svg polyline[stroke="#28e9cc"] {
+    stroke: #0b7169;
+  }
+  .ref-radar svg line[stroke="#ffae2b"] {
+    stroke: #a16316;
+  }
+  .ref-radar-skill circle[fill="#31eaba"] {
+    fill: #0c766c;
+    stroke: #fff;
+  }
+  .ref-radar-skill circle[fill="#ffb844"] {
+    fill: #a16316;
+  }
+  .ref-radar-activity-mark circle {
+    fill: #11677b;
+    stroke: #fff;
+  }
+  .ref-trend svg circle[fill="#28e9cc"] {
+    fill: #0b7169;
+  }
+  .ref-trend svg text[fill="#8caabe"] {
+    fill: #456176;
+  }
+  .ref-trend svg line[stroke="#183a4e"] {
+    stroke: #b9d0de;
+  }
+  .ref-bar-pair i {
+    background: linear-gradient(0deg, #0e716f, #177f80);
+  }
+  .ref-bar-pair b {
+    background: linear-gradient(0deg, #185b91, #257ab1);
+  }
+  .ref-meter > span,
+  .ref-meter > div {
+    background: linear-gradient(90deg, #0d756c, #197ca2);
+  }
   .ref-radar-center rect {
     fill: #e3f0f5;
     stroke: #b5d1df;
