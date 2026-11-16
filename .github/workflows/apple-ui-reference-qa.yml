@@ -26,6 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Install pinned Ruff
+        run: python3 -m pip install ruff==0.16.9
+      - name: Check Python reference scripts for formatting and lint
+        run: |
+          ruff format --check "Apple UI kit"
+          ruff check "Apple UI kit"
       - name: Validate docs, manifest, links and JS syntax
         run: node "Apple UI kit/04-web-reference/verify-library.mjs"
       - name: Validate original SVG board XML and provenance
