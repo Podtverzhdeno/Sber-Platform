@@ -2729,4 +2729,9 @@
   .trajectory-v2-cycle-ready {
     color: #086d61 !important;
   }
+
+  /* Actual role panel, grade subtitle and demo warning are text on light surfaces. */
+  .trajectory-v2-role-dialog .trajectory-v2-role-panel { color: var(--trj-text); }
+  .trajectory-v2-grades-heading p { color: var(--trj-muted); }
+  .trajectory-v2-stats-origin { color: #805100 !important; }
 }
