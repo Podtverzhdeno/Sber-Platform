@@ -1,20 +1,26 @@
-/* Practice: calm, compact first-fold switcher; existing catalog and project UI remain intact. */
+/*
+ * Apple HIG inspired destination switcher: no off-screen "More", icon + text,
+ * semantic links, >=44px targets, solid content behind a quiet navigation bar.
+ * This is an independent browser implementation, not native Apple UIKit CSS.
+ */
 .practice-navigation {
-  --practice-ink: #edf4ff;
-  --practice-muted: #afbdd0;
-  --practice-line: rgba(158, 187, 225, .22);
-  --practice-focus: #95c9ff;
-  display: flex;
-  grid-column: 1 / -1;
+  --practice-ink: #edf4fc;
+  --practice-muted: #b3c3d4;
+  --practice-line: rgb(166 194 229 / 18%);
+  --practice-chrome: rgb(162 186 213 / 10%);
+  --practice-selected: rgb(104 155 226 / 22%);
+  --practice-selected-line: rgb(143 186 248 / 32%);
+  --practice-focus: #a9d3ff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 12px 18px;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  box-sizing: border-box;
   min-width: 0;
   max-width: 100%;
-  gap: 8px 18px;
-  box-sizing: border-box;
-  padding: 3px 0 13px;
-  margin-bottom: 12px;
+  padding: 3px 0 15px;
+  margin: 0 0 12px;
   border-bottom: 1px solid var(--practice-line);
   color: var(--practice-ink);
 }
@@ -22,91 +28,147 @@
 :root[data-theme="light"] .practice-navigation,
 [data-theme="light"] .practice-navigation {
   --practice-ink: #19324b;
-  --practice-muted: #566c83;
-  --practice-line: rgba(50, 83, 120, .22);
-  --practice-focus: #1967c2;
+  --practice-muted: #566a80;
+  --practice-line: rgb(31 55 83 / 15%);
+  --practice-chrome: #edf2f7;
+  --practice-selected: #fff;
+  --practice-selected-line: #d8e2ee;
+  --practice-focus: #1763b4;
+}
+
+.practice-navigation__heading {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-width: 0;
 }
 
 .practice-navigation__label {
-  font-size: 13px;
-  line-height: 1.4;
-  letter-spacing: -.01em;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 740;
+  line-height: 20px;
+  letter-spacing: -.02em;
+  color: var(--practice-ink);
+}
+
+.practice-navigation__description {
   color: var(--practice-muted);
+  font-size: 12px;
+  line-height: 17px;
 }
 
 .practice-navigation__tabs {
-  display: flex;
-  align-items: center;
-  max-width: 100%;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 3px;
   min-width: 0;
-  gap: 4px;
-  padding: 4px;
+  max-width: 100%;
   box-sizing: border-box;
+  padding: 4px;
   border: 1px solid var(--practice-line);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--practice-ink) 5%, transparent);
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
+  border-radius: 15px;
+  background: var(--practice-chrome);
 }
 
 .practice-navigation__tabs a {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
-  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 44px;
   box-sizing: border-box;
-  padding: 8px 14px;
+  padding: 10px 15px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 11px;
   color: var(--practice-muted);
+  font: inherit;
   font-size: 13px;
-  font-weight: 620;
-  line-height: 20px;
+  font-weight: 595;
+  line-height: 19px;
+  letter-spacing: -.012em;
+  text-align: center;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color .16s ease, color .16s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .16s ease, color .16s ease, box-shadow .16s ease;
 }
 
-.practice-navigation__tabs a:hover {
-  color: var(--practice-ink);
-  background: color-mix(in srgb, var(--practice-ink) 8%, transparent);
+.practice-navigation__tabs a svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  opacity: .88;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .practice-navigation__tabs a:not([aria-current="page"]):hover {
+    color: var(--practice-ink);
+    background: color-mix(in srgb, var(--practice-selected) 58%, transparent);
+  }
+}
+
+.practice-navigation__tabs a:active {
+  background: var(--practice-selected);
 }
 
 .practice-navigation__tabs a[aria-current="page"] {
   color: var(--practice-ink);
-  background: color-mix(in srgb, var(--practice-focus) 17%, transparent);
-  border-color: color-mix(in srgb, var(--practice-focus) 34%, transparent);
-  font-weight: 690;
+  background: var(--practice-selected);
+  border-color: var(--practice-selected-line);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+  font-weight: 720;
 }
 
 .practice-navigation__tabs a:focus-visible {
-  outline: 3px solid var(--practice-focus);
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--practice-focus);
   outline-offset: 2px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1000px) {
   .practice-navigation {
-    align-items: stretch;
-    gap: 8px;
-    padding: 0 0 10px;
-    margin-bottom: 10px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
   }
   .practice-navigation__tabs {
+    grid-auto-flow: initial;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
   }
   .practice-navigation__tabs a {
-    min-height: 44px;
-    padding: 10px 12px;
+    padding-inline: 8px;
+    white-space: normal;
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 560px) {
+  .practice-navigation {
+    gap: 9px;
+    padding: 0 0 13px;
+    margin-bottom: 12px;
+  }
+  .practice-navigation__heading { gap: 1px; }
+  .practice-navigation__label { font-size: 14px; line-height: 19px; }
+  .practice-navigation__description { font-size: 11px; line-height: 16px; }
   .practice-navigation__tabs a {
-    padding-inline: 10px;
+    gap: 5px;
+    flex-direction: column;
+    min-height: 54px;
+    padding: 6px 3px;
     font-size: 12px;
+    line-height: 16px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 340px) {
+  .practice-navigation__tabs a {
+    font-size: 11px;
+    line-height: 15px;
   }
 }
 
@@ -114,11 +176,30 @@
   .practice-navigation__tabs a { transition: none; }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  .practice-navigation {
+    --practice-chrome: #263950;
+    --practice-selected: #315273;
+  }
+  :root[data-theme="light"] .practice-navigation,
+  [data-theme="light"] .practice-navigation {
+    --practice-chrome: #edf2f7;
+    --practice-selected: #fff;
+  }
+}
+
 @media (forced-colors: active) {
-  .practice-navigation__tabs { border-color: ButtonText; }
+  .practice-navigation {
+    --practice-ink: CanvasText;
+    --practice-muted: CanvasText;
+    --practice-line: ButtonBorder;
+    --practice-chrome: Canvas;
+    --practice-selected: Highlight;
+    --practice-selected-line: Highlight;
+    --practice-focus: Highlight;
+  }
   .practice-navigation__tabs a[aria-current="page"] {
-    border-color: Highlight;
-    color: Highlight;
-    background: Canvas;
+    color: HighlightText;
+    box-shadow: none;
   }
 }
