@@ -37,3 +37,54 @@
     }
   }
 }
+
+
+/* The event artwork is preserved, but the legacy midnight overlay and pale
+ * title are incompatible with the participant's light appearance. Keep these
+ * replacements here rather than altering the shared theme or event layout. */
+:root[data-theme="light"] .participant-events--apple .ev-detail-modal {
+  .ev-detail-hero {
+    background: #f5f9fd;
+    border-color: #d9e3ee;
+  }
+  .ev-detail-hero::before {
+    background: linear-gradient(90deg,
+      #f5f9fd 0%,
+      rgb(245 249 253 / 98%) 40%,
+      rgb(245 249 253 / 88%) 67%,
+      rgb(245 249 253 / 55%) 100%);
+  }
+  .ev-detail-hero h2 {
+    color: #172c42;
+  }
+  .ev-detail-hero p,
+  .ev-detail-hero-meta {
+    color: #4d6276;
+  }
+  .ev-detail-hero-meta svg {
+    color: #095eb4;
+  }
+  .ev-detail-hero-top > span:not(.ev-hero-tag) {
+    color: #234762;
+    background: #eaf3ff;
+    border-color: #bad4ef;
+  }
+  .ev-detail-hero-top .ev-demo-stamp {
+    color: #4d6276;
+    background: transparent;
+    border-color: transparent;
+  }
+  .ev-detail-hero-top .ev-hero-tag {
+    color: #075d55;
+    background: #d6f5ed;
+    border-color: #a9ded1;
+  }
+  @media (max-width: 740px) {
+    .ev-detail-hero::before {
+      background: linear-gradient(90deg,
+        rgb(245 249 253 / 98%) 0%,
+        rgb(245 249 253 / 96%) 60%,
+        rgb(245 249 253 / 80%) 100%);
+    }
+  }
+}
