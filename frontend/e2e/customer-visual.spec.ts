@@ -200,8 +200,8 @@ test("customer five-step brief applies guidance and submits one task for moderat
 });
 
 test("customer can send messages and each dialog keeps its own history", async ({ page }) => {
-  await openCustomer(page);
   await installMessages(page);
+  await openCustomer(page);
   await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".messenger-page")).toBeVisible();
@@ -232,8 +232,8 @@ test("customer settings show the customer profile without participant HR control
 });
 
 test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
-  await openCustomer(page);
   await installMessages(page);
+  await openCustomer(page);
   await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button",{name:"Профиль",exact:true}).first().click();
   await expect(page.getByRole("dialog",{name:/Никита Соколов/})).toBeVisible();
@@ -246,8 +246,8 @@ test("customer opens the selected participant profile and direct dialog", async 
 });
 
 test("customer participant dialogs keep separate histories", async ({ page }) => {
-  await openCustomer(page);
   await installMessages(page);
+  await openCustomer(page);
   await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   const dialogs=page.getByRole("list", { name: "Диалоги" });
@@ -259,8 +259,8 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
 });
 
 test("customer messages expose the linked work context", async ({ page }) => {
-  await openCustomer(page);
   await installMessages(page);
+  await openCustomer(page);
   await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".chat-context h2")).toContainText("Рекомендательная система");
