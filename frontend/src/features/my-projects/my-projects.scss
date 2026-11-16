@@ -1456,6 +1456,8 @@
     background: var(--mp-detail-active);
     border-color: #b7d0e6;
   }
+  /* Stage completion percentages were pale teal on an opaque white card. */
+  .mp-ref-stage em { color: #086d60; }
   .mp-overview-checkpoint small,
   .mp-mini-stat span,
   .mp-progress-stage small,
