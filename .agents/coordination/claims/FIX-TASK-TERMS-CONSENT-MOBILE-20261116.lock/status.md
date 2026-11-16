@@ -11,6 +11,7 @@
   - frontend/src/features/task-catalog-v2/conditions-dialog.tsx (consent row markup only)
   - frontend/src/features/task-catalog-v2/catalog-v2.scss (consent row CSS only)
   - frontend/e2e/conditions-consent-mobile-20261116.spec.ts (new test)
+  - frontend/playwright.consent-20261116.config.mjs (isolated QA port)
   - .agents/coordination/claims/FIX-TASK-TERMS-CONSENT-MOBILE-20261116.lock/status.md
 - excluded: any global topbar/search, app shell, backend, auth, terms acceptance semantics, other agents' files, production deploy until integration QA
 - review_of_prior_claims: 2026-10-24 task-catalog-visual-polish REVIEW and task-catalog-desktop-firstfold IN_PROGRESS are 23 days without heartbeats; their original PRs have been integrated; this owner-directed fix is an independent post-merge regression and DOES NOT update their claims
