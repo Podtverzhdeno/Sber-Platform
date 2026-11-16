@@ -66,7 +66,13 @@ test("owner Home buttons honor reduced motion and keyboard focus", async ({ page
   await openOwnerHome(page, "midnight");
 
   const primary = page.locator(".impulse-pixel__primary");
-  await expect(primary).toHaveCSS("transition-duration", "0s");
+  // Chromium uses 10 microseconds instead of literal 0s under reduced-motion.
+  // This is effectively disabled motion; avoid a browser-version string assertion.
+  const duration = await primary.evaluate((element) => {
+    const first = getComputedStyle(element).transitionDuration.split(",")[0] ?? "0s";
+    return Number.parseFloat(first);
+  });
+  expect(duration).toBeLessThanOrEqual(0.0001);
   await page.keyboard.press("Tab");
   await primary.focus();
   await expect(primary).toHaveCSS("outline-style", "solid");
