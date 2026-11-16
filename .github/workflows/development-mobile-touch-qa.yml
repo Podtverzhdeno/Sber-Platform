@@ -1,0 +1,56 @@
+name: Development mobile touch QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/participant-development-hub/development-hub.scss"
+      - "frontend/e2e/development-mobile-touch.spec.ts"
+      - ".github/workflows/development-mobile-touch-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/participant-development-hub/development-hub.scss"
+      - "frontend/e2e/development-mobile-touch.spec.ts"
+      - ".github/workflows/development-mobile-touch-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  development-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out tested SHA
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint and typecheck
+        run: |
+          npm run lint
+          npm run typecheck
+      - name: Build production frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify mobile Development course actions
+        run: npx playwright test e2e/development-mobile-touch.spec.ts e2e/participant-development-hub.spec.ts --project=chromium --workers=1
+      - name: Upload mobile screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: development-mobile-touch-screenshots
+          path: |
+            frontend/test-results/development-mobile-*.png
+            frontend/test-results/**/*.zip
+          if-no-files-found: warn
+          retention-days: 14

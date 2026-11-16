@@ -250,3 +250,64 @@
 @media (prefers-reduced-motion: reduce) {
   .development-hub *, .development-hub *::before, .development-hub *::after { transition: none !important; animation: none !important; }
 }
+
+/* Owner mobile QA: Development touch targets and visible level context (2026-11-16). */
+@media (max-width: 768px) {
+  .development-hub__course-link,
+  .development-hub__subtle-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .development-hub__subtle-link {
+    flex: none;
+    padding: 8px 9px;
+  }
+
+  .development-hub__course-link {
+    flex: none;
+    min-width: 56px;
+  }
+
+  .development-hub__card-heading > div {
+    min-width: 0;
+  }
+
+  .development-hub__header-progress small {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+}
+
+/* Below 600px the compact global-search icon still occupies a second
+ * mobile toolbar row. Reserve that real height on 320/390px so the first
+ * Development label and level badge stay visible instead of being covered. */
+@media (max-width: 600px) {
+  .development-hub {
+    padding-top: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .development-hub__header {
+    flex-wrap: wrap;
+  }
+
+  .development-hub__header > div {
+    flex: 1 1 160px;
+  }
+
+  .development-hub__header-progress {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .development-hub__header-progress small {
+    display: inline;
+    font-size: 12px;
+  }
+}
