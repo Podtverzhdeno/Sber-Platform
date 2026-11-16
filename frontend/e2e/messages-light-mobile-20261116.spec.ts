@@ -13,7 +13,7 @@ const actor = {
 };
 
 async function openMessages(page: Page, choice: "light" | "dark") {
-  await page.addInitScript((theme) => localStorage.setItem("impulse-theme", theme), choice);
+  await page.addInitScript((theme) => { localStorage.setItem("impulse-theme", theme); }, choice);
   let signedIn = false;
   await page.route("**/api/v1/config", route => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
@@ -42,9 +42,10 @@ async function openMessages(page: Page, choice: "light" | "dark") {
     const channel = referenceChannels.find(item => item.id === id);
     return route.fulfill({ json: { ...channel, unread: 0 } });
   });
-  await page.goto("/");
+  await page.route("**/api/v1/me/engagement/**", route => route.fulfill({ status: 404, json: { code: "RESOURCE_NOT_FOUND" } }));
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/4");
+  await page.goto("/workspace/4", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".sberchat-reference .msg-dialog-list")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", choice);
 }
