@@ -144,7 +144,9 @@ export function StudyRequirements({
               <p className="development-hub__empty-note" role="status">
                 {level.curriculum_state === "unpublished"
                   ? "Программа следующего цикла ещё не опубликована. Пройденные курсы сохранены."
-                  : "Список обязательных курсов пока не получен. Проверьте Bootcamp."}
+                  : level.required_courses === 0
+                    ? "На этом уровне обязательных курсов нет."
+                    : "Список обязательных курсов пока не получен. Проверьте Bootcamp."}
               </p>
             )}
           </section>
