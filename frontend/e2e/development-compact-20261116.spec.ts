@@ -100,6 +100,12 @@ for(const mode of ["light","blue","midnight"] as const){
         for (const [red, green, blue] of skin) {
           expect(Math.min(red, green, blue)).toBeGreaterThanOrEqual(220);
         }
+        await page.getByRole("button", {name: /Все уровни/}).click();
+        const gradeDialog = page.getByRole("dialog", {name: "Все уровни"});
+        await expect(gradeDialog).toBeVisible();
+        await expect(gradeDialog).toHaveCSS("background-color", "rgb(255, 255, 255)");
+        await gradeDialog.getByRole("button", {name: "Закрыть"}).click();
+        await expect(gradeDialog).toBeHidden();
       }
       await page.getByRole("button",{name:"Impulse — открыть разделы"}).click();
       const menu=page.getByRole("dialog",{name:"Главное меню"});
