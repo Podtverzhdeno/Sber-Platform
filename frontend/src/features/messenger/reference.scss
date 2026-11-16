@@ -1166,3 +1166,285 @@
     grid-template-columns:295px minmax(0,1fr);
   }
 }
+
+
+/* Messenger mobile polish 2026-11-16 */
+/* The community subsection rail participates in layout; neither it nor a
+   short mobile viewport may be covered by the former absolute chat canvas. */
+@media (max-width: 959px) {
+  .page-shell:has(.sberchat-reference) .workspace-content > .sberchat-reference {
+    min-height: 0;
+  }
+
+  .messenger-page.sberchat-reference {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100dvh - 105px);
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  .messenger-page.sberchat-reference > .messenger-shell {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    max-height: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  .messenger-page.sberchat-reference > .community-navigation--compact {
+    flex: 0 0 auto;
+  }
+
+  .sberchat-reference .msg-dialog-list,
+  .sberchat-reference .chat-thread,
+  .sberchat-reference .msg-context {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* At 801-959px the legacy tablet rule hides context regardless of pane. */
+  .sberchat-reference .messenger-shell[data-pane="context"] > .msg-context {
+    display: flex;
+  }
+
+  .sberchat-reference .msg-chat,
+  .sberchat-reference .msg-dialog-list {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .sberchat-reference .msg-chat__scroll,
+  .sberchat-reference .msg-dialog-list__scroll {
+    min-height: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sberchat-reference .msg-composer {
+    flex: 0 0 auto;
+    padding-bottom: max(9px, env(safe-area-inset-bottom));
+  }
+
+  .sberchat-reference .msg-composer__fieldset,
+  .sberchat-reference .msg-composer__input-shell {
+    min-width: 0;
+  }
+
+  .sberchat-reference .msg-composer__textarea {
+    font-size: 16px; /* iOS: prevent automatic zoom when keyboard opens */
+  }
+
+  .sberchat-reference .msg-chat__mobile-back {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    min-height: 44px;
+    margin-left: -2px;
+  }
+}
+
+@media (max-width: 520px) {
+  .sberchat-reference .msg-chat__header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    padding-inline: 7px;
+  }
+
+  .sberchat-reference .msg-chat__avatar {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .sberchat-reference .msg-chat__header-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sberchat-reference .msg-chat__header-title :is(strong, small) {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sberchat-reference .msg-chat__header-actions {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .sberchat-reference .msg-chat__header-actions .msg-chat__header-action--context-toggle {
+    display: none; /* the info action still opens the same panel */
+  }
+
+  .sberchat-reference .msg-chat__header-action {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .sberchat-reference .msg-composer__tools { gap: 0; }
+  .sberchat-reference .msg-composer__tool {
+    box-sizing: border-box;
+    flex: 0 0 38px;
+    width: 38px;
+    min-width: 38px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .sberchat-reference .msg-composer__send {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .sberchat-reference .msg-chat__group {
+    max-width: 94%;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Touch users cannot hover to reveal reply/reaction controls. */
+@media (hover: none), (pointer: coarse) {
+  .sberchat-reference .msg-chat__actions {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 8px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    box-shadow: none;
+  }
+  .sberchat-reference .msg-chat__actions .msg-chat__action {
+    opacity: 1;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .sberchat-reference .msg-dialog-list__row-action {
+    opacity: 1;
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* The reference palette is dark by design; resolve the same semantic interface
+   into light/system-light instead of leaving light mode on a black canvas. */
+:root[data-theme="light"] .page-shell:has(.sberchat-reference) {
+  background: var(--color-bg);
+}
+:root[data-theme="light"] .sberchat-reference {
+  --msg-panel: #fff;
+  --msg-panel-elevated: #f6f8fa;
+  --msg-text: #17262b;
+  --msg-muted: #60747d;
+  --msg-line: #e2e8ec;
+  --msg-hover: #f3f7f7;
+  --msg-active: #e5f5ef;
+  --msg-chat-bg: #f7f9fa;
+  --msg-bubble-in: #fff;
+  --msg-bubble-out: #e4f4ed;
+  --msg-bubble-border: #dce6e8;
+  background: var(--msg-panel);
+  color: var(--msg-text);
+}
+:root[data-theme="light"] .sberchat-reference .messenger-shell {
+  background: var(--msg-chat-bg);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list, .chat-thread, .msg-context, .msg-reference-context-empty) {
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .chat-thread,
+:root[data-theme="light"] .sberchat-reference .msg-chat__scroll {
+  background: var(--msg-chat-bg);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__heading h2, .msg-dialog-list__row-title strong, .msg-chat__header-title strong, .msg-context__title, .msg-context__section-title, .msg-reference-empty h2, .msg-reference-context-empty h2) {
+  color: var(--msg-text);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__heading p, .msg-dialog-list__preview, .msg-dialog-list__kind, .msg-chat__header-title small, .msg-chat__bubble-body, .msg-chat__meta, .msg-reference-empty > p, .msg-reference-context-empty__inner > p) {
+  color: var(--msg-muted);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__search-field, .msg-dialog-list__create-button--header, .msg-composer__input-shell, .msg-composer__panel) {
+  background: var(--msg-panel-elevated);
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-dialog-list__search-field input, .msg-composer__textarea) {
+  color: var(--msg-text);
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__search-field input::placeholder,
+:root[data-theme="light"] .sberchat-reference .msg-composer__textarea::placeholder {
+  color: var(--msg-muted);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-chat__header, .msg-composer, .msg-context__eyebrow, .msg-dialog-list__top, .msg-dialog-list__tabs) {
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: var(--msg-active);
+  border-left-color: #39a98a;
+  box-shadow: none;
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__row:hover,
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__row:focus-visible {
+  background: var(--msg-hover);
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__bubble,
+:root[data-theme="light"] .sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-in);
+  border-color: var(--msg-line);
+  box-shadow: 0 3px 15px rgb(20 40 40 / 5%);
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-out);
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__bubble-body {
+  color: var(--msg-text);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-chat__header-action, .msg-composer__tool) {
+  color: var(--msg-muted);
+}
+:root[data-theme="light"] .sberchat-reference :is(.msg-chat__header-action, .msg-composer__tool):hover {
+  background: var(--msg-hover);
+  color: var(--msg-text);
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__tabs button {
+  color: var(--msg-muted);
+}
+:root[data-theme="light"] .sberchat-reference .msg-dialog-list__tabs button.active {
+  color: #097a6a;
+  border-bottom-color: #097a6a;
+}
+:root[data-theme="light"] .sberchat-reference .msg-chat__actions {
+  background: var(--msg-panel);
+  border-color: var(--msg-line);
+}
+:root[data-theme="light"] .sberchat-reference .msg-reference-empty__actions button,
+:root[data-theme="light"] .sberchat-reference .msg-reference-context-empty__blocks section {
+  background: var(--msg-panel);
+  border-color: var(--msg-line);
+  color: var(--msg-text);
+}
