@@ -102,7 +102,7 @@ async function checkTextContrast(page: Page, foreground: string, surface: string
     .evaluate(node => getComputedStyle(node).backgroundColor);
   const a = luminosity(ink), b = luminosity(bg);
   expect((Math.max(a, b) + .05) / (Math.min(a, b) + .05),
-    foreground + " contrast on " + surface).toBeGreaterThanOrEqual(4.5);
+    foreground + " ink " + ink + " on " + surface + " background " + bg).toBeGreaterThanOrEqual(4.5);
 }
 
 async function checkSvgContrast(page: Page, selector: string, property: "fill" | "stroke", minimum: number) {
