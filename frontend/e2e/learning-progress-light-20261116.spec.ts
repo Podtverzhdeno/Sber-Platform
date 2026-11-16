@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
@@ -122,4 +123,28 @@ test("midnight learning panel retains original gradient and dark metric cards", 
   }));
   expect(appearance.background).toContain("linear-gradient");
   expect(brightness(appearance.metric)).toBeLessThan(0.2);
+});
+
+test("Bootcamp also receives the shared light panel and legible empty progress", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("impulse-theme", "light");
+    localStorage.setItem("impulse-visual-mode", "light");
+  });
+  await installBootcampReferenceApi(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.goto("/workspace/2", { waitUntil: "domcontentloaded" });
+  const panel = page.getByTestId("learning-progress-bridge").first();
+  await expect(panel).toBeVisible();
+  await expect(panel.locator(".learning-progress-bridge__metrics > div")).toHaveCount(4);
+  await expect(panel.getByText("Результаты появятся после первого сохранённого урока в Bootcamp.")).toBeVisible();
+  const surface = await panel.evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(brightness(surface)).toBeGreaterThan(0.84);
+  await checkContrast(page, ".learning-progress-bridge h3", ".learning-progress-bridge");
+  await checkContrast(page, ".learning-progress-bridge header a", ".learning-progress-bridge");
+  await checkContrast(page, ".learning-progress-bridge__empty", ".learning-progress-bridge");
+  await checkContrast(page, ".learning-progress-bridge > small", ".learning-progress-bridge");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
+    .toBeLessThanOrEqual(2);
 });
