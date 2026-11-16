@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
 
 // Reference-specific compositions for the remaining R-* flows from
 // visual-reference-catalog.md. Partner doc: visual-route-traceability.md.
@@ -692,6 +693,201 @@ test("R-PAR-02 journey composition and mentor consultation", async ({ page }) =>
   await expect(page.getByText("Запрос отправлен")).toBeVisible();
   await page.getByRole("button", { name: "Продолжить самостоятельно" }).click();
   await expect(page.getByRole("button", { name: "Отправить запрос" })).toHaveCount(0);
+});
+
+test("R-PAR-02 canonical development layout stays within narrow viewports", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  // The canonical route reads an authorized overview, unlike ?legacy=1.
+  // Use a schema-shaped response and keep the optional-role state on the server side.
+  let optionalEnabled = false;
+  const optionalRequests: { track_key: string; enabled: boolean }[] = [];
+  await page.route("**/api/v1/me/tracks/optional", (route) => {
+    const body = route.request().postDataJSON() as { track_key: string; enabled: boolean };
+    optionalRequests.push(body);
+    if (body.track_key !== "product") {
+      return route.fulfill({ status: 400, json: { code: "INVALID_TRACK" } });
+    }
+    optionalEnabled = body.enabled;
+    return route.fulfill({ json: { success: true } });
+  });
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: [
+          ...overviewFixture.roles,
+          { track_key: "data", title: "Data-аналитик", state: "paused", attempt_number: 1, completed_milestones: 1, total_milestones: 3 },
+          { track_key: "product", title: "Продакт-менеджер", state: optionalEnabled ? "learning" : "unselected", attempt_number: optionalEnabled ? 1 : null, completed_milestones: 0, total_milestones: 4 },
+        ],
+      },
+    }),
+  );
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+
+  const development = page.locator('.trajectory-v2[data-reference="R-PAR-02"]');
+  await expect(development).toBeVisible();
+  await expect(page.getByTestId("trajectory-role-card").first()).toBeVisible();
+  await expect(page.getByTestId("trajectory-role-detail")).toBeVisible();
+
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(development).toBeVisible();
+    const layout = await page.evaluate(() => {
+      const content = document.querySelector<HTMLElement>('.trajectory-v2[data-reference="R-PAR-02"]');
+      const header = content?.querySelector<HTMLElement>(".trajectory-v2-heading");
+      const columns = content?.querySelector<HTMLElement>(".trajectory-v2-columns");
+      if (!content || !header || !columns) return null;
+      const headerBox = header.getBoundingClientRect();
+      const columnsBox = columns.getBoundingClientRect();
+      return {
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        headerGap: Math.round(columnsBox.top - headerBox.bottom),
+        contentLeft: content.getBoundingClientRect().left,
+        contentRight: content.getBoundingClientRect().right,
+      };
+    });
+    if (layout === null) {
+      throw new Error(`Development layout did not mount at ${String(width)}px`);
+    }
+    expect(layout.pageWidth, `No document horizontal scrolling at ${String(width)}px`).toBeLessThanOrEqual(width + 1);
+    expect(layout.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeGreaterThanOrEqual(0);
+    expect(layout.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeLessThanOrEqual(16);
+    expect(layout.contentLeft).toBeGreaterThanOrEqual(-1);
+    expect(layout.contentRight).toBeLessThanOrEqual(width + 1);
+  }
+
+  // A grey secondary role must be explorable and reversible without changing
+  // the primary gold career path or silently erasing progress.
+  const primary = page.locator('[data-testid="trajectory-role-card"][data-role-key="python"]');
+  const optional = page.locator('[data-testid="trajectory-role-card"][data-role-key="product"]');
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await optional.click();
+  await expect(page).toHaveURL(/role=product/);
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key", "product");
+  await page.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  await expect(optional).toHaveAttribute("data-tone", "learning");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  await page.getByRole("button", { name: "Сделать карточку серой" }).click();
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  expect(optionalRequests).toEqual([
+    { track_key: "product", enabled: true },
+    { track_key: "product", enabled: false },
+  ]);
+
+  await page.reload();
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key", "product");
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+});
+
+test("R-PAR-02 opens the next course from the real roadmap detail drawer", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: overviewFixture.roles.map((role) => ({ ...role, completed_milestones: 0 })),
+      },
+    }),
+  );
+  const roadmap = {
+    track_key: "python",
+    policy_version: 2,
+    replacement_reason: null,
+    milestones: [
+      {
+        key: "foundation",
+        position: 1,
+        title: "Основы Python",
+        purpose: "Подготовиться к реальной практике",
+        skill: "Python",
+        target_kind: "course",
+        target_key: "python-base",
+        completed: false,
+        deliverable: null,
+        lab: null,
+        estimated_hours: null,
+      },
+      {
+        key: "first-practice",
+        position: 2,
+        title: "Первая практика",
+        purpose: "Собрать проверяемый артефакт",
+        skill: "Python",
+        target_kind: "task",
+        target_key: "task-market",
+        completed: false,
+        deliverable: null,
+        lab: null,
+        estimated_hours: null,
+      },
+    ],
+    next_step: {
+      key: "foundation", position: 1, title: "Основы Python", purpose: "Подготовиться к реальной практике",
+      skill: "Python", target_kind: "course", target_key: "python-base", completed: false,
+      deliverable: null, lab: null, estimated_hours: null,
+    },
+  };
+  await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [roadmap] }));
+  await page.route("**/api/v1/me/roadmap-catalog", (route) => route.fulfill({ json: [roadmap] }));
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  await expect(page.getByTestId("trajectory-stages")).toContainText("Основы Python");
+  await expect(page.getByTestId("trajectory-stages")).toContainText("Первая практика");
+  const details = page.getByTestId("trajectory-stage-detail");
+  await expect(details).toHaveAttribute("data-stage-key", "foundation");
+  await details.getByRole("button", { name: /Продолжить/ }).click();
+  const drawer = page.getByRole("dialog", { name: "Детали этапа" });
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toContainText("Подготовиться к реальной практике");
+  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await details.getByRole("button", { name: /Продолжить/ }).click();
+  await expect(drawer).toBeVisible();
+  await drawer.getByRole("button", { name: "Открыть курс" }).click();
+  await expect(page).toHaveURL(/\/workspace\/2\?[^#]*course=python-base/);
+});
+
+test("R-PAR-02 rejected optional role keeps the original career path", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: [
+          ...overviewFixture.roles,
+          { track_key: "product", title: "Продакт-менеджер", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 4 },
+        ],
+      },
+    }),
+  );
+  let attempted = false;
+  await page.route("**/api/v1/me/tracks/optional", (route) => {
+    attempted = true;
+    return route.fulfill({
+      status: 403,
+      json: { code: "FORBIDDEN", message: "Нет разрешения на дополнительную траекторию." },
+    });
+  });
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  const optional = page.locator('[data-testid="trajectory-role-card"][data-role-key="product"]');
+  const primary = page.locator('[data-testid="trajectory-role-card"][data-role-key="python"]');
+  await optional.click();
+  await page.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  await expect(page.getByTestId("trajectory-optional-actions").getByRole("alert")).toBeVisible();
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  expect(attempted).toBe(true);
 });
 
 test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
