@@ -43,11 +43,9 @@ async function enterProjects(page: Page, mode: "light" | "dark") {
   await page.route("**/api/v1/me/work", route => route.fulfill({ json: work }));
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
-  const navigation = page.getByRole("dialog", { name: "Главное меню" });
-  const group = navigation.getByRole("button", { name: "Практика", exact: true });
-  if (await group.getAttribute("aria-expanded") !== "true") await group.click();
-  await navigation.getByRole("link", { name: "Мои проекты", exact: true }).click();
+  // This focused theme test uses the authorized route directly; the overlay
+  // navigation itself is covered by the five-section E2E suite.
+  await page.goto("/workspace/4", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".mpv2")).toBeVisible();
 }
 
