@@ -216,3 +216,156 @@
 @media (prefers-reduced-motion: reduce) {
   .participant-events--apple .ev-hero-action { transition: none; }
 }
+
+
+/*
+ * The original compact Events control introduced horizontal touch scrolling
+ * at <=650px: "Скоро дедлайн" disappeared beyond the visible rail.
+ * Make all FOUR actual category controls visible at every phone width,
+ * without dropping sort, source-backed event cards, query filters or search.
+ *
+ * Apple HIG: controls represent real views; no "More" just to find a category.
+ * Search/filters are actions and remain distinct from Community navigation.
+ */
+.participant-events--apple .ev-result-header--compact .ev-result-tabs button {
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+.participant-events--apple .ev-compact-search,
+.participant-events--apple .ev-compact-trigger,
+.participant-events--apple .ev-result-order select {
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.participant-events--apple .ev-v3-popover-head button {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 10px;
+}
+.participant-events--apple .ev-v3-filter-options button,
+.participant-events--apple .ev-v3-apply,
+.participant-events--apple .ev-v3-clear {
+  min-height: 44px;
+  border-radius: 10px;
+}
+@media (max-width: 650px) {
+  .participant-events--apple .ev-result-header--compact {
+    min-width: 0;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .participant-events--apple .ev-result-header--compact .ev-result-tabs {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 5px;
+    padding: 5px;
+    margin: 0;
+    overflow: visible;
+    scrollbar-width: none;
+    border: 1px solid var(--events-apple-line);
+    border-radius: 14px;
+  }
+  .participant-events--apple .ev-result-header--compact .ev-result-tabs button {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    height: auto;
+    flex: initial;
+    padding: 9px 6px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+  .participant-events--apple .ev-compact-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: stretch;
+    flex: 1 1 100%;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+  .participant-events--apple .ev-compact-search {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 10px;
+  }
+  .participant-events--apple .ev-compact-search input {
+    min-width: 0;
+    height: 42px;
+    font-size: 13px;
+  }
+  .participant-events--apple .ev-compact-trigger {
+    min-width: 99px;
+    padding-inline: 10px;
+  }
+  .participant-events--apple .ev-v3-popover {
+    box-sizing: border-box;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 14px;
+  }
+  .participant-events--apple .ev-v3-popover .ev-v3-filter-options button {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .participant-events--apple .ev-result-header--compact .ev-result-order {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+  .participant-events--apple .ev-result-header--compact .ev-result-order select {
+    width: min(260px, 100%);
+    max-width: 100%;
+  }
+}
+@media (max-width: 340px) {
+  .participant-events--apple .ev-result-header--compact .ev-result-tabs button {
+    font-size: 11px;
+    padding-inline: 3px;
+  }
+  .participant-events--apple .ev-compact-trigger { min-width: 90px; padding-inline: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .participant-events--apple .ev-result-header--compact button {
+    transition: none;
+    transform: none;
+  }
+}
+@media (forced-colors: active) {
+  .participant-events--apple .ev-result-tabs button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    color: Highlight;
+  }
+}
+
+
+/* 651–1100px: the narrow filter control used to right-anchor a 346px popup
+ * inside a smaller row, giving it negative viewport X (confirmed 820px E2E).
+ * Anchor from the left of its actual trigger row instead. */
+@media (min-width: 651px) and (max-width: 1100px) {
+  .participant-events--apple .ev-v3-popover {
+    left: 0;
+    right: auto;
+    width: min(346px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+  }
+}

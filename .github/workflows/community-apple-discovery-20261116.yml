@@ -1,0 +1,59 @@
+name: Community Apple discovery acceptance
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/participant-community-hub/**"
+      - "frontend/e2e/community-apple-discovery-20261116.spec.ts"
+      - ".github/workflows/community-apple-discovery-20261116.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/participant-community-hub/**"
+      - "frontend/e2e/community-apple-discovery-20261116.spec.ts"
+      - ".github/workflows/community-apple-discovery-20261116.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  community-apple:
+    name: Community Apple — events, messages, mobile discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Strict TypeScript
+        run: npm run typecheck
+      - name: Scoped ESLint
+        run: npx eslint src/features/participant-community-hub/CommunityNavigation.tsx src/features/participant-community-hub/CommunityNavigation.test.tsx e2e/community-apple-discovery-20261116.spec.ts --max-warnings 0
+      - name: Navigation unit regression
+        run: npm test -- src/features/participant-community-hub/CommunityNavigation.test.tsx
+      - name: Production frontend build
+        run: npm run build
+      - name: Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Community end-to-end, authentic event and messenger regressions
+        run: npx playwright test e2e/community-apple-discovery-20261116.spec.ts e2e/participant-events.spec.ts e2e/messages-reference.spec.ts --project=chromium --workers=1 --trace=off
+      - name: Retain responsive screenshots and browser failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: community-apple-e2e-screenshots
+          path: |
+            frontend/test-results/community-apple-*.png
+            frontend/test-results/**/error-context.md
+          if-no-files-found: ignore
+          retention-days: 14

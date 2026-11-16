@@ -43,6 +43,33 @@ describe("Community group minimal navigation", () => {
     expect(screen.getByRole("heading", { name: "Сообщество" })).toBeTruthy();
   });
 
+  it("keeps readable labels and decorative icons in both real destinations", () => {
+    const view = renderNav(authorized, "События");
+    for (const label of ["События", "Сообщения"]) {
+      const link = screen.getByRole("link", { name: label });
+      expect(link.querySelector("span")?.textContent).toBe(label);
+      expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    }
+    expect(view.container.querySelectorAll(".community-navigation__links a")).toHaveLength(2);
+  });
+
+  it("uses the same icon and label pattern inside compact Messages", () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
+    client.setQueryData(["me"], { navigation: authorized, active_role: "participant" });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <CommunityNavigation activeSection="Сообщения" compact />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const selected = screen.getByRole("link", { name: "Сообщения" });
+    expect(selected).toHaveAttribute("aria-current", "page");
+    expect(selected.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("never invents a destination that is not authorized", () => {
     renderNav(["Главная", "События"], "События");
     expect(screen.getByRole("link", { name: "События" })).toHaveAttribute("href", "/workspace/1");

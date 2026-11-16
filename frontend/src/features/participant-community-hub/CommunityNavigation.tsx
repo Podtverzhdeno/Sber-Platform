@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { CalendarDays, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { apiRequest } from "../../api/client";
@@ -32,16 +33,20 @@ export function CommunityNavigation({ activeSection, compact = false }: { active
       </div>}
       {destinations.length > 0 && (
         <nav aria-label="Подразделы сообщества" className="community-navigation__links">
-          {destinations.map((destination) => (
-            <Link
-              key={destination.label}
-              to={destination.href}
-              className={destination.label === activeSection ? "is-selected" : ""}
-              aria-current={destination.label === activeSection ? "page" : undefined}
-            >
-              {destination.label}
-            </Link>
-          ))}
+          {destinations.map((destination) => {
+            const SectionIcon = destination.label === "События" ? CalendarDays : MessageCircle;
+            return (
+              <Link
+                key={destination.label}
+                to={destination.href}
+                className={destination.label === activeSection ? "is-selected" : ""}
+                aria-current={destination.label === activeSection ? "page" : undefined}
+              >
+                <SectionIcon size={17} strokeWidth={1.85} aria-hidden="true" focusable="false" />
+                <span>{destination.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       )}
     </section>

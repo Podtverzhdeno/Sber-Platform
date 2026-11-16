@@ -131,3 +131,108 @@
   .community-navigation--compact { padding: 0; margin: 0; }
   .community-navigation--compact .community-navigation__links { width: 100%; }
 }
+
+
+/*
+ * Apple HIG-inspired Community destinations (iOS/iPadOS 27 kit).
+ * An independent web implementation, not UIKit assets or pixel parity.
+ * Preserve existing server-authorized route mapping and messenger shell.
+ */
+.community-navigation {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+.community-navigation__links {
+  box-sizing: border-box;
+  min-width: 0;
+  border-radius: 15px;
+}
+.community-navigation__links a {
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 15px;
+  font-weight: 640;
+  letter-spacing: -.01em;
+  border: 1px solid transparent;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.community-navigation__links a svg {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  opacity: .9;
+}
+.community-navigation__links a[aria-current="page"] {
+  background: #1a3853;
+  border-color: #43678c;
+  color: #f4f9ff;
+  box-shadow: none;
+  font-weight: 750;
+}
+:root[data-theme="light"] .community-navigation__links {
+  background: #eef3f8;
+  border-color: #d9e4ee;
+}
+:root[data-theme="light"] .community-navigation__links a[aria-current="page"] {
+  color: #193851;
+  background: #fff;
+  border-color: #d7e3ee;
+  box-shadow: 0 1px 4px rgb(27 51 81 / 9%);
+}
+.community-navigation__links a:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--community-focus);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .community-navigation__links a:not([aria-current="page"]):hover {
+    background: color-mix(in srgb, var(--community-focus) 13%, transparent);
+  }
+}
+@media (max-width: 650px) {
+  .community-navigation__links {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+  }
+  .community-navigation__links a {
+    flex: 1 1 0;
+    justify-content: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    min-height: 48px;
+    padding: 8px 6px;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+  .community-navigation--compact .community-navigation__links {
+    margin-inline: 0;
+    max-width: 100%;
+  }
+}
+@media (max-width: 340px) {
+  .community-navigation__links a { padding-inline: 3px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .community-navigation__links a { transition: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .community-navigation__links { background: #233549; }
+  :root[data-theme="light"] .community-navigation__links { background: #eef3f8; }
+}
+@media (forced-colors: active) {
+  .community-navigation__links,
+  .community-navigation__links a { border-color: ButtonBorder; }
+  .community-navigation__links a[aria-current="page"] {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+}
