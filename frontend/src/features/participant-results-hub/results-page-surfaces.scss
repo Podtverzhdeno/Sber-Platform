@@ -1,0 +1,599 @@
+/*
+ * Results · calm light presentation for the EXISTING domain screens.
+ * Inspired by Apple HIG materials + lists: opaque reading surfaces, a single
+ * intentional accent, explicit data/loading/error states. No domain data or
+ * actions are hidden, fabricated, or restyled outside participant Results.
+ *
+ * Dark/blue/midnight modes intentionally continue using their owner-approved
+ * visuals. Scoped to :root[data-theme=light] and real Results route classes.
+ */
+:root[data-theme="light"] {
+  .analytics-v3--results {
+    --av3-muted: #62758a;
+    --av3-stroke: #dbe5ef;
+    color: #22354a;
+
+    &::before { background: none; }
+
+    .av3-headline > span { color: #5c7693; }
+    .av3-headline h1 { color: #172b42; }
+    .av3-headline > p { color: #596c80; }
+
+    .av3-tabs {
+      background: #edf2f7;
+      border-color: #d9e3ed;
+      box-shadow: none;
+    }
+    .av3-tabs button {
+      color: #546982;
+      font-weight: 650;
+    }
+    .av3-tabs button.selected {
+      color: #172c44;
+      background: #fff;
+      box-shadow: 0 1px 4px rgb(16 40 68 / 12%);
+    }
+    .av3-global-filters label { color: #536d86; }
+    .av3-global-filters select,
+    .av3-fresh {
+      color: #203c58;
+      background: #fff;
+      border-color: #d7e2ec;
+    }
+    .av3-help-inline button {
+      min-height: 44px;
+      color: #165e8b;
+      background: #f0f7fd;
+      border: 1px solid #d5e4f0;
+      border-radius: 11px;
+      box-shadow: none;
+    }
+    .av3-help-inline button svg { color: #176d99; }
+    .av3-small-btn {
+      color: #17679b;
+      background: #f0f6fb;
+      border-color: #d6e5ee;
+    }
+
+    .av3-panel,
+    .av3-visuals .av3-panel,
+    .av3-study-results {
+      color: #21374c;
+      background: #fff;
+      border-color: #dfe7f0;
+      box-shadow: 0 1px 3px rgb(22 50 78 / 4%);
+    }
+    .av3-panel > header h2,
+    .av3-study-results h2 { color: #19324b; }
+    .av3-panel > header p,
+    .av3-study-note { color: #62758a; }
+
+    .av3-metric,
+    .av3-study-metrics > div,
+    .av3-study-course,
+    .av3-credential,
+    .av3-next {
+      color: #1e344b;
+      background: #fff;
+      border-color: #dfe7ef;
+      box-shadow: none;
+    }
+    .av3-metric > span,
+    .av3-metric strong,
+    .av3-study-course strong { color: #1e344b; }
+    .av3-metric small,
+    .av3-study-course small,
+    .av3-study-metrics span { color: #61758b; }
+
+    /* Missing measurements are not zero and are never disguised as success. */
+    .av3-alert {
+      color: #75521a;
+      background: #fff7e9;
+      border-color: #eed9b8;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .av3-alert button {
+      margin-left: auto;
+      color: #175b88;
+      font-weight: 700;
+      min-height: 40px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      background: #fff;
+      border: 1px solid #dae3eb;
+    }
+    .av3-footnote,
+    .av3-data-foot,
+    .av3-empty { color: #5c7189; }
+
+    /* Activity is a reading view, not a permanently dark neon dashboard. */
+    &[data-tab="activity"] {
+      &::before { background: none; }
+      .av3-headline > p { color: #596c80; }
+      .av3-tabs { background: #edf2f7; border-color: #d9e3ed; }
+      .av3-global-filters select,
+      .av3-fresh { background: #fff; }
+    }
+    .avp-learning,
+    .avp-visuals .av3-panel,
+    .avp-study-number,
+    .avp-activity-number,
+    .avp-course {
+      color: #21374c;
+      background: #fff;
+      border-color: #dfe7f0;
+      box-shadow: 0 1px 3px rgb(22 50 78 / 4%);
+    }
+    .avp-heading h2,
+    .avp-heading--small h3 { color: #1b334b !important; }
+    .avp-heading p,
+    .avp-learning__tip,
+    .avp-learning__disclaimer,
+    .avp-course__copy p,
+    .avp-visuals__label p { color: #5e7286; }
+    .avp-study-number strong,
+    .avp-activity-number strong,
+    .avp-course__title strong,
+    .avp-visuals__label h2 { color: #1c354d; }
+    .avp-study-number small,
+    .avp-activity-number small,
+    .avp-study-number em,
+    .avp-activity-number span:not(.avp-icon) { color: #58728a; }
+    .avp-course__foot button,
+    .avp-learning-empty button {
+      color: #17669a;
+      background: #f0f6fc;
+      border-color: #d6e5ef;
+    }
+    .avp-learning-empty {
+      color: #536e87;
+      border-color: #cedee9;
+      background: #f8fafc;
+    }
+    .avp-profile__legend > div { color: #273e55; border-color: #e0e8f1; }
+    .avp-profile__legend b { color: #244058; }
+    .avp-profile__legend small,
+    .avp-heat-labels,
+    .avp-heat-weeks-label small,
+    .avp-missing { color: #5a7188; }
+    .avp-donut > div { background: #fff; }
+    .avp-donut strong { color: #1d344b; }
+    .avp-donut small { color: #5c7188; }
+    .avp-period-select select {
+      color: #24445e;
+      background: #fff;
+      border-color: #d6e4ef;
+    }
+  }
+
+
+  /*
+   * Embedded Skill Passport is a separate legacy document. Its default
+   * dark panels AND fixed toast stack were obscuring most of a 320px light
+   * page. Keep the missing-data messages in document flow instead of
+   * floating over the metrics; preserve every retry action.
+   */
+  .analytics-v3--results .analytics-reference {
+    --ref-bg: transparent;
+    --ref-card: #fff;
+    --ref-edge: #dce6f0;
+    --ref-txt: #203a52;
+    --ref-muted: #61788e;
+    --ref-cyan: #146cad;
+    --ref-green: #136f75;
+    color: #203a52;
+    background: transparent;
+    font-family: inherit;
+    padding: 0 0 24px;
+  }
+  .analytics-v3--results .analytics-reference .ref-source-notices {
+    position: static;
+    inset: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: none;
+    gap: 8px;
+    margin: 0 0 13px;
+    pointer-events: auto;
+  }
+  .analytics-v3--results .analytics-reference .ref-source-notices > * {
+    margin: 0;
+    box-shadow: none;
+    pointer-events: auto;
+  }
+  .analytics-v3--results .analytics-reference .ref-alert {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    padding: 10px 13px;
+    color: #79551f;
+    background: #fff7e9;
+    border: 1px solid #ecd9b8;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .analytics-v3--results .analytics-reference .ref-alert button {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 9px 13px;
+    border: 1px solid #e5d0ac;
+    border-radius: 9px;
+    color: #805924;
+    background: #fff;
+    font-weight: 700;
+  }
+  .analytics-v3--results .analytics-reference .ref-panel,
+  .analytics-v3--results .analytics-reference .ref-kpi,
+  .analytics-v3--results .analytics-reference .ref-matrix-list,
+  .analytics-v3--results .analytics-reference .ref-passport,
+  .analytics-v3--results .analytics-reference .ref-evidence-row {
+    color: #203b54;
+    background: #fff;
+    border-color: #dfe8f0;
+    box-shadow: none;
+  }
+  .analytics-v3--results .analytics-reference .ref-kpi > span,
+  .analytics-v3--results .analytics-reference .ref-kpi > b,
+  .analytics-v3--results .analytics-reference .ref-card-title h2,
+  .analytics-v3--results .analytics-reference .ref-passport-top h2,
+  .analytics-v3--results .analytics-reference .ref-skill-row,
+  .analytics-v3--results .analytics-reference .ref-passport-info b,
+  .analytics-v3--results .analytics-reference .ref-passport-summary b {
+    color: #1c354d;
+  }
+  .analytics-v3--results .analytics-reference .ref-cap,
+  .analytics-v3--results .analytics-reference .ref-kpi > small,
+  .analytics-v3--results .analytics-reference .ref-kpi > i,
+  .analytics-v3--results .analytics-reference .ref-matrix-list h3 { color: #17699a; }
+  .analytics-v3--results .analytics-reference .ref-card-title p,
+  .analytics-v3--results .analytics-reference .ref-kpi small,
+  .analytics-v3--results .analytics-reference .ref-passport-top p,
+  .analytics-v3--results .analytics-reference .ref-passport-info,
+  .analytics-v3--results .analytics-reference .ref-passport-summary,
+  .analytics-v3--results .analytics-reference .ref-disclaimer,
+  .analytics-v3--results .analytics-reference .ref-evidence-row small,
+  .analytics-v3--results .analytics-reference .ref-legend,
+  .analytics-v3--results .analytics-reference .ref-chart-note { color: #61768a; }
+  .analytics-v3--results .analytics-reference .ref-big-value { color: #1e496c; }
+  .analytics-v3--results .analytics-reference .ref-passport-crest {
+    color: #1a6b9a;
+    background: #eaf4fc;
+  }
+  .analytics-v3--results .analytics-reference .ref-switch {
+    color: #20384d;
+    background: #eef3f8;
+    border-color: #d9e5ee;
+  }
+  .analytics-v3--results .analytics-reference .ref-switch button { color: #546e84; }
+  .analytics-v3--results .analytics-reference .ref-switch button.active {
+    color: #1d344c;
+    background: #fff;
+    box-shadow: 0 1px 4px rgb(24 54 81 / 9%);
+  }
+  .analytics-v3--results .analytics-reference .ref-skill-row { border-color: #e3eaf1; }
+  .analytics-v3--results .analytics-reference .ref-small-link,
+  .analytics-v3--results .analytics-reference .ref-ghost-cta {
+    color: #1f6392;
+    background: #f2f7fc;
+    border-color: #dbe7f0;
+  }
+  .analytics-v3--results .analytics-reference .ref-evidence-empty,
+  .analytics-v3--results .analytics-reference .ref-no-series {
+    color: #587187;
+    background: #f8fafc;
+    border-color: #d7e4ed;
+  }
+  .analytics-v3--results .analytics-reference .ref-primary-cta {
+    color: #fff;
+    background: #176ac4;
+  }
+
+  /* Activity Calendar is an independently mounted Results widget. Keep
+     its meaning and scrollable heatmap while removing the dark light-theme
+     card, dialogs and illegible status text. */
+  .analytics-v3--results .ac-calendar-card {
+    --ac-bg: #fff;
+    --ac-line: #dce6ef;
+    color: #213a53;
+    background: #fff;
+    border-color: #dce6ef;
+    box-shadow: 0 1px 3px rgb(26 56 85 / 5%);
+  }
+  .analytics-v3--results .ac-heading h2 { color: #1c354c !important; }
+  .analytics-v3--results .ac-eyebrow { color: #266a9a; }
+  .analytics-v3--results .ac-heading h2 svg { color: #207ca4; }
+  .analytics-v3--results .ac-heading p,
+  .analytics-v3--results .ac-weekdays,
+  .analytics-v3--results .ac-month-name,
+  .analytics-v3--results .ac-footer p,
+  .analytics-v3--results .ac-legend { color: #59738b; }
+  .analytics-v3--results .ac-summary span {
+    color: #55728b;
+    background: #f5f8fb;
+    border-color: #dce7f0;
+  }
+  .analytics-v3--results .ac-summary strong { color: #195b8a; }
+  .analytics-v3--results .ac-day.ac-level-0,
+  .analytics-v3--results .ac-legend .ac-level-0 {
+    background: #e6edf3;
+    border-color: #d5e1eb;
+  }
+  .analytics-v3--results .ac-day.ac-unknown {
+    background: repeating-linear-gradient(45deg, #eef3f7, #eef3f7 3px, #e3eaf1 3px, #e3eaf1 6px);
+    border-color: #d3e0e9;
+  }
+  .analytics-v3--results .ac-hover-card,
+  .analytics-v3--results .ac-day-dialog {
+    color: #243f55;
+    background: #fff;
+    border-color: #dce6ee;
+    box-shadow: 0 10px 28px rgb(28 55 84 / 14%);
+  }
+  .analytics-v3--results .ac-hover-card strong,
+  .analytics-v3--results .ac-day-dialog h2,
+  .analytics-v3--results .ac-day-events h3 { color: #1b334b !important; }
+  .analytics-v3--results .ac-hover-card span,
+  .analytics-v3--results .ac-hover-card small,
+  .analytics-v3--results .ac-hover-card em,
+  .analytics-v3--results .ac-day-note { color: #5a7186; }
+  .analytics-v3--results .ac-day-metrics > div,
+  .analytics-v3--results .ac-day-events article {
+    color: #26445b;
+    background: #f6f9fc;
+    border-color: #dce7ef;
+  }
+  .analytics-v3--results .ac-day-events article strong { color: #233b52; }
+  .analytics-v3--results .ac-day-events time,
+  .analytics-v3--results .ac-day-events article small,
+  .analytics-v3--results .ac-day-metrics span { color: #61768b; }
+  .analytics-v3--results .ac-close,
+  .analytics-v3--results .ac-day-events button {
+    color: #176595;
+    background: #edf6ff;
+    border-color: #d5e6f2;
+    min-height: 44px;
+  }
+
+  .ach-gallery--results {
+    --ag-ink: #1c3045;
+    --ag-muted: #62758a;
+    --ag-line: #dfe7f0;
+    --ag-surface: #fff;
+    color: #1c3045;
+
+    .ach-gallery-hero {
+      color: #1b314b;
+      background: linear-gradient(120deg, #f5f9ff, #eef5fd);
+      border-color: #dce6f2;
+      box-shadow: none;
+    }
+    .ach-gallery-hero::before {
+      opacity: .22;
+      background: radial-gradient(ellipse at 95% 15%, #accffc 0, transparent 57%);
+    }
+    .ach-gallery-eyebrow { color: #346f9e; }
+    .ach-gallery-copy h1 { color: #192f48; }
+    .ach-gallery-copy h1 span { color: #145d95; }
+    .ach-gallery-copy p { color: #506c84; }
+    .ach-gallery-demo { color: #657c8f; }
+    .ach-gallery-scene { opacity: .16; }
+
+    .ach-gallery-create {
+      min-height: 44px;
+      color: #fff;
+      border-color: #1764bb;
+      background: #146acb;
+      box-shadow: 0 2px 6px rgb(25 87 153 / 11%);
+    }
+    .ach-gallery-create:hover {
+      color: #fff;
+      background: #0e5db6;
+      box-shadow: 0 3px 8px rgb(20 77 144 / 15%);
+    }
+    .ach-gallery-stat {
+      color: #20344a;
+      background: #fff;
+      border-color: #dce6f0;
+      box-shadow: 0 1px 3px rgb(27 56 86 / 4%);
+    }
+    .ach-gallery-stat strong { color: #19334c; }
+    .ach-gallery-stat small { color: #5a7288; }
+    .ach-gallery-stat em,
+    .ach-gallery-stat:not(:first-child) em { color: #58748b; }
+    .ach-gallery-stat .stat-icon {
+      color: #156b90;
+      background: #e8f4f6;
+      border-color: #d2e6ed;
+      box-shadow: none;
+    }
+    .ach-gallery-stat .stat-icon-project {
+      color: #1967a7;
+      background: #eaf2ff;
+      border-color: #d6e6f9;
+    }
+    .ach-gallery-stat .stat-icon-cert {
+      color: #6554a7;
+      background: #f0ecfd;
+      border-color: #e2dcf6;
+    }
+    .ach-gallery-stat .stat-icon-award {
+      color: #95651b;
+      background: #fff4dc;
+      border-color: #f3e4c6;
+    }
+
+    .ach-gallery-alert {
+      color: #72511b;
+      background: #fff7e8;
+      border-color: #e9d7b8;
+      border-radius: 12px;
+      flex-wrap: wrap;
+      line-height: 1.45;
+    }
+    .ach-gallery-alert button {
+      min-height: 40px;
+      color: #72511b;
+      background: #fff;
+      border-color: #e9d7b8;
+      font-weight: 700;
+    }
+
+    .ach-gallery-tabs button,
+    .ach-gallery-select,
+    .ach-gallery-search {
+      color: #3e536a;
+      background: #f4f7fb;
+      border-color: #d9e3ee;
+      border-radius: 10px;
+    }
+    .ach-gallery-tabs button span,
+    .ach-gallery-select > span { color: #60758a; }
+    .ach-gallery-tabs button.active {
+      color: #fff;
+      background: #146acb;
+      border-color: #146acb;
+      box-shadow: none;
+    }
+    .ach-gallery-tabs button.active span { color: #e9f3ff; }
+    .ach-gallery-search input,
+    .ach-gallery-select select { color: #203a53; }
+    .ach-gallery-search input::placeholder { color: #687f96; }
+    .ach-gallery-select select option { background: #fff; color: #233e55; }
+    .ach-gallery-reset { color: #12649d; }
+
+    .ach-gallery-card,
+    .ach-gallery-empty {
+      color: #203a52;
+      background: #fff;
+      border-color: #dce6ef;
+      box-shadow: none;
+    }
+    .ach-gallery-card-body h3,
+    .ach-gallery-empty h2 { color: #1d3851; }
+    .ach-gallery-issuer,
+    .ach-gallery-date,
+    .ach-gallery-empty p { color: #5a7086; }
+    .ach-gallery-chips span {
+      color: #395e80;
+      background: #f1f6fb;
+      border-color: #d7e5f0;
+    }
+    .ach-gallery-empty-actions button {
+      color: #226390;
+      background: #eff6fc;
+      border-color: #d7e6ef;
+      min-height: 44px;
+    }
+
+    /* The achievement editor/drawer is an active surface in the same group. */
+    .ach-gallery-add,
+    .ach-gallery-drawer {
+      color: #21394f;
+      background: #fff;
+      border-color: #dce6ef;
+    }
+    .ach-gallery-back,
+    .ach-gallery-drawer-buttons button,
+    .ach-gallery-add-close,
+    .ach-gallery-add nav button {
+      color: #26445d;
+      background: #f3f7fb;
+      border-color: #dce5ef;
+    }
+    .ach-gallery-add nav button.active {
+      color: #185b98;
+      background: #e6f2ff;
+      border-color: #cce4fa;
+    }
+    .ach-gallery-add-preview,
+    .ach-gallery-detail-highlights > div,
+    .ach-gallery-evidence {
+      color: #26445d;
+      background: #f7fafd;
+      border-color: #d5e5ef;
+    }
+    .ach-gallery-add > p,
+    .ach-gallery-add-preview p,
+    .ach-gallery-detail-meta,
+    .ach-gallery-intro,
+    .ach-gallery-drawer-panel p,
+    .ach-gallery-detail-highlights small,
+    .ach-gallery-evidence { color: #5b7187; }
+    .ach-gallery-drawer-tabs { border-color: #dfe7ef; }
+    .ach-gallery-drawer-tabs button { color: #5b7187; }
+    .ach-gallery-drawer-tabs button.active { color: #1465a5; border-color: #1465a5; }
+    .ach-gallery-detail-chips span {
+      color: #3b5975;
+      background: #f0f5fa;
+      border-color: #d9e5ed;
+    }
+    .ach-gallery-source-link {
+      color: #13649c;
+      background: #eff7ff;
+      border-color: #d3e7f2;
+    }
+  }
+
+  .rating-results-entry {
+    .ir-disclaimer[role="alert"] {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 13px;
+      border: 1px solid #eed9b8;
+      border-radius: 12px;
+      background: #fff8eb;
+      color: #785522;
+      font-size: 12px;
+    }
+    .ir-disclaimer[role="alert"] button {
+      min-height: 44px;
+      padding: 9px 13px;
+      border: 1px solid #e4d0aa;
+      border-radius: 9px;
+      color: #72501c;
+      background: #fff;
+      font-weight: 700;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  :root[data-theme="light"] .ach-gallery--results {
+    .ach-gallery-hero {
+      padding: 19px 16px 71px;
+      min-height: 213px;
+    }
+    .ach-gallery-copy h1 {
+      font-size: clamp(24px, 7.2vw, 29px);
+      line-height: 1.11;
+    }
+    .ach-gallery-scene { opacity: .09; }
+    .ach-gallery-stat { min-height: 78px; height: auto; }
+    .ach-gallery-tabs button { min-height: 44px; }
+    .ach-gallery-search,
+    .ach-gallery-select { min-height: 44px; height: auto; }
+  }
+  :root[data-theme="light"] .analytics-v3--results {
+    .av3-tabs button { min-height: 44px; }
+    .av3-global-filters select,
+    .av3-period-select select { min-height: 44px; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="light"] .ach-gallery--results,
+  :root[data-theme="light"] .analytics-v3--results {
+    * { transition: none !important; animation: none !important; }
+  }
+}

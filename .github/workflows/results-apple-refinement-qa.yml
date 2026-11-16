@@ -1,0 +1,63 @@
+name: Results Apple UI acceptance
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/participant-results-hub/ResultsNavigation.tsx"
+      - "frontend/src/features/participant-results-hub/results-navigation.scss"
+      - "frontend/src/features/participant-results-hub/results-page-surfaces.scss"
+      - "frontend/src/features/participant-results-hub/ResultsNavigation.test.tsx"
+      - "frontend/e2e/participant-results-apple-navigation-20261116.spec.ts"
+      - ".github/workflows/results-apple-refinement-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/participant-results-hub/**"
+      - "frontend/e2e/participant-results-apple-navigation-20261116.spec.ts"
+      - ".github/workflows/results-apple-refinement-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  results-apple:
+    name: Results Apple — 3 themes, five widths, real destinations
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check TypeScript and scoped ESLint
+        run: |
+          npm run typecheck
+          npx eslint src/features/participant-results-hub/ResultsNavigation.tsx src/features/participant-results-hub/ResultsNavigation.test.tsx e2e/participant-results-apple-navigation-20261116.spec.ts --max-warnings 0
+      - name: Test Results navigation component
+        run: npm test -- src/features/participant-results-hub/ResultsNavigation.test.tsx
+      - name: Build production frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test original routes and Apple navigation
+        run: npx playwright test e2e/participant-results-navigation.spec.ts e2e/participant-results-apple-navigation-20261116.spec.ts --project=chromium --workers=1
+      - name: Upload screenshots and failed traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-apple-acceptance-screens
+          path: |
+            frontend/test-results/results-apple-*.png
+            frontend/test-results/**/trace.zip
+            frontend/test-results/**/error-context.md
+          if-no-files-found: ignore
+          retention-days: 14

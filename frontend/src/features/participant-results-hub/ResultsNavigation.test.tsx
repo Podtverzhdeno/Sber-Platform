@@ -39,6 +39,25 @@ describe("Results local navigation", () => {
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.queryByRole("link", { name: "Портфолио" })).toBeNull();
   });
+  it("keeps every destination visible with a decorative icon and an accessible name", () => {
+    mount(routes, "Портфолио");
+    expect(screen.getByText("Подтверждённый опыт и прогресс")).toBeTruthy();
+    for (const label of ["Портфолио", "Аналитика", "Достижения", "Рейтинг"]) {
+      const link = screen.getByRole("link", { name: label });
+      expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+      expect(link.querySelector("span")?.textContent).toBe(label);
+    }
+    expect(screen.getByRole("link", { name: "Портфолио" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("preserves the allowed label even when all other result destinations are denied", () => {
+    mount(["Главная", "Рейтинг"], "Рейтинг");
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/workspace/1");
+    expect(links[0]).toHaveAttribute("aria-current", "page");
+  });
+
   it("never exposes participant destinations for another role", () => {
     mount(routes, "Рейтинг", "customer");
     expect(screen.queryByRole("link")).toBeNull();
