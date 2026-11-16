@@ -10,6 +10,7 @@ import {
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
+import { PracticeNavigation } from "../participant-practice-navigation/PracticeNavigation";
 import { ProjectDashboard } from "./project-dashboard";
 import { RewardsJourney } from "./rewards-journey";
 import { ProjectReferenceTasks, ProjectReferenceProgress, ProjectReferenceTeam, ProjectReferenceRewards } from "./project-detail-reference";
@@ -478,6 +479,7 @@ export function ParticipantProjectsV2() {
   </div>;
   if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} onTabChange={(tab)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("tab",tab);return next;},{replace:true});}} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={(key)=>{setWorkspaceCheckpoint(key??null);setWorkspaceTab(true);}} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
   return <div className="mpv2" data-project-screen={layout}>
+    <PracticeNavigation activePage="projects" />
     <h1 id="workspace-title" className="mp-visually-hidden">Мои проекты</h1>
     <RewardsJourney completedCount={finished}/>
     <section className="mp-toolbar" aria-label="Управление проектами">
