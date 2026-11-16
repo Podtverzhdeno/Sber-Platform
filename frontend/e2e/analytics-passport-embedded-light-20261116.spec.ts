@@ -115,6 +115,21 @@ async function checkSvgContrast(page: Page, selector: string, property: "fill" |
     .toBeGreaterThanOrEqual(minimum);
 }
 
+async function checkMeterTargetContrast(page: Page, selector: string) {
+  const swatches = await page.locator(selector).first().evaluate(track => {
+    const marker = track.querySelector("i");
+    if (!marker) throw new Error("Target marker missing from skill meter");
+    return {
+      marker: getComputedStyle(marker).backgroundColor,
+      track: getComputedStyle(track).backgroundColor,
+    };
+  });
+  const a = luminosity(swatches.marker), b = luminosity(swatches.track);
+  const ratio = (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+  expect(ratio, selector + " target tick " + swatches.marker + " on track " + swatches.track)
+    .toBeGreaterThanOrEqual(3);
+}
+
 for (const width of [320, 390, 1440]) {
   test("light Skill Passport nested surfaces at " + String(width) + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 844 : 900 });
@@ -171,6 +186,7 @@ for (const width of [320, 390, 1440]) {
       document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(2);
 
+    await checkMeterTargetContrast(page, root + " .ref-matrix-list .ref-skill-row .ref-meter");
     const roleGroup = passport.getByRole("group", { name: "Профессиональная группа" });
     const chartGroup = passport.getByRole("group", { name: "Вид диаграммы" });
     await expect(roleGroup).toBeVisible();
@@ -181,6 +197,7 @@ for (const width of [320, 390, 1440]) {
     await chartGroup.getByRole("button", { name: "Гистограмма" }).click();
     await expect(passport.locator(".ref-skill-bars"))
       .toBeVisible();
+    await checkMeterTargetContrast(page, root + " .ref-skill-bars .ref-meter");
     await chartGroup.getByRole("button", { name: "Тренд" }).click();
     await expect(passport.locator(".ref-trend svg")).toBeVisible();
     await checkSvgContrast(page, root + ' .ref-trend polyline[stroke="#28e9cc"]', "stroke", 3);
