@@ -79,3 +79,21 @@ test("Practice tabs never fabricate inaccessible projects", async ({ page }) => 
   await expect(nav.getByRole("link", { name: "Мои проекты" })).toHaveCount(0);
   await expect(nav.getByRole("link", { name: "В работе" })).toHaveCount(0);
 });
+
+test("empty Projects opens the actual authorized task catalog instead of hardcoded /workspace/3", async ({ page }) => {
+  await signIn(page, ["Главная", "Мои проекты", "Задачи"]);
+  await page.goto("/workspace/1");
+  await expect(page.getByRole("heading", { name: "Пока нет принятых проектов" })).toBeVisible();
+  await page.getByRole("button", { name: "Перейти к задачам" }).click();
+  await expect(page).toHaveURL(/\/workspace\/2$/);
+  const nav = page.getByRole("navigation", { name: "Подразделы практики" });
+  await expect(nav.getByRole("link", { name: "Задачи" })).toHaveAttribute("aria-current", "page");
+});
+
+test("empty Projects hides task CTA when catalog is not authorized", async ({ page }) => {
+  await signIn(page, ["Главная", "Мои проекты"]);
+  await page.goto("/workspace/1");
+  await expect(page.getByRole("heading", { name: "Пока нет принятых проектов" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Перейти к задачам" })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Подразделы практики" }).getByRole("link")).toHaveCount(2);
+});
