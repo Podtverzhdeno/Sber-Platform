@@ -157,8 +157,8 @@ for (const mode of ["light", "blue", "midnight"] as const) {
           const node = root.querySelector<HTMLElement>(selector);
           if (!node) throw new Error(`Missing evidence element ${selector}`);
           const style = getComputedStyle(node);
-          const background = style.backgroundColor.match(/[\\d.]+/g)?.slice(0, 3).map(Number) ?? [];
-          const foreground = style.color.match(/[\\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+          const background = style.backgroundColor.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
+          const foreground = style.color.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
           return { background, foreground, bounds: node.getBoundingClientRect(), fontSize: Number.parseFloat(style.fontSize) };
         };
         const overview = pick(".catalog-skill-stats__overview > div");
