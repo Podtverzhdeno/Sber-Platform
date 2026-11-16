@@ -43,7 +43,7 @@ for (const mode of ["blue", "midnight", "light"] as const) {
 }
 
 for (const width of [390, 320]) {
-  test(`owner Home buttons remain usable without overflow at ${width}px`, async ({ page }) => {
+  test(`owner Home buttons remain usable without overflow at ${String(width)}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await openOwnerHome(page, "blue");
 
