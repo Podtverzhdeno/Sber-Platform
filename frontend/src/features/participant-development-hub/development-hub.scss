@@ -686,3 +686,21 @@
     overflow-wrap: anywhere;
   }
 }
+
+
+/* Role tab contrast regression guard. The legacy trajectory skin still
+ * applies high-priority cyan selected-tab text in some appearance cascades.
+ * Keep the fix local to Development light mode; preserve blue/midnight. */
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[role="tab"] {
+  color: var(--dh-secondary) !important;
+}
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[role="tab"][aria-selected="true"] {
+  color: var(--dh-accent) !important;
+  border-bottom-color: var(--dh-accent) !important;
+}
+@media (max-width: 560px) {
+  .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[role="tab"] {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+}
