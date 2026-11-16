@@ -592,8 +592,12 @@
   .ref-radar-center text:last-of-type {
     fill: #526a7d;
   }
-  .ref-radar-skill:focus-visible text {
+  .ref-radar-skill:focus-visible > text {
     fill: #0f548c;
+  }
+  .ref-radar-skill:focus-visible .ref-radar-activity-mark text {
+    /* The count is white on a dark filled circle even on keyboard focus. */
+    fill: #fff;
   }
   .ref-all-evidence {
     scrollbar-color: #a7bdcd #f3f8fb;
