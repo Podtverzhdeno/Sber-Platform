@@ -184,6 +184,7 @@ test("Community navigation has no critical axe violations", async ({ page }) => 
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page, "light");
   await page.goto("/workspace/1");
+  await expect(page.getByTestId("community-navigation")).toBeVisible();
   const report = await new AxeBuilder({ page }).include(".community-navigation").analyze();
   expect(report.violations).toEqual([]);
 });
