@@ -54,7 +54,7 @@ const overview: DevelopmentOverviewView = {
   },
 };
 
-async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false, demoPortfolio = false) {
+async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false, demoPortfolio = false, populatedLearning = false) {
   await page.addInitScript((theme: string) => {
     localStorage.setItem("impulse-theme", theme);
     localStorage.setItem("impulse-visual-mode", theme === "light" ? "light" : "midnight");
@@ -80,6 +80,18 @@ async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance
   if (demoPortfolio) {
     await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
       demo_data: true, courses: [], contributions: [],
+    } }));
+  }
+  if (populatedLearning) {
+    await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => route.fulfill({ json: {
+      started_courses: 1, finished_courses: 0, completed_lessons: 1,
+      approved_practices: 0, credited_practices: 0,
+      courses: [{
+        course_key: "course-demo-agent", title: "Основы AI-агентов",
+        completed_units: 1, total_units: 5, finished: false,
+        finished_at: null, certificate_id: null, updated_at: "2026-11-16T00:00:00Z",
+        practice_status: null, practical_certificate_id: null,
+      }],
     } }));
   }
   if (readyToAdvance) {
@@ -251,6 +263,7 @@ test("light expanded statistics and populated stage drawer have readable text", 
   await expect(drawer).toBeVisible();
   await lightSurface(page, ".trajectory-v2-drawer");
   await contrast(page, ".trajectory-v2-drawer-section h3", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-heading small", ".trajectory-v2-drawer");
   await contrast(page, ".trajectory-v2-drawer-section p", ".trajectory-v2-drawer");
   await expect(drawer.locator(".trajectory-v2-drawer-activities li")).toHaveCount(2);
   await contrast(page, ".trajectory-v2-drawer-activities li", ".trajectory-v2-drawer");
@@ -274,6 +287,21 @@ test("light next-step subtitle and sidebar entry points meet AA contrast", async
   await contrast(page, ".trajectory-v2-level-error button", ".trajectory-v2-reference-sidebar > section");
   await expect(page.locator(".trajectory-v2-passport-panel > header button")).toBeVisible();
   await contrast(page, ".trajectory-v2-passport-panel > header button", ".trajectory-v2-passport-panel");
+});
+
+test("light embedded learning summary with saved course uses readable colors", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light", false, false, true);
+  const panel = page.getByTestId("learning-progress-bridge");
+  await expect(panel).toBeVisible();
+  await lightSurface(page, ".learning-progress-bridge");
+  await expect(panel.getByText("Основы AI-агентов")).toBeVisible();
+  await contrast(page, ".learning-progress-bridge h3", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge header a", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge__metrics strong", ".learning-progress-bridge__metrics > div");
+  await contrast(page, ".learning-progress-bridge__courses strong", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge__courses li span", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge > small", ".learning-progress-bridge");
 });
 
 test("light optional-trajectory action failure retains accessible error ink", async ({ page }) => {
