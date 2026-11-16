@@ -7,17 +7,14 @@ export interface PracticeDestination {
   readonly href: string;
 }
 
-function authorizedIndex(navigation: readonly string[], names: readonly string[]): number {
-  return navigation.findIndex((label) => names.includes(label));
-}
-
 /**
  * 'В работе' uses the existing projects filter and is not a new route.
+ * Labels match the ACTUAL participant route switch in App.tsx, not guessed aliases.
  * No user-specific counts or progression state is computed on the client.
  */
 export function practiceDestinations(navigation: readonly string[]): readonly PracticeDestination[] {
-  const tasks = authorizedIndex(navigation, ["Задачи", "Мои задачи"]);
-  const projects = authorizedIndex(navigation, ["Мои проекты", "Проекты"]);
+  const tasks = navigation.indexOf("Задачи");
+  const projects = navigation.indexOf("Мои проекты");
   const destinations: PracticeDestination[] = [];
   if (tasks >= 0) {
     destinations.push({ id: "tasks", label: "Задачи", href: `/workspace/${String(tasks)}` });
