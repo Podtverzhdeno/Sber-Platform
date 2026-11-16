@@ -73,11 +73,7 @@ describe("authorized Practice subsection navigation", () => {
     expect(screen.queryByRole("navigation", { name: "Подразделы практики" })).toBeNull();
   });
 
-  it("supports participant legacy aliases without rearranging server indexes", () => {
-    expect(practiceDestinations(["Проекты", "Мои задачи"])).toEqual([
-      { id: "tasks", label: "Задачи", href: "/workspace/1" },
-      { id: "active", label: "В работе", href: "/workspace/0?filter=active" },
-      { id: "projects", label: "Мои проекты", href: "/workspace/0" },
-    ]);
+  it("does not invent pages for authorized labels unsupported by the current route switch", () => {
+    expect(practiceDestinations(["Проекты", "Мои задачи"])).toEqual([]);
   });
 });
