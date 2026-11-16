@@ -276,6 +276,21 @@ test("light next-step subtitle and sidebar entry points meet AA contrast", async
   await contrast(page, ".trajectory-v2-passport-panel > header button", ".trajectory-v2-passport-panel");
 });
 
+test("light optional-trajectory action failure retains accessible error ink", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.route("**/api/v1/me/tracks/optional", route => route.fulfill({
+    status: 403, json: { code: "OPTIONAL_DENIED", message: "Дополнительная роль недоступна" },
+  }));
+  await page.locator(".trajectory-v2-role-card[data-tone='unselected']").click();
+  const actions = page.getByTestId("trajectory-optional-actions");
+  await expect(actions).toBeVisible();
+  await actions.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  const warning = actions.getByRole("alert");
+  await expect(warning).toBeVisible();
+  await contrast(page, ".trajectory-v2-optional-actions p[role='alert']", ".trajectory-v2-optional-actions");
+});
+
 test("light ready-to-advance learning cycle uses readable status ink", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await showTrajectory(page, "light", true);
