@@ -599,6 +599,9 @@
 @media (max-width: 820px) {
   .page-shell.page-shell--owner-pixel .topbar .global-search {
     position: relative;
+    /* Clear the old absolute two-row offsets (top:65px/left:15px). */
+    inset: auto;
+    margin-left: auto;
     display: flex;
     flex: 0 0 42px;
     width: 42px !important;
@@ -612,6 +615,13 @@
     justify-content: center;
     border-radius: 13px;
     cursor: text;
+  }
+
+  /* Align search with theme and notifications inside the topbar. */
+  .page-shell.page-shell--owner-pixel .topbar .header-actions {
+    margin-left: 0;
+    max-width: none;
+    overflow: visible;
   }
 
   .page-shell--owner-pixel .topbar .global-search .home-search-icon {
@@ -645,7 +655,7 @@
   .page-shell--owner-pixel .topbar .global-search:focus-within input {
     position: fixed;
     inset: auto;
-    top: calc(100% + 12px);
+    top: 70px;
     left: 1px;
     width: calc(100vw - 24px) !important;
     height: 48px;
@@ -667,7 +677,7 @@
 
   .page-shell--owner-pixel .topbar .global-search-results {
     position: fixed;
-    top: calc(100% + 68px);
+    top: 126px;
     left: 1px;
     width: calc(100vw - 24px) !important;
     max-height: min(58dvh, 460px);
