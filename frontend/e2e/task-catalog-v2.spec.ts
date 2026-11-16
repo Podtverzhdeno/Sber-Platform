@@ -307,7 +307,7 @@ test("mobile collapses secondary filters and reveals opened task detail", async 
 /* task workflow tabs preserve roving keyboard focus and readable touch targets. */
 for (const mode of ["light", "blue", "midnight"] as const) {
   for (const width of [320, 390, 1440]) {
-    test(`task workflow tabs remain accessible in ${mode} at ${width}px`, async ({ page }) => {
+    test(`task workflow tabs remain accessible in ${mode} at ${String(width)}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript((value: string) => {
         localStorage.setItem("impulse-visual-mode", value);
