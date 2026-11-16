@@ -25,3 +25,242 @@
   .event-grid--list > article { grid-template-columns:1fr; }
   .event-detail-facts, .event-counters { grid-template-columns:1fr; }
 }
+
+
+/* Light theme event catalogue: the legacy reference, fidelity and compact
+   layers hardcoded navy surfaces and near-white ink. Scope these overrides to
+   the participant's light theme; preserve dark/blue/midnight verbatim. */
+:root[data-theme="light"] .participant-events--apple {
+  --events-light-surface: #ffffff;
+  --events-light-subtle: #f5f8fc;
+  --events-light-selected: #e9f3ff;
+  --events-light-border: #d9e3ee;
+  --events-light-ink: #172c42;
+  --events-light-muted: #516679;
+  --events-light-accent: #095eb4;
+  color: var(--events-light-ink);
+
+  .ev-metrics {
+    background: var(--events-light-subtle);
+    border: 1px solid var(--events-light-border);
+    box-shadow: none;
+  }
+  .ev-metrics > div {
+    background: transparent;
+    color: var(--events-light-ink);
+    border-color: var(--events-light-border);
+  }
+  .ev-metrics strong,
+  .ev-metrics b,
+  .ev-average-ring strong { color: var(--events-light-ink); }
+  .ev-metrics small { color: var(--events-light-muted); }
+  .ev-metrics svg {
+    color: var(--events-light-accent);
+    background: var(--events-light-selected);
+    border-color: var(--events-light-border);
+  }
+  .ev-average-ring {
+    background: var(--events-light-surface);
+    border-color: #158d88;
+    box-shadow: none;
+  }
+
+  .ev-result-tabs button,
+  .ev-layout-select button,
+  .ev-compact-trigger,
+  .ev-compact-search,
+  .ev-result-order select {
+    background: var(--events-light-surface);
+    border-color: var(--events-light-border);
+    color: var(--events-light-ink);
+    box-shadow: none;
+  }
+  .ev-result-tabs button.active,
+  .ev-layout-select button.active,
+  .ev-compact-trigger.is-open {
+    color: var(--events-light-accent);
+    background: var(--events-light-selected);
+    border-color: #87b5e8;
+    box-shadow: none;
+  }
+  .ev-result-tabs button:hover,
+  .ev-layout-select button:hover,
+  .ev-compact-trigger:hover {
+    background: var(--events-light-selected);
+    border-color: #87b5e8;
+    color: var(--events-light-accent);
+  }
+  .ev-compact-search,
+  .ev-compact-search input {
+    color: var(--events-light-ink);
+  }
+  .ev-compact-search input::placeholder { color: var(--events-light-muted); }
+  .ev-compact-search svg,
+  .ev-compact-trigger > svg { color: var(--events-light-accent); }
+  .ev-result-order { color: var(--events-light-muted); }
+  .ev-result-order select { color-scheme: light; }
+
+  .ev-v3-popover {
+    background: var(--events-light-surface);
+    color: var(--events-light-ink);
+    border-color: var(--events-light-border);
+    box-shadow: 0 14px 32px rgb(28 48 75 / 12%);
+  }
+  .ev-v3-popover-head strong,
+  .ev-v3-filter-section h3 { color: var(--events-light-ink); }
+  .ev-v3-filter-section { border-color: var(--events-light-border); }
+  .ev-v3-popover-head button,
+  .ev-v3-filter-options button,
+  .ev-v3-clear {
+    color: var(--events-light-ink);
+    background: var(--events-light-subtle);
+    border-color: var(--events-light-border);
+  }
+  .ev-v3-filter-options button.is-active,
+  .ev-compact-applied button {
+    color: var(--events-light-accent);
+    background: var(--events-light-selected);
+    border-color: #87b5e8;
+    box-shadow: none;
+  }
+  .ev-compact-applied button.ev-compact-clear {
+    color: var(--events-light-muted);
+    background: transparent;
+  }
+  .ev-v3-apply {
+    color: #fff;
+    background: var(--events-light-accent);
+    border-color: var(--events-light-accent);
+  }
+  .ev-v3-apply:hover { background: #084a90; }
+
+  .ev-event-card.ev-event-card--compact {
+    color: var(--events-light-ink);
+    background: var(--events-light-surface);
+    border-color: var(--events-light-border);
+    box-shadow: none;
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-main > h3,
+  .ev-event-card.ev-event-card--compact .ev-event-main h3 {
+    color: var(--events-light-ink);
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-meta,
+  .ev-event-card.ev-event-card--compact .ev-match-title {
+    color: var(--events-light-muted);
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-meta svg {
+    color: var(--events-light-accent);
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-match--compact {
+    border-color: var(--events-light-border);
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-tags span,
+  .ev-event-card.ev-event-card--compact .ev-event-tags span:first-child,
+  .ev-event-card.ev-event-card--compact .ev-event-type {
+    color: var(--events-light-accent);
+    background: var(--events-light-selected);
+    border-color: #bad4ef;
+  }
+  .ev-event-card.ev-event-card--compact .ev-role-bar {
+    background: #dce7f0;
+  }
+  .ev-event-card.ev-event-card--compact .ev-role-score strong {
+    color: #04726e;
+  }
+  .ev-event-card.ev-event-card--compact .ev-inline-verification {
+    color: #087b50 !important;
+  }
+  .ev-event-card.ev-event-card--compact .ev-inline-verification svg {
+    color: #087b50 !important;
+  }
+  .ev-event-card.ev-event-card--compact .ev-inline-verification--pending {
+    color: #865900 !important;
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-reason {
+    color: var(--events-light-ink);
+    background: var(--events-light-subtle);
+    border-color: var(--events-light-border);
+  }
+  .ev-event-card.ev-event-card--compact .ev-event-reason strong {
+    color: var(--events-light-ink);
+  }
+  .ev-event-card.ev-event-card--compact .ev-card-footer {
+    color: var(--events-light-muted);
+    background: var(--events-light-subtle);
+    border-color: var(--events-light-border);
+  }
+  .ev-event-card.ev-event-card--compact .ev-source-link,
+  .ev-event-card.ev-event-card--compact .ev-report-action {
+    color: var(--events-light-accent);
+  }
+  .ev-empty,
+  .ev-benefits-bottom {
+    color: var(--events-light-ink);
+    background: var(--events-light-subtle);
+    border-color: var(--events-light-border);
+  }
+  .ev-benefits-bottom span { color: var(--events-light-muted); }
+
+  /* The details and registration flows use the same former night palette. */
+  .ev-detail-modal .overlay-panel--dialog,
+  .ev-panel,
+  .ev-registration-card {
+    color: var(--events-light-ink);
+    background: var(--events-light-surface);
+    border-color: var(--events-light-border);
+  }
+  .ev-detail-top button,
+  .ev-panel h3,
+  .ev-paragraph,
+  .ev-panel > p,
+  .ev-subtitle,
+  .ev-side-note,
+  .ev-organizer-feature h4,
+  .ev-registration-card h3,
+  .ev-reg-finish h4 {
+    color: var(--events-light-ink) !important;
+  }
+  .ev-detail-side .ev-panel h3 { color: var(--events-light-ink); }
+  .ev-benefit-grid > div,
+  .ev-faq details,
+  .ev-day-tabs,
+  .ev-organizer-feature,
+  .ev-prize-grid > div,
+  .ev-requirements-grid > div,
+  .ev-reg-fields input,
+  .ev-reg-fields select,
+  .ev-reg-fields textarea,
+  .ev-outline,
+  .ev-reg-top button {
+    color: var(--events-light-ink);
+    background: var(--events-light-subtle);
+    border-color: var(--events-light-border);
+  }
+  .ev-panel small,
+  .ev-benefit-grid small,
+  .ev-prize-grid small,
+  .ev-requirements-grid p,
+  .ev-requirements-grid li,
+  .ev-faq details p,
+  .ev-organizer-feature p,
+  .ev-info-row span,
+  .ev-match-overview p,
+  .ev-reg-top p,
+  .ev-reg-fields label,
+  .ev-reg-consent,
+  .ev-reg-finish p {
+    color: var(--events-light-muted);
+  }
+  .ev-tabs,
+  .ev-info-row { border-color: var(--events-light-border); }
+  .ev-tabs > button:not(.ev-primary):not(.ev-save),
+  .ev-day-tabs button,
+  .ev-reg-steps > div { color: var(--events-light-muted); }
+  .ev-tabs > button.active:not(.ev-primary) { color: var(--events-light-accent); border-bottom-color: var(--events-light-accent); }
+  .ev-reg-steps span { color: var(--events-light-ink); background: var(--events-light-subtle); border-color: var(--events-light-border); }
+  .ev-detail-modal .overlay-panel--dialog > header button {
+    color: var(--events-light-ink);
+    background: var(--events-light-surface);
+    border-color: var(--events-light-border);
+  }
+}
