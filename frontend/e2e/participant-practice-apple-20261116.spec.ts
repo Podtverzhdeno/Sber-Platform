@@ -100,14 +100,18 @@ for (const mode of ["light", "blue", "midnight"] as const) {
         expect(third?.y ?? 0).toBeGreaterThan((first?.y ?? 0) + 50);
       }
 
-      const filter = page.getByRole("button", { name: "Все фильтры" });
+      const filter = page.locator(".catalog-v2-filter-expander");
+      await expect(filter).toHaveAccessibleName("Все фильтры");
       await expect(filter).toHaveAttribute("aria-expanded", "false");
       const filterBounds = await filter.boundingBox();
       expect(filterBounds?.height).toBeGreaterThanOrEqual(44);
       await filter.click();
+      await expect(filter).toHaveAccessibleName("Скрыть фильтры");
       await expect(filter).toHaveAttribute("aria-expanded", "true");
       await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
       await filter.click();
+      await expect(filter).toHaveAccessibleName("Все фильтры");
+      await expect(filter).toHaveAttribute("aria-expanded", "false");
 
       if ((width === 320 || width === 1440) && (mode === "light" || mode === "midnight")) {
         await page.screenshot({ path: `test-results/practice-apple-${mode}-${String(width)}.png` });
