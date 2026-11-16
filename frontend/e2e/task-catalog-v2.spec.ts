@@ -344,8 +344,8 @@ for (const mode of ["light", "blue", "midnight"] as const) {
       await expect(overview).toBeFocused();
 
       const metrics = await detail.evaluate((node) => {
-        const tabs = [...node.querySelectorAll<HTMLButtonElement>('.catalog-v2-workflow-tabs [role="tab"]')];
-        const buttons = [...node.querySelectorAll<HTMLButtonElement>(".catalog-v2-workflow-action")];
+        const tabs = Array.from(node.querySelectorAll<HTMLButtonElement>('.catalog-v2-workflow-tabs [role="tab"]'));
+        const buttons = Array.from(node.querySelectorAll<HTMLButtonElement>(".catalog-v2-workflow-action"));
         const disclosure = node.querySelector<HTMLElement>(".catalog-v2-workflow-extra summary");
         return {
           tabHeights: tabs.map((tab) => tab.getBoundingClientRect().height),
