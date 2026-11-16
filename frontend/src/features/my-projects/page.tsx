@@ -450,8 +450,8 @@ export function ParticipantProjectsV2() {
     return !text||[project.work.task.title,project.work.terms.deliverable,projectCompany(project)].some(x=>x.toLowerCase().includes(text.toLowerCase()));
   }).sort((a,b)=>sort==="title"?a.work.task.title.localeCompare(b.work.task.title,"ru"):sort==="progress"?(completion(b)??-1)-(completion(a)??-1):new Date(a.work.terms.deadline_at).getTime()-new Date(b.work.terms.deadline_at).getTime());
   const finished=projects.filter(p=>finishedStatuses.has(p.work.assignment.status)).length;
-  if(work.isPending) return <StatePanel kind="loading"/>;
-  if(work.isError)return <StatePanel kind="error" action="Повторить" onAction={()=>{void work.refetch();}}/>;
+  if(work.isPending) return <div className="mpv2"><PracticeNavigation activePage="projects"/><StatePanel kind="loading"/></div>;
+  if(work.isError)return <div className="mpv2"><PracticeNavigation activePage="projects"/><StatePanel kind="error" action="Повторить" onAction={()=>{void work.refetch();}}/></div>;
   if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace">
     <ProjectDashboard
       assignmentId={selected.work.assignment.id} initialCheckpointKey={workspaceCheckpoint}
