@@ -50,12 +50,19 @@ for (const width of [320, 390, 1440]) {
   });
 }
 
-test("Messages destination follows original server-approved order", async ({ page }) => {
+test("candidate profile offers honest chat-list navigation for synthetic people", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await setupCustomer(page, ["Главная", "Сообщения", "Мои задачи"]);
-  await page.goto("/workspace/2");
-  await page.locator(".task-team-compact").getByRole("button", { name: "Открыть чаты" }).first().click();
-  await expect(page).toHaveURL(/\/workspace\/1$/);
+  await setupCustomer(page, [
+    "Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика",
+    "AI-помощник", "База участников", "Сообщения", "Настройки",
+  ]);
+  await page.goto("/workspace/1");
+  await page.locator(".task-team-compact").getByRole("button", { name: "Профиль" }).first().click();
+  await expect(page).toHaveURL(/\/workspace\/6\?participant=p1/);
+  const profile = page.getByRole("dialog", { name: /Цифровой профиль Никита Соколов/ });
+  await expect(profile).toBeVisible();
+  await profile.getByRole("button", { name: "Открыть чаты" }).click();
+  await expect(page).toHaveURL(/\/workspace\/7$/);
   await expect(page.locator(".messenger-page")).toBeVisible();
 });
 
