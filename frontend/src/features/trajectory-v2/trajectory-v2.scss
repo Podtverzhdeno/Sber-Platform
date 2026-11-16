@@ -2736,4 +2736,36 @@
   .trajectory-v2-stats-origin { color: #805100 !important; }
   .trajectory-v2-level-error button { color: #095eaa; }
   .trajectory-v2-optional-actions p[role="alert"] { color: #a92735; }
+
+  /* Embedded persisted-learning summary uses standalone midnight defaults. */
+  .learning-progress-bridge {
+    color: var(--trj-text);
+    background: #fff;
+    border-color: var(--trj-line);
+  }
+  .learning-progress-bridge h3,
+  .learning-progress-bridge__courses strong { color: var(--trj-text); }
+  .learning-progress-bridge__eyebrow { color: #086e67; }
+  .learning-progress-bridge header a,
+  .learning-progress-bridge__practice-link { color: #095eaa; }
+  .learning-progress-bridge__metrics > div {
+    background: #f5f8fc;
+    border-color: var(--trj-line);
+  }
+  .learning-progress-bridge__metrics strong { color: #086e67; }
+  .learning-progress-bridge__metrics span,
+  .learning-progress-bridge__courses li span,
+  .learning-progress-bridge__courses li small,
+  .learning-progress-bridge > small,
+  .learning-progress-bridge__empty { color: var(--trj-muted); }
+  .learning-progress-bridge__practice-link {
+    background: #eaf3ff;
+    border-color: #9bbfe4;
+  }
+  .learning-progress-bridge__practice-link:hover,
+  .learning-progress-bridge__practice-link:focus-visible { background: #d9eaff; }
+  .learning-progress-bridge p[role="alert"] button { color: #095eaa; }
+
+  /* Stage status is a <small> in the drawer heading, not a section label. */
+  .trajectory-v2-drawer-heading small { color: #086e67; }
 }
