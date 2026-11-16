@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "events-light-theme-20261116.spec.ts",
+  testMatch: ["events-light-theme-20261116.spec.ts", "participant-events.spec.ts"],
   fullyParallel: false,
   workers: 1,
   retries: 0,
