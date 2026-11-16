@@ -568,10 +568,10 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   ].filter((chip): chip is { key: string; label: string } => chip !== null);
 
   if (catalog.isPending) {
-    return <div className="catalog-v2"><StatePanel kind="loading" /></div>;
+    return <div className="catalog-v2"><PracticeNavigation activePage="tasks" /><StatePanel kind="loading" /></div>;
   }
   if (catalog.isError && catalog.data === undefined) {
-    return <div className="catalog-v2"><StatePanel kind={isOfflineError(catalog.error) ? "offline" : "error"} action="Повторить" onAction={() => { void catalog.refetch(); }} /></div>;
+    return <div className="catalog-v2"><PracticeNavigation activePage="tasks" /><StatePanel kind={isOfflineError(catalog.error) ? "offline" : "error"} action="Повторить" onAction={() => { void catalog.refetch(); }} /></div>;
   }
   return (
     <div className="catalog-v2" data-reference="R-PAR-03">
