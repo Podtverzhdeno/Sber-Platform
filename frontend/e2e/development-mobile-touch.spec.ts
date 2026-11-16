@@ -63,6 +63,16 @@ for (const mode of ["blue", "midnight", "light"] as const) {
       await expect(page.getByRole("navigation", { name: "Подразделы развития" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Обязательные курсы" })).toBeVisible();
 
+      // The compact topbar moves search onto a second row on phones.
+      // Its fixed search control must never cover the first page label.
+      const search = await page.locator(".topbar .global-search").boundingBox();
+      const heading = await page.locator(".development-hub__header .development-hub__eyebrow").boundingBox();
+      if (search === null || heading === null) throw new Error("Mobile header geometry unavailable");
+      expect(
+        heading.y - (search.y + search.height),
+        `Development heading clears global search at ${String(width)}px`,
+      ).toBeGreaterThanOrEqual(8);
+
       const levelLabel = page.locator(".development-hub__header-progress small");
       await expect(levelLabel).toBeVisible();
       await expect(levelLabel).toHaveText("Уровень Impulse");
