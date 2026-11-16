@@ -11,6 +11,14 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+
+def safe_svg_root(path: Path) -> ET.Element:
+    """Read only small local SVG documents, without DTD or entity definitions."""
+    data = path.read_bytes()
+    if len(data) > 2_000_000 or b"<!doctype" in data.lower() or b"<!entity" in data.lower():
+        raise ET.ParseError("Unsafe SVG source")
+    return ET.fromstring(data)  # noqa: S314 -- local size-bounded SVG with DTD/entities refused
+
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_GROUPS = [
     "01-liquid-glass-materials",
@@ -89,7 +97,7 @@ def main() -> int:
         svg = directory / "preview.svg"
         if svg.is_file():
             try:
-                image = ET.parse(svg).getroot()
+                image = safe_svg_root(svg)
                 if image.tag != "{http://www.w3.org/2000/svg}svg":
                     problems.append(f"Invalid SVG namespace: {slug}")
                 if "NOT an Apple design kit export" not in svg.read_text(encoding="utf8"):

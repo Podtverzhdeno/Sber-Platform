@@ -17,6 +17,14 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
+
+def safe_svg_root(path: Path) -> ET.Element:
+    """Read only small local SVG documents, without DTD or entity definitions."""
+    data = path.read_bytes()
+    if len(data) > 2_000_000 or b"<!doctype" in data.lower() or b"<!entity" in data.lower():
+        raise ET.ParseError("Unsafe SVG source")
+    return ET.fromstring(data)  # noqa: S314 -- local size-bounded SVG with DTD/entities refused
+
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "06-cases"
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -145,7 +153,7 @@ def validate_reference_cases() -> None:
         if not image.is_file():
             continue
         try:
-            xml = ET.parse(image).getroot()
+            xml = safe_svg_root(image)
         except ET.ParseError as exc:
             errors.append(f"Malformed reference SVG {slug}: {exc}")
             continue
@@ -234,7 +242,7 @@ def main() -> int:
         check(expected in preview_text, f"Markdown gallery missing {slug}")
 
         try:
-            root = ET.parse(image).getroot()
+            root = safe_svg_root(image)
         except ET.ParseError as exc:
             errors.append(f"Invalid SVG/XML at {expected}: {exc}")
             continue
@@ -305,7 +313,8 @@ def main() -> int:
 
     print(f"SVG library check passed: {checks} assertions, {len(seen)} original boards")
     print(
-        "Limitations: no visual rendering, external link check, Apple kit access or pixel-parity claim."
+        "Limitations: no visual rendering, external link check, "
+        "Apple kit access or pixel-parity claim."
     )
     return 0
 

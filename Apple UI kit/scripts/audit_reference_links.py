@@ -110,7 +110,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     counts, errors = audit(args.root)
     print(
-        f"Scanned {counts.files} files; {counts.local} local links; {counts.remote_unverified} remote URLs not checked; {counts.outside_root} out-of-bundle paths; {counts.site_absolute_skipped} site-absolute links"
+        f"Scanned {counts.files} files; {counts.local} local links; "
+        f"{counts.remote_unverified} remote URLs not checked; "
+        f"{counts.outside_root} out-of-bundle paths; "
+        f"{counts.site_absolute_skipped} site-absolute links"
     )
     for error in errors:
         print("BROKEN: " + error)

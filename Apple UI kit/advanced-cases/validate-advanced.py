@@ -14,6 +14,14 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlparse
 
+
+def safe_svg_root(path: Path) -> ET.Element:
+    """Read only small local SVG documents, without DTD or entity definitions."""
+    data = path.read_bytes()
+    if len(data) > 2_000_000 or b"<!doctype" in data.lower() or b"<!entity" in data.lower():
+        raise ET.ParseError("Unsafe SVG source")
+    return ET.fromstring(data)  # noqa: S314 -- local size-bounded SVG with DTD/entities refused
+
 ROOT = Path(__file__).resolve().parent
 SVG = "{http://www.w3.org/2000/svg}"
 BANNED = {
@@ -105,7 +113,7 @@ def main() -> int:
             if not target.is_file():
                 continue
             try:
-                root = ET.parse(target).getroot()
+                root = safe_svg_root(target)
             except ET.ParseError as exc:
                 issues.append(f"Malformed SVG {name}/{theme}: {exc}")
                 continue

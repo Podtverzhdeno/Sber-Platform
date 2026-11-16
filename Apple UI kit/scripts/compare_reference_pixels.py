@@ -41,7 +41,7 @@ def compare(source: Path, candidate: Path, out: Path, threshold: int) -> dict[st
     max_x, max_y = -1, -1
     # Pixel-wise check: channels are RGB, and a pixel differs if its
     # maximum absolute channel difference is strictly greater than threshold.
-    for pos, (left, right) in enumerate(zip(a.getdata(), b.getdata())):
+    for pos, (left, right) in enumerate(zip(a.getdata(), b.getdata(), strict=True)):
         diffs = (abs(left[0] - right[0]), abs(left[1] - right[1]), abs(left[2] - right[2]))
         total_abs_rgb += sum(diffs)
         if max(diffs) > threshold:

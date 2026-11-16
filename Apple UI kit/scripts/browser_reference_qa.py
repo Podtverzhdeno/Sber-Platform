@@ -14,8 +14,8 @@ from pathlib import Path
 try:
     from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import sync_playwright
-except ImportError:
-    raise SystemExit("Install Playwright first: python -m pip install playwright")
+except ImportError as exc:
+    raise SystemExit("Install Playwright first: python -m pip install playwright") from exc
 
 HERE = Path(__file__).resolve().parents[1] / "web-implementation" / "index.html"
 VIEWPORTS = [(320, 720), (390, 844), (1024, 768), (1422, 803), (1440, 900)]
@@ -181,7 +181,8 @@ def main(argv: list[str] | None = None) -> int:
             browser.close()
         print(f"PASS: {n + 2} browser checks, five responsive viewports, touch and reduced-motion")
         print(
-            "NOT VERIFIED: Apple source frame parity, owner pixel diff, native Liquid Glass or full Impulse app"
+            "NOT VERIFIED: Apple source frame parity, owner pixel diff, "
+            "native Liquid Glass or full Impulse app"
         )
         return 0
     except (AssertionError, PlaywrightError) as error:

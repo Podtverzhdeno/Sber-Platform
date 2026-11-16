@@ -15,6 +15,14 @@ import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from pathlib import Path
 
+
+def safe_svg_root(path: Path) -> ET.Element:
+    """Read only small local SVG documents, without DTD or entity definitions."""
+    data = path.read_bytes()
+    if len(data) > 2_000_000 or b"<!doctype" in data.lower() or b"<!entity" in data.lower():
+        raise ET.ParseError("Unsafe SVG source")
+    return ET.fromstring(data)  # noqa: S314 -- local size-bounded SVG with DTD/entities refused
+
 REQUIRED = (
     "README.md",
     "REFERENCE_GALLERY.md",
@@ -87,7 +95,7 @@ def audit(root: Path) -> list[str]:
         image = folder / "preview.svg"
         if image.is_file():
             try:
-                if ET.parse(image).getroot().tag != SVG_NS:
+                if safe_svg_root(image).tag != SVG_NS:
                     issues.append(f"invalid SVG namespace in {folder.name}")
                 if "NOT an Apple design kit export" not in image.read_text(encoding="utf-8"):
                     issues.append(f"SVG provenance disclaimer missing in {folder.name}")
@@ -160,7 +168,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"FAILED ({len(errors)} issue(s)); no source content was changed")
         return 1
     print(
-        "PASS: reference bundle structure, original SVG provenance, metadata, catalog, HTML IDs and restricted-asset guard"
+        "PASS: reference bundle structure, original SVG provenance, metadata, "
+        "catalog, HTML IDs and restricted-asset guard"
     )
     print(
         "NOT CHECKED: real Apple kit layers, rights audit, browser render, source pixel equivalence"

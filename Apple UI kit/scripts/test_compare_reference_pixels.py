@@ -27,7 +27,7 @@ class CompareReferencePixelsTest(unittest.TestCase):
             b = p / "b.png"
             Image.new("RGB", (12, 8), (25, 30, 35)).save(a)
             Image.new("RGB", (12, 8), (25, 30, 35)).save(b)
-            run = subprocess.run(
+            run = subprocess.run(  # noqa: S603 -- fixed Python interpreter and local QA script
                 [sys.executable, str(SCRIPT), str(a), str(b), "--out", str(p / "out")],
                 text=True,
                 capture_output=True,
@@ -49,7 +49,7 @@ class CompareReferencePixelsTest(unittest.TestCase):
             other = Image.new("RGB", (10, 10), (0, 0, 0))
             other.putpixel((3, 4), (60, 0, 0))
             other.save(b)
-            run = subprocess.run(
+            run = subprocess.run(  # noqa: S603 -- fixed Python interpreter and local QA script
                 [
                     sys.executable,
                     str(SCRIPT),
@@ -78,7 +78,7 @@ class CompareReferencePixelsTest(unittest.TestCase):
             a, b = p / "a.png", p / "b.png"
             Image.new("RGB", (10, 10), (0, 0, 0)).save(a)
             Image.new("RGB", (11, 10), (0, 0, 0)).save(b)
-            run = subprocess.run(
+            run = subprocess.run(  # noqa: S603 -- fixed Python interpreter and local QA script
                 [sys.executable, str(SCRIPT), str(a), str(b), "--out", str(p / "out")],
                 text=True,
                 capture_output=True,
