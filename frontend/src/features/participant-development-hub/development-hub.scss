@@ -616,3 +616,73 @@
   min-width: 44px;
   min-height: 44px;
 }
+
+
+/* Role information contrast audit — semantic foregrounds on light surfaces.
+ * The legacy dialog inherited bright-on-dark colors from TrajectoryV2. */
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog :is(
+  .trajectory-v2-role-modal-heading h2,
+  .trajectory-v2-role-intro-grid h3,
+  .trajectory-v2-role-panel,
+  .trajectory-v2-role-intro-card li
+) {
+  color: var(--dh-text);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog :is(
+  .trajectory-v2-role-intro-hero p,
+  .trajectory-v2-role-intro-card p,
+  .trajectory-v2-role-intro-card li,
+  .trajectory-v2-role-panel > p
+) {
+  color: var(--dh-secondary);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs {
+  border-bottom-color: var(--dh-line);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button {
+  color: var(--dh-secondary);
+  border-bottom-color: transparent;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[aria-selected="true"] {
+  color: var(--dh-accent);
+  border-bottom-color: var(--dh-accent);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs button:focus-visible {
+  outline-color: var(--dh-accent);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-skill-chips span {
+  color: var(--dh-text);
+  background: var(--dh-muted-panel);
+  border-color: var(--dh-line);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-intro-card li::before {
+  color: #176447;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog > .trajectory-v2-role-dialog-close {
+  color: var(--dh-text);
+  background: var(--dh-muted-panel);
+  border-color: var(--dh-line);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-modal-icon {
+  background: #e9f2fe;
+  color: #145dc0;
+}
+/* Six role sections remain visible on narrow screens rather than hiding
+ * actions in a horizontally scrolled strip. All modes share this layout. */
+@media (max-width: 560px) {
+  .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    overflow: visible;
+  }
+  .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-role-dialog .trajectory-v2-role-tabs > button {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 5px;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
