@@ -401,8 +401,10 @@
   }
   /* Computed browser QA caught 4.29:1 on the nested fact captions.
      Use an explicit ink token; small text must clear 4.5:1 in practice. */
-  .ref-personal-facts small {
-    color: #344c60;
+  .ref-personal-facts > div > span > small {
+    /* A global small-text rule wins in the integrated CSS cascade without
+       this explicit override. Keep these 11px captions readable on mist. */
+    color: #213b50 !important;
   }
   :is(.ref-switch, .ref-pages, .ref-filters select, .ref-fresh) {
     color: var(--ref-txt);
