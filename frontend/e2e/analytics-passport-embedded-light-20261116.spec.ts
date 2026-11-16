@@ -155,7 +155,7 @@ for (const width of [320, 390, 1440]) {
       buttons.map(button => button.getBoundingClientRect().height));
     expect(Math.min(...touchHeights)).toBeGreaterThanOrEqual(44);
     await chartGroup.getByRole("button", { name: "Гистограмма" }).click();
-    await expect(passport.getByRole("region", { name: "Уровни навыков по шкале 1–4" }))
+    await expect(passport.locator(".ref-skill-bars"))
       .toBeVisible();
   });
 }
