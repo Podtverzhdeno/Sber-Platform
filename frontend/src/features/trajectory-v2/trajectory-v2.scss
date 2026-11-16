@@ -2588,4 +2588,63 @@
   .trajectory-v2-role-skill-chips span { color: #215a83; background: #eaf3ff; border-color: #c3d7eb; }
   .trajectory-v2-role-dialog .trajectory-v2-role-tabs button { color: #52677d; }
   .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[aria-selected="true"] { color: #096d7d; border-color: #0b8b83; }
+
+  /* Less prominent panels must follow the same light surface contract. */
+  .trajectory-v2-grade-callout,
+  .trajectory-v2-next-panel .trajectory-v2-next-task,
+  .trajectory-v2-statistics-grid > div,
+  .trajectory-v2-stage-more dl > div,
+  .trajectory-v2-grade-next-note,
+  .trajectory-v2-role-suitability,
+  .trajectory-v2-drawer-metrics > div {
+    color: var(--trj-text);
+    background: #f5f8fc;
+    border-color: #d7e3ef;
+  }
+  .trajectory-v2-grade-callout-icon,
+  .trajectory-v2-next-task-icon,
+  .trajectory-v2-activity-order {
+    color: #095f91;
+    background: #e0effd;
+    border-color: #b4d1e9;
+  }
+  .trajectory-v2-next-task-description strong,
+  .trajectory-v2-statistics-grid strong,
+  .trajectory-v2-activities h4 { color: var(--trj-text); }
+  .trajectory-v2-grade-callout,
+  .trajectory-v2-next-task-description p,
+  .trajectory-v2-statistics-grid small,
+  .trajectory-v2-stage-more dt,
+  .trajectory-v2-drawer-metrics small { color: var(--trj-muted); }
+  .trajectory-v2-next-task button,
+  .trajectory-v2-drawer-footer > button:not(:last-child),
+  .trajectory-v2-drawer-close,
+  .trajectory-v2-role-dialog-close,
+  .trajectory-v2-grades-dialog > header button {
+    color: #125eac;
+    background: #eaf3ff;
+    border-color: #bed4ea;
+  }
+  .trajectory-v2-activities,
+  .trajectory-v2-deliverable {
+    background: #f2f8fb;
+    border-color: #bdd9e8;
+    color: var(--trj-text) !important;
+  }
+  .trajectory-v2-activities p,
+  .trajectory-v2-stage-more dd,
+  .trajectory-v2-deliverable,
+  .trajectory-v2-activity-copy { color: var(--trj-text) !important; }
+  .trajectory-v2-grade-ring::before { background: #f8fbff; }
+  .trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring::before { background: #f8fbff; }
+  .trajectory-v2-grade-explanation > p,
+  .trajectory-v2-grade-expectations p,
+  .trajectory-v2-grade-explanation-progress small { color: var(--trj-muted); }
+  .trajectory-v2-reading-resources a:hover { color: #064e84; }
+  .trajectory-v2-hero-graphic {
+    background: radial-gradient(circle at 79% 20%, #dbeaff 0%, #f3f9ff 64%, transparent 70%);
+  }
+  .trajectory-v2-hero-graphic::before {
+    background: linear-gradient(145deg, #a4c8e8, #dfeaf7);
+  }
 }
