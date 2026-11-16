@@ -86,7 +86,7 @@ for (const width of [320, 390, 1440]) {
       overlay: getComputedStyle(el, "::before").backgroundImage,
     }));
     expect(luminance(computed.bg), "hero surface must be light").toBeGreaterThan(0.8);
-    expect(computed.overlay).toContain("rgb(245, 249, 253)");
+    expect(computed.overlay).toMatch(/rgba?\(245,\s*249,\s*253/);
     const banner = hero.locator("img.ev-detail-banner");
     await expect(banner).toBeAttached();
     await expect(banner).toHaveAttribute("src", /\/events\/banners\/.*\.avif/);
