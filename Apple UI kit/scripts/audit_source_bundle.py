@@ -4,6 +4,7 @@
 No network calls and no Apple asset downloads. Does NOT perform browser tests
 or inspect licensed Figma/Sketch layers.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,10 +17,16 @@ import xml.etree.ElementTree as ET
 
 
 REQUIRED = (
-    "README.md", "REFERENCE_GALLERY.md", "OFFICIAL_VISUAL_GALLERY.md",
-    "reference-gallery.html", "reference-manifest.json", "component-catalog.json",
-    "component-catalog.html", "web-implementation/index.html",
-    "web-implementation/app.js", "web-implementation/styles.css",
+    "README.md",
+    "REFERENCE_GALLERY.md",
+    "OFFICIAL_VISUAL_GALLERY.md",
+    "reference-gallery.html",
+    "reference-manifest.json",
+    "component-catalog.json",
+    "component-catalog.html",
+    "web-implementation/index.html",
+    "web-implementation/app.js",
+    "web-implementation/styles.css",
 )
 DISALLOWED_BINARY_EXTS = {".fig", ".sketch", ".ttf", ".otf", ".woff", ".woff2"}
 SVG_NS = "{http://www.w3.org/2000/svg}svg"
@@ -44,13 +51,19 @@ def audit(root: Path) -> list[str]:
         if not (root / relative).is_file():
             issues.append("missing required file: " + relative)
 
-    categories = sorted(
-        p for p in root.iterdir()
-        if p.is_dir() and CATEGORY_PATTERN.fullmatch(p.name)
-        # The monorepo also has 06-cases/, 08-component-packs/ and other
-        # numbered modules. Atlas categories have dedicated source records.
-        and ((p / "references.json").is_file() or (p / "preview.svg").is_file())
-    ) if root.exists() else []
+    categories = (
+        sorted(
+            p
+            for p in root.iterdir()
+            if p.is_dir()
+            and CATEGORY_PATTERN.fullmatch(p.name)
+            # The monorepo also has 06-cases/, 08-component-packs/ and other
+            # numbered modules. Atlas categories have dedicated source records.
+            and ((p / "references.json").is_file() or (p / "preview.svg").is_file())
+        )
+        if root.exists()
+        else []
+    )
     if len(categories) < 13:
         issues.append(f"only {len(categories)} category folders (expected at least 13)")
 
@@ -66,7 +79,9 @@ def audit(root: Path) -> list[str]:
                     issues.append(f"category ID mismatch in {folder.name}")
                 if data.get("kit_component_layers_inspected") is not False:
                     issues.append(f"false/unreviewed Apple layer inspection in {folder.name}")
-                if not str(data.get("reference_page", "")).startswith("https://developer.apple.com/"):
+                if not str(data.get("reference_page", "")).startswith(
+                    "https://developer.apple.com/"
+                ):
                     issues.append(f"missing official Apple source in {folder.name}")
             except (ValueError, OSError) as exc:
                 issues.append(f"invalid {folder.name}/references.json: {exc}")
@@ -145,8 +160,12 @@ def main(argv: list[str] | None = None) -> int:
     if errors:
         print(f"FAILED ({len(errors)} issue(s)); no source content was changed")
         return 1
-    print("PASS: reference bundle structure, original SVG provenance, metadata, catalog, HTML IDs and restricted-asset guard")
-    print("NOT CHECKED: real Apple kit layers, rights audit, browser render, source pixel equivalence")
+    print(
+        "PASS: reference bundle structure, original SVG provenance, metadata, catalog, HTML IDs and restricted-asset guard"
+    )
+    print(
+        "NOT CHECKED: real Apple kit layers, rights audit, browser render, source pixel equivalence"
+    )
     return 0
 
 

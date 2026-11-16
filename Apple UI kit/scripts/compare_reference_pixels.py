@@ -5,6 +5,7 @@ Optional dependency: Pillow (python -m pip install Pillow).
 Makes a 50/50 overlay, enhanced RGB diff and JSON metrics. Does NOT prove
 source-frame provenance, native Apple Liquid Glass equality, or design acceptance.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -18,9 +19,7 @@ except ImportError as exc:
     raise SystemExit("Pillow is required: python -m pip install Pillow") from exc
 
 
-def compare(
-    source: Path, candidate: Path, out: Path, threshold: int
-) -> dict[str, object]:
+def compare(source: Path, candidate: Path, out: Path, threshold: int) -> dict[str, object]:
     if not 0 <= threshold <= 255:
         raise ValueError("threshold must be in 0..255")
     with Image.open(source) as image:
@@ -75,7 +74,9 @@ def compare(
             "or independent visual acceptance."
         ),
     }
-    report_path.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    report_path.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     return result
 
 
@@ -84,10 +85,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("source", type=Path, help="Approved reference PNG, legally obtained")
     parser.add_argument("candidate", type=Path, help="Impulse browser screenshot PNG")
     parser.add_argument("--out", type=Path, default=Path("pixel-diff-output"), help="Output folder")
-    parser.add_argument("--threshold", type=int, default=12, help="Max channel delta threshold 0..255")
     parser.add_argument(
-        "--max-mismatch-pct", type=float, default=None,
-        help="Optional failure threshold; default is diagnostic-only"
+        "--threshold", type=int, default=12, help="Max channel delta threshold 0..255"
+    )
+    parser.add_argument(
+        "--max-mismatch-pct",
+        type=float,
+        default=None,
+        help="Optional failure threshold; default is diagnostic-only",
     )
     args = parser.parse_args(argv)
     try:

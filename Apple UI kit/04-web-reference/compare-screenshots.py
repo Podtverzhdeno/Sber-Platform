@@ -10,6 +10,7 @@ python "Apple UI kit/04-web-reference/compare-screenshots.py" \
 This is pixel-difference diagnostics, NOT a claim of parity between native Liquid
 Glass and CSS, and NOT a pass/fail certification. Keep output outside git.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -76,6 +77,7 @@ def main() -> int:
     max_channel = Image.new("L", reference.size)
     dr, dg, db = delta.split()
     from PIL import ImageChops as Chops
+
     max_channel = Chops.lighter(Chops.lighter(dr, dg), db)
     mask = max_channel.point(lambda n: 255 if n > options.threshold else 0)
     changed_fraction = ImageStat.Stat(mask).mean[0] / 255
@@ -84,7 +86,7 @@ def main() -> int:
     output_overlay = options.out_dir / "overlay.png"
     output_difference = options.out_dir / "difference.png"
     output_mask = options.out_dir / "changed-mask.png"
-    Image.blend(reference, candidate, .5).save(output_overlay)
+    Image.blend(reference, candidate, 0.5).save(output_overlay)
     ImageEnhance.Contrast(delta).enhance(3).save(output_difference)
     mask.save(output_mask)
 
