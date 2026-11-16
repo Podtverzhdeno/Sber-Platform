@@ -45,6 +45,8 @@ async function showLearning(page: Page, theme: "light" | "dark") {
   } }));
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="participant-alex"]').click();
+  // Demo login resolves asynchronously; wait for the authorized landing route before redirecting.
+  await expect(page).toHaveURL(/\/workspace\/0(?:[?#]|$)/);
   await page.goto("/workspace/5?analyticsTab=certification", { waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("analytics-v3")).toHaveAttribute("data-tab", "certification");
   const panel = page.getByTestId("analytics-v3").getByTestId("learning-progress-bridge");
@@ -134,6 +136,8 @@ test("Bootcamp also receives the shared light panel and legible empty progress",
   await installBootcampReferenceApi(page);
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="participant-alex"]').click();
+  // Demo login resolves asynchronously; wait for the authorized landing route before redirecting.
+  await expect(page).toHaveURL(/\/workspace\/0(?:[?#]|$)/);
   await page.goto("/workspace/2", { waitUntil: "domcontentloaded" });
   const panel = page.getByTestId("learning-progress-bridge").first();
   await expect(panel).toBeVisible();
