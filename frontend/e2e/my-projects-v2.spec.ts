@@ -733,3 +733,55 @@ for (const mode of ["light", "blue", "midnight"] as const) {
     });
   }
 }
+
+
+// The checkpoint form is a full-screen dialog on phones. Verify that opening
+// it does not bring the dark-only surfaces back into a light workspace.
+for (const mode of ["light", "blue", "midnight"] as const) {
+  for (const width of [320, 390, 1440]) {
+    test(`Checkpoint form surfaces follow ${mode} at ${String(width)}px`, async ({page}) => {
+      await page.setViewportSize({width,height:844});
+      await page.addInitScript((value: string) => {
+        localStorage.setItem("impulse-visual-mode", value);
+        localStorage.setItem("impulse-theme", value==="light" ? "light" : "dark");
+      },mode);
+      await fixture(page,"cards",mode);
+      await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+      await page.getByTestId("project-next-action").getByRole("button",{name:/Открыть задачу этапа/}).click();
+      const popup=page.getByTestId("checkpoint-solution-popup");
+      await expect(popup).toBeVisible();
+      const styles=await popup.evaluate((node) => {
+        const resolve=(selector:string)=>{
+          const element=node.querySelector<HTMLElement>(selector);
+          if(!element) throw new Error("Checkpoint control missing: "+selector);
+          const style=getComputedStyle(element);
+          return {background:style.backgroundColor,text:style.color,image:style.backgroundImage};
+        };
+        return {
+          dialog:{background:getComputedStyle(node).backgroundColor,image:getComputedStyle(node).backgroundImage},
+          card:resolve(".mpc-card"),
+          heading:resolve(".mpc-heading h2"),
+          field:resolve(".mpc-form textarea"),
+          dropzone:resolve(".mpc-dropzone"),
+        };
+      });
+      if(mode==="light"){
+        expect(styles.dialog.background).toBe("rgb(255, 255, 255)");
+        expect(styles.dialog.image).toBe("none");
+        expect(styles.card.background).toBe("rgb(248, 250, 252)");
+        expect(styles.field.background).toBe("rgb(255, 255, 255)");
+        expect(styles.dropzone.background).toBe("rgb(241, 247, 251)");
+        expect(styles.heading.text).toBe("rgb(25, 51, 72)");
+      }else{
+        expect(styles.dialog.image).toContain("linear-gradient");
+      }
+      const bounds=await popup.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds?.x??-1).toBeGreaterThanOrEqual(-1);
+      expect((bounds?.x??0)+(bounds?.width??0)).toBeLessThanOrEqual(width+1);
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
+      await page.keyboard.press("Escape");
+      await expect(popup).toHaveCount(0);
+    });
+  }
+}
