@@ -150,6 +150,16 @@ for (const width of [320, 390, 1440]) {
     await checkSvgContrast(page, root + ' .ref-radar svg line[stroke="#ffae2b"]', "stroke", 3);
     await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#31eaba"]', "fill", 3);
     await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#ffb844"]', "fill", 3);
+    for (const selector of [
+      ".ref-legend .ref-dot:not(.amber):not(.activity)",
+      ".ref-legend .ref-dot.amber",
+      ".ref-legend .ref-dot.activity",
+    ]) {
+      const paint = await passport.locator(selector).evaluate(el =>
+        getComputedStyle(el).backgroundColor);
+      const contrast = (1.05) / (luminosity(paint) + .05);
+      expect(contrast, selector + " symbol on white").toBeGreaterThanOrEqual(3);
+    }
 
     const viewport = await passport.boundingBox();
     expect(viewport).not.toBeNull();
