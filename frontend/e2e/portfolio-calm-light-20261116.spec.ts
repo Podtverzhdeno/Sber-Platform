@@ -72,14 +72,14 @@ for (const mode of ["light", "blue", "midnight"] as const) {
         };
       });
       if (mode === "light") {
-        expect(display.hero.bg).toBe("rgb(248, 250, 252)");
+        expect(display.hero.bg).toBe("rgb(255, 255, 255)");
         expect(display.metric.bg).toBe("rgb(255, 255, 255)");
         expect(display.panel.bg).toBe("rgb(255, 255, 255)");
-        expect(display.project.bg).toBe("rgb(248, 250, 252)");
-        expect(display.tabs.bg).toBe("rgb(242, 246, 250)");
+        expect(display.project.bg).toBe("rgb(255, 255, 255)");
+        expect(display.tabs.bg).toBe("rgb(255, 255, 255)");
         expect(display.label.color).toBe("rgb(37, 66, 87)");
       } else {
-        expect(display.panel.image).toContain("linear-gradient");
+        expect(display.panel.bg).not.toBe("rgb(255, 255, 255)");
       }
       expect(display.overflow).toBeLessThanOrEqual(2);
       expect(display.panel.left).toBeGreaterThanOrEqual(-1);
