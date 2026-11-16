@@ -249,7 +249,7 @@ export function ConditionsDialog(props: {
                   setConsent(event.target.checked);
                 }}
               />
-              Я прочитал(а) условия версии {termsData.terms_version} и подтверждаю их перед откликом.
+              <span className="catalog-v2-consent-copy">Я прочитал(а) условия версии {termsData.terms_version} и подтверждаю их перед откликом.</span>
             </label>
             <div className="catalog-v2-conditions-actions">
               <button type="button" disabled={apply.isPending} onClick={props.onClose}>Закрыть</button>
