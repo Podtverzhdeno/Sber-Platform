@@ -81,6 +81,13 @@ for(const mode of ["light","blue","midnight"] as const){
       }
       await navigation.getByRole("button",{name:"Безопасность"}).click();
       const security=await inspectSurface(page,".settings-cards article");
+      // The UI must not invent session devices, login locations or completed
+      // credential actions when the backend supplies no security audit data.
+      await expect(page.getByText("Подключённые устройства")).toBeVisible();
+      await expect(page.getByText(/Список устройств и история входов не предоставляются/)).toBeVisible();
+      await expect(page.getByRole("button",{name:"Сменить пароль"})).toHaveCount(0);
+      await expect(page.getByRole("button",{name:"Завершить",exact:true})).toHaveCount(0);
+      await expect(page.getByText(/Windows · Chrome · Москва|Android · 27 сентября|Обновлён 18 дней назад/)).toHaveCount(0);
       await navigation.getByRole("button",{name:"Согласия"}).click();
       const toggle=await inspectSurface(page,".settings-toggle");
       const checkbox=page.getByRole("checkbox",{name:"Публичный профиль и достижения"});

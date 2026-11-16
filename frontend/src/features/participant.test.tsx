@@ -63,31 +63,22 @@ describe("participant settings", () => {
     expect(screen.getByText("Профиль и предпочтения сохранены")).toBeInTheDocument();
   });
 
-  it("hides non-functional 2FA and external identity flows behind honest disabled states", async () => {
-    const queries = [
-      { path: "/api/v1/me", payload: { consent_scopes: [] } },
-    ];
+  it("never fabricates security sessions or offers unsupported password controls", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const path = input instanceof Request ? new URL(input.url).pathname : input instanceof URL ? input.pathname : input;
-      const match = queries.find((item) => item.path === path);
-      if (match) return Promise.resolve(new Response(JSON.stringify(match.payload), { status: 200 }));
+      if (path === "/api/v1/me") return Promise.resolve(new Response(JSON.stringify({ consent_scopes: [] }), { status: 200 }));
       return Promise.resolve(new Response(JSON.stringify({ ...profile, buddy_enabled: true }), { status: 200 }));
     });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={client}>
-        <ParticipantSettings actorName="Алекс Речной" consentScopes={[]} />
-      </QueryClientProvider>,
-    );
-    await waitFor(() => { expect(screen.getByRole("button", { name: /Безопасность/ })).toBeInTheDocument(); });
+    render(<QueryClientProvider client={client}><ParticipantSettings actorName="Алекс Речной" consentScopes={[]} /></QueryClientProvider>);
     fireEvent.click(screen.getByRole("button", { name: /Безопасность/ }));
     expect(screen.getByText("Двухфакторная аутентификация")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Недоступно в MVP" })).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: "Недоступно в MVP" }).every((element) => element.hasAttribute("disabled"))).toBe(true);
-    expect(screen.getByText("Внешний вход (SSO / Google / GitHub)")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Недоступно в MVP" })).toHaveLength(2);
-    expect(screen.getByText(/Не поддерживается в демо-режиме/)).toBeInTheDocument();
     expect(screen.getByText("Провайдер входа")).toBeInTheDocument();
+    expect(screen.getByText("Подключённые устройства")).toBeInTheDocument();
+    expect(screen.getByText(/Список устройств и история входов не предоставляются/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Сменить пароль" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Завершить" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Windows · Chrome · Москва|Android · 27 сентября|Обновлён 18 дней назад/)).not.toBeInTheDocument();
   });
 
   it("splits the notification matrix into mandatory, product and marketing groups", async () => {
