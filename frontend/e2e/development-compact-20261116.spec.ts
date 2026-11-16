@@ -91,9 +91,9 @@ for(const mode of ["light","blue","midnight"] as const){
             const element = node.querySelector<HTMLElement>(selector);
             if (!element) throw new Error("Development surface missing: " + selector);
             const color = getComputedStyle(element).backgroundColor;
-            const rgb = color.match(/^rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
-            if (!rgb) throw new Error("Non-solid Development background: " + color);
-            return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+            const rgb = color.match(/[0-9]+/g)?.slice(0, 3).map(Number);
+            if (!rgb || rgb.length !== 3) throw new Error("Non-solid Development background: " + color);
+            return rgb;
           });
           return colors;
         });
