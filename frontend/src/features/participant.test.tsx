@@ -63,7 +63,7 @@ describe("participant settings", () => {
     expect(screen.getByText("Профиль и предпочтения сохранены")).toBeInTheDocument();
   });
 
-  it("never fabricates security sessions or offers unsupported password controls", async () => {
+  it("never fabricates security sessions or offers unsupported password controls", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const path = input instanceof Request ? new URL(input.url).pathname : input instanceof URL ? input.pathname : input;
       if (path === "/api/v1/me") return Promise.resolve(new Response(JSON.stringify({ consent_scopes: [] }), { status: 200 }));
