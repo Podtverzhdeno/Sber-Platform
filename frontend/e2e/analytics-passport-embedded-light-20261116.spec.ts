@@ -177,8 +177,9 @@ for (const width of [320, 390, 1440]) {
     await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#ffb844"]', "fill", 3);
     const activityMark = passport.locator(".ref-radar-activity-mark").first();
     await expect(activityMark).toBeVisible();
-    const focusableSkill = passport.locator(".ref-radar-skill")
-      .filter({ has: activityMark }).first();
+    const focusableSkill = passport.locator(
+      ".ref-radar-skill:has(.ref-radar-activity-mark)",
+    ).first();
     await focusableSkill.focus();
     await expect(focusableSkill).toBeFocused();
     const activityForeground = await activityMark.locator("text")
