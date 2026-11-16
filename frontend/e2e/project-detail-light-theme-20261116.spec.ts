@@ -111,6 +111,10 @@ for (const width of [320, 390, 1440]) {
       if (name === "Обзор") {
         await expectLight(page, ".mpv2 .mp-overview-next");
         await expectContrast(page, ".mp-overview-next > header h2", ".mp-overview-next");
+        await expectContrast(page, ".mp-outcome-band > span", ".mp-outcome-band");
+        const action = dialog.locator(".mp-inline-action").first();
+        await action.hover();
+        await expectContrast(page, ".mp-inline-action:hover", ".mp-detail-panel");
       }
       if (name === "Задачи") {
         await expectLight(page, ".mpv2 .mp-ref-task-row");
@@ -125,6 +129,7 @@ for (const width of [320, 390, 1440]) {
         await expectLight(page, ".mpv2 .mp-ref-contrib-metrics > div");
         await expectContrast(page, ".mp-ref-contrib-metrics strong", ".mp-ref-contrib-metrics > div");
         await expectLight(page, ".mpv2 .mp-contribute-form textarea");
+        await expectContrast(page, ".mp-explain-steps li > strong", ".mp-detail-panel");
       }
       if (name === "Команда") {
         await expectLight(page, ".mpv2 .mp-ref-responsibility > div");
