@@ -3537,3 +3537,43 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   .catalog-v2-workflow-tabs button { min-width: 0; padding: 9px 6px; }
   .catalog-v2-workflow-panel { padding: 14px; }
 }
+
+/* Apple-sized workflow touch targets and calm light-mode tab surfaces.
+ * Preserve the existing task lifecycle, API-sourced values and dark skins. */
+.catalog-v2 .catalog-v2-workflow-tabs button,
+.catalog-v2 .catalog-v2-workflow-action {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.catalog-v2 .catalog-v2-workflow-extra summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  width: fit-content;
+  max-width: 100%;
+}
+:root[data-theme="light"] .catalog-v2 .catalog-v2-workflow-tabs button[role="tab"] {
+  color: #40566b;
+  background: #f4f7fb;
+  border-color: #dbe5ee;
+  box-shadow: none;
+}
+:root[data-theme="light"] .catalog-v2 .catalog-v2-workflow-tabs button[role="tab"][aria-selected="true"] {
+  color: #14558d;
+  background: #eaf3ff;
+  border-color: #a9c9e8;
+  box-shadow: none;
+}
+:root[data-theme="light"] .catalog-v2 .catalog-v2-workflow-panel {
+  background: #fff;
+  border-color: #dbe5ee;
+  color: #20374c;
+}
+:root[data-theme="light"] .catalog-v2 .catalog-v2-workflow-facts span {
+  background: #f0f5fa;
+  color: #40566b;
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2 .catalog-v2-workflow-tabs button,
+  .catalog-v2 .catalog-v2-workflow-action { transition: none; transform: none; }
+}
