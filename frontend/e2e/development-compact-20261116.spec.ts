@@ -65,6 +65,42 @@ for(const mode of ["light","blue","midnight"] as const){
       expect(geometry.left).toBeGreaterThanOrEqual(-1);
       expect(geometry.right).toBeLessThanOrEqual(width+1);
       expect(geometry.headerMargin).toBe("12px");
+      // All section destinations must remain available at 320px, without a hidden tab.
+      const navigation = page.getByRole("navigation", {name:"Подразделы развития"});
+      await expect(navigation.getByRole("button",{name:"Траектории"})).toBeVisible();
+      await expect(navigation.getByRole("button",{name:"Уровни"})).toBeVisible();
+      await expect(navigation.getByRole("link",{name:"Курсы"})).toBeVisible();
+      if (width <= 600) {
+        const contained = await navigation.evaluate(node => {
+          const bounds = node.getBoundingClientRect();
+          return Array.from(node.querySelectorAll("button,a")).every(item => {
+            const rect = item.getBoundingClientRect();
+            return rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1;
+          });
+        });
+        expect(contained).toBe(true);
+      }
+      if (mode === "light") {
+        const skin = await screen.evaluate(node => {
+          const selectors = [
+            ".trajectory-v2-role-card",
+            ".trajectory-v2-role-detail",
+            ".trajectory-v2-reference-sidebar > section",
+          ];
+          const colors = selectors.map(selector => {
+            const element = node.querySelector<HTMLElement>(selector);
+            if (!element) throw new Error("Development surface missing: " + selector);
+            const color = getComputedStyle(element).backgroundColor;
+            const rgb = color.match(/^rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+            if (!rgb) throw new Error("Non-solid Development background: " + color);
+            return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+          });
+          return colors;
+        });
+        for (const [red, green, blue] of skin) {
+          expect(Math.min(red, green, blue)).toBeGreaterThanOrEqual(220);
+        }
+      }
       await page.getByRole("button",{name:"Impulse — открыть разделы"}).click();
       const menu=page.getByRole("dialog",{name:"Главное меню"});
       await expect(menu).toBeVisible();
