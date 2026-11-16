@@ -314,7 +314,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
           }}
         >{value}</button>
       ))}</div>}
-      {person !== null && <div className="ir-profile-tab-panel" id="ir-profile-tab-panel" role="tabpanel" aria-labelledby={`ir-profile-tab-${String(profileSections.indexOf(tab as (typeof profileSections)[number]))}`} tabIndex={0}>}
+      {person !== null && <div className="ir-profile-tab-panel" id="ir-profile-tab-panel" role="tabpanel" aria-labelledby={`ir-profile-tab-${String(profileSections.indexOf(tab as (typeof profileSections)[number]))}`} tabIndex={0}>
       {person !== null && feedback && <div className="ir-feedback" role="status"><CircleCheck size={18}/>{feedback}<button type="button" onClick={()=>{setFeedback("");}} aria-label="Закрыть уведомление">×</button></div>}
       {person !== null && (tab==="Обзор"||tab==="Награды")&&<section className="ir-unlocks"><h2><LockKeyhole size={20}/> Открытые возможности</h2><div className="ir-unlock-grid">{levels.map((item)=>{const qualifies=item.label==="ТОП 1"?person.place===1:item.label==="ТОП 30"?person.place<=30:person.place<=50;const reward=benefits.find(benefit => benefit.place === item.label);if (!reward) return null;return <button type="button" key={item.label} className={"ir-unlock ir-unlock--"+reward.key} onClick={() => {setSelectedBenefit(reward);}}><item.icon size={25}/><strong>{item.label}</strong><span>{item.benefit}</span><small>{qualifies?<><Check size={15}/> В призовой зоне</>:<><LockKeyhole size={15}/> Пока недоступно</>}</small></button>;})}</div><p>Попадание в призовую зону не подтверждает фактическую выдачу награды. Организаторы проверяют результаты и утверждают условия.</p></section>}
       {person !== null && <div className="ir-profile-grid">
@@ -323,7 +323,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
         {(tab==="Обзор"||tab==="Оценки")&&<section className="ir-profile-panel ir-evaluation"><h2><Star size={19}/> Оценки и вклад</h2><p className="ir-small-note">Оценки компетенций не выводятся из позиции в рейтинге. Требуется отдельная подтверждённая оценка.</p></section>}
         {(tab==="Обзор"||tab==="Достижения"||tab==="Награды")&&<section className="ir-profile-panel"><h2><BadgeCheck size={19}/> Skill Passport и признание</h2><div className="ir-skill-passport"><FileBadge2 size={35}/><div><strong>Skill Passport</strong><span>Данные о результатах и достижениях</span><small>Награды проверяются отдельно от таблицы рейтинга</small></div></div><button type="button" className="ir-subtle-action" onClick={viewBenefits}>Условия признания <ArrowRight size={16}/></button></section>}
       </div>}
-      {person !== null && </div>}
+      </div>}
       <button type="button" className="ir-back-button" onClick={backToList}><ArrowLeft size={18}/> Вернуться в рейтинг</button>
     </>}
     {selectedBenefit && <RewardDialog benefit={selectedBenefit} onClose={() => {setSelectedBenefit(null);}} />}
