@@ -7,12 +7,14 @@ on:
       - "frontend/e2e/events-detail-hero-light-20261116.spec.ts"
       - "frontend/playwright.events-detail-hero-20261116.config.mjs"
       - ".github/workflows/events-detail-light-review-qa.yml"
+      - ".agents/coordination/claims/QA-EVENTS-DETAIL-REVIEW-GATE-20261116.lock/status.md"
   push:
     branches: [main]
     paths:
       - "frontend/src/features/participant-events-detail-banner.scss"
       - "frontend/e2e/events-detail-hero-light-20261116.spec.ts"
       - ".github/workflows/events-detail-light-review-qa.yml"
+      - ".agents/coordination/claims/QA-EVENTS-DETAIL-REVIEW-GATE-20261116.lock/status.md"
 
 permissions:
   contents: read
