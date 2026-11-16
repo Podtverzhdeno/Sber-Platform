@@ -142,8 +142,14 @@ for(const mode of ["light","blue","midnight"] as const){
             contrasts: tabs.map(tab => contrast(getComputedStyle(tab).color, bg)),
             headingContrast: contrast(getComputedStyle(node.querySelector<HTMLElement>(".trajectory-v2-role-modal-heading h2")!).color, bg),
             tileBackgrounds: tiles.map(tile => toRgb(getComputedStyle(tile).backgroundColor)),
-            tabBounds: tabs.map(tab => tab.getBoundingClientRect()),
-            listBounds: tablist.getBoundingClientRect(),
+            tabBounds: tabs.map(tab => {
+              const rect = tab.getBoundingClientRect();
+              return {left: rect.left, right: rect.right};
+            }),
+            listBounds: (() => {
+              const rect = tablist.getBoundingClientRect();
+              return {left: rect.left, right: rect.right};
+            })(),
             layout: getComputedStyle(tablist).display,
           };
         });
