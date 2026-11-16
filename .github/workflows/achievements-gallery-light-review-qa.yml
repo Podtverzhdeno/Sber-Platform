@@ -1,0 +1,60 @@
+name: Achievements artwork light independent QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/achievements-v2/gallery.scss"
+      - "frontend/e2e/achievements-gallery-light-20261116.spec.ts"
+      - "frontend/playwright.achievements-light-20261116.config.mjs"
+      - ".github/workflows/achievements-gallery-light-review-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/achievements-v2/gallery.scss"
+      - "frontend/e2e/achievements-gallery-light-20261116.spec.ts"
+      - ".github/workflows/achievements-gallery-light-review-qa.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: achievements-artwork-light-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  achievements-artwork-light:
+    name: Actual gallery light/dark 320/390/1440 + drawer
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact tested PR
+        uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Focused ESLint and TypeScript
+        run: |
+          npx eslint e2e/achievements-gallery-light-20261116.spec.ts playwright.achievements-light-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Production frontend build
+        run: npm run build
+      - name: Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify gallery real route, artwork and detail overlay
+        run: npx playwright test --config=playwright.achievements-light-20261116.config.mjs --project=chromium
+      - name: Browser diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: achievements-gallery-artwork-debug
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
