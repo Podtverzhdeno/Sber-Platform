@@ -1,0 +1,56 @@
+name: My Projects light catalogue QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/my-projects/my-projects.scss"
+      - "frontend/e2e/my-projects-light-surfaces-20261116.spec.ts"
+      - "frontend/playwright.projects-light-20261116.config.mjs"
+      - ".github/workflows/my-projects-light-20261116-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/my-projects/my-projects.scss"
+      - "frontend/e2e/my-projects-light-surfaces-20261116.spec.ts"
+      - ".github/workflows/my-projects-light-20261116-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  projects-light:
+    name: Light table and cards — 320/390/1440, dark unaffected
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact PR revision
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint tests and check frontend types
+        run: |
+          npx eslint e2e/my-projects-light-surfaces-20261116.spec.ts playwright.projects-light-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Build frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validate light table and card surfaces
+        run: npx playwright test --config=playwright.projects-light-20261116.config.mjs --project=chromium
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: projects-light-qa
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
