@@ -21,7 +21,8 @@ test("approved live dashboard at 1422px has one floating header, no Menu and dyn
   await expect(page.locator(".impulse-pixel__topbar")).toHaveCount(0);
   await expect(page.locator(".topbar")).toHaveCount(1);
   await expect(page.getByRole("heading",{name:"Моя траектория"})).toBeVisible();
-  await expect(page.getByRole("heading",{name:"Главная"})).toBeVisible();
+  await expect(page.locator(".impulse-pixel__heading h1")).toHaveText("Обзор участника");
+  await expect(page.locator(".impulse-pixel__heading h1")).toHaveClass(/sr-only/);
   const bar=await page.locator(".topbar").boundingBox();
   const hero=await page.locator(".impulse-pixel__hero").boundingBox();
   const trajectory=await page.locator(".impulse-pixel__trajectory").boundingBox();
@@ -45,8 +46,8 @@ test("approved live dashboard at 1422px has one floating header, no Menu and dyn
   expect(trajectory?.width).toBeLessThan(345);
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
   await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
-  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("background-image", "none");
-  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("border-top-width", "0px");
+  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("background-image", /linear-gradient/);
+  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("border-radius", "12px");
 });
 
 test("reference Liquid Glass home has no duplicate requirements or unsolicited floating tips", async ({ page }) => {
@@ -59,8 +60,8 @@ test("reference Liquid Glass home has no duplicate requirements or unsolicited f
   // Liquid Glass is reserved for the interactive toolbar and overlays.
   await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
-  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("background-image", "none");
-  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("border-top-width", "0px");
+  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("background-image", /linear-gradient/);
+  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("border-radius", "12px");
   await page.waitForTimeout(2200);
   await expect(page.locator(".participant-guide")).toHaveCount(0);
   await page.getByRole("button", { name: "Требования уровня" }).click();
