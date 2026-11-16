@@ -18,7 +18,7 @@ async function openHome(page: Page) {
   await expect(page.getByTestId("pixel-live-shell")).toBeVisible();
 }
 
-for (const width of [320, 390, 820]) {
+for (const width of [320, 390, 570, 767, 820]) {
   test(`mobile search is a compact icon until focused at ${String(width)}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await openHome(page);
@@ -29,6 +29,12 @@ for (const width of [320, 390, 820]) {
     const compact = await searchControl.boundingBox();
     expect(compact).not.toBeNull();
     expect(compact?.width).toBeLessThanOrEqual(44);
+    const header = await page.locator(".topbar").boundingBox();
+    expect(header).not.toBeNull();
+    expect(compact?.x ?? -1).toBeGreaterThanOrEqual((header?.x ?? 0) - 1);
+    expect((compact?.x ?? 0) + (compact?.width ?? 0)).toBeLessThanOrEqual((header?.x ?? 0) + (header?.width ?? 0) + 1);
+    expect(compact?.y ?? -1).toBeGreaterThanOrEqual((header?.y ?? 0) - 1);
+    expect((compact?.y ?? 0) + (compact?.height ?? 0)).toBeLessThanOrEqual((header?.y ?? 0) + (header?.height ?? 0) + 1);
     await expect(search).toHaveCSS("opacity", "0");
 
     await searchControl.click();
@@ -39,12 +45,15 @@ for (const width of [320, 390, 820]) {
     expect(expanded).not.toBeNull();
     expect(topbar).not.toBeNull();
     expect(expanded?.y).toBeGreaterThanOrEqual((topbar?.y ?? 0) + (topbar?.height ?? 0));
+    expect(expanded?.y).toBeLessThanOrEqual((topbar?.y ?? 0) + (topbar?.height ?? 0) + 20);
+    await expect(search).toBeInViewport();
     expect(expanded?.x).toBeGreaterThanOrEqual(8);
     expect((expanded?.x ?? 0) + (expanded?.width ?? 0)).toBeLessThanOrEqual(width - 7);
 
     await search.fill("Python");
     const results = page.getByRole("listbox", { name: "Результаты поиска" });
     await expect(results).toBeVisible();
+    await expect(results).toBeInViewport();
     await results.getByRole("option", { name: /Python: исследование/ }).click();
     await expect.poll(() => page.url()).toContain("/workspace/3?task=task-search");
     await expect(search).toHaveCSS("opacity", "0");
