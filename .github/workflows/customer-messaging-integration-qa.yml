@@ -1,0 +1,87 @@
+name: Customer messaging integration QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/e2e/customer-visual.spec.ts"
+      - ".github/workflows/customer-messaging-integration-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/customer-visual.spec.ts"
+      - ".github/workflows/customer-messaging-integration-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  focused-messaging:
+    name: Customer messaging and authorized overlay
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Frontend lint and TypeScript
+        run: |
+          npm run lint
+          npm run typecheck
+      - name: Frontend build
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run customer messaging regression
+        run: >-
+          npx playwright test e2e/customer-visual.spec.ts
+          --grep "customer can send messages and each dialog keeps its own history|customer participant dialogs keep separate histories|customer messages expose the linked work context"
+          --project=chromium --workers=1
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-messaging-qa-traces
+          path: frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+  full-customer-audit:
+    name: Customer route and actions 15-case audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run all customer browser journeys
+        run: npx playwright test e2e/customer-visual.spec.ts --project=chromium --workers=1
+      - name: Upload customer screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-full-audit-evidence
+          path: frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
