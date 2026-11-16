@@ -117,6 +117,27 @@ describe("content-first Development section", () => {
     expect(within(requirements).getByText(/не официальный карьерный грейд/)).toBeVisible();
   });
 
+  it("shows genuine course and practice progress with accessible values", () => {
+    renderSection({ url: "/workspace/1?role=python&hub=levels" });
+    const courseProgress = screen.getByRole("progressbar", { name: "Завершённые обязательные курсы" });
+    const practiceProgress = screen.getByRole("progressbar", { name: "Зачтённые практические работы" });
+    expect(courseProgress).toHaveAttribute("max", "2");
+    expect(courseProgress).toHaveAttribute("value", "1");
+    expect(practiceProgress).toHaveAttribute("max", "2");
+    expect(practiceProgress).toHaveAttribute("value", "1");
+    fireEvent.click(screen.getByText("Как учитывается практика"));
+    expect(screen.getByText(/Независимая проверка компетенций/)).toBeVisible();
+  });
+
+  it("does not mistake a published zero-course level for a failed curriculum load", () => {
+    renderSection({ url: "/workspace/1?role=python&hub=levels", level: {
+      ...level, required_courses: 0, completed_courses: 0, required_course_keys: [],
+    } });
+    expect(screen.getByText("На этом уровне обязательных курсов нет.")).toBeVisible();
+    expect(screen.queryByRole("progressbar", { name: "Завершённые обязательные курсы" })).toBeNull();
+    expect(screen.queryByText(/Список обязательных курсов пока не получен/)).toBeNull();
+  });
+
   it("preserves role query while switching between trajectories and levels", () => {
     renderSection({ url: "/workspace/1?role=python&stage=foundation&hub=levels" });
     expect(screen.getByTestId("development-level-requirements")).toBeVisible();
