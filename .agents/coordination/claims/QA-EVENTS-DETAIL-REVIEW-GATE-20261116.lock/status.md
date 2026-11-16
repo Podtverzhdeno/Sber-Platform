@@ -2,7 +2,7 @@
 
 - task_id: QA-EVENTS-DETAIL-REVIEW-GATE-20261116
 - session_id: gpt6-20261116-events-detail-independent-gate
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T14:22:00+03:00
 - heartbeat_at: 2026-11-16T14:22:00+03:00
 - depends_on: FIX-EVENTS-LIGHT-DETAIL-HERO-20261116 (REVIEW, PR #239)
@@ -14,4 +14,10 @@
 - task: automatically validate exact PR SHA on GitHub hosted Linux with scoped ESLint, TypeScript, Vite build, 4 Chromium cases
 - progress: verified no existing workflow or active claim for events-detail-light-review-qa.yml; existing frontend lint + architecture checks PASS, global CI red due unrelated legacy E2E and Ruff/OpenSpec, a focused exact-SHA workflow separates this feature result
 - acceptance: workflow starts on feature PR, reports jobs/check conclusion, does not change user-visible product, independent reviewer still required
-- blockers: workflow not yet installed; no self-review, no deploy
+- verified_gitHub_sha: 4852e2848e13550a92620eef86d134fdcd4e80a2
+- verified_workflow_run: 43860765535 (Events detail light theme independent QA)
+- verified_qa: Linux ubuntu-latest, Node 24, npm ci PASS, scoped ESLint PASS, frontend TypeScript PASS, Vite build PASS, Chromium installed and 4/4 mobile/desktop/light/dark browser tests PASS. Workflow conclusion SUCCESS.
+- final_workflow_path: .github/workflows/events-detail-light-review-qa.yml, now includes own claim handoff in paths so final PR SHA is rechecked
+- source_scope: no application behavior changes in this QA task, only dedicated CI workflow and own claim
+- remaining: independent human/agent reviewer, integration release gate; full global CI may remain red due unrelated Ruff/OpenSpec and legacy visual tests
+- blockers: no independent reviewer yet, no approval for author-only merge or Railway deploy
