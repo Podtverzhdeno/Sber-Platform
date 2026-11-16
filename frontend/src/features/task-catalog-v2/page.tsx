@@ -12,6 +12,7 @@ import { Award, Bookmark, ChartNoAxesColumnIncreasing, CircleHelp, ChevronDown, 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
+import { PracticeNavigation } from "../participant-practice-navigation/PracticeNavigation";
 import { trackCatalogEvent } from "./analytics";
 import {
   catalogErrorMessage,
@@ -567,13 +568,14 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   ].filter((chip): chip is { key: string; label: string } => chip !== null);
 
   if (catalog.isPending) {
-    return <div className="catalog-v2"><StatePanel kind="loading" /></div>;
+    return <div className="catalog-v2"><PracticeNavigation activePage="tasks" /><StatePanel kind="loading" /></div>;
   }
   if (catalog.isError && catalog.data === undefined) {
-    return <div className="catalog-v2"><StatePanel kind={isOfflineError(catalog.error) ? "offline" : "error"} action="Повторить" onAction={() => { void catalog.refetch(); }} /></div>;
+    return <div className="catalog-v2"><PracticeNavigation activePage="tasks" /><StatePanel kind={isOfflineError(catalog.error) ? "offline" : "error"} action="Повторить" onAction={() => { void catalog.refetch(); }} /></div>;
   }
   return (
     <div className="catalog-v2" data-reference="R-PAR-03">
+      <PracticeNavigation activePage="tasks" />
       <header className="catalog-v2-heading">
         <div>
           <p className="eyebrow">ЗАДАЧИ</p>

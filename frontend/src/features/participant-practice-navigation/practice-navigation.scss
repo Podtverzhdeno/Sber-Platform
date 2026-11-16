@@ -1,0 +1,124 @@
+/* Practice: calm, compact first-fold switcher; existing catalog and project UI remain intact. */
+.practice-navigation {
+  --practice-ink: #edf4ff;
+  --practice-muted: #afbdd0;
+  --practice-line: rgba(158, 187, 225, .22);
+  --practice-focus: #95c9ff;
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  gap: 8px 18px;
+  box-sizing: border-box;
+  padding: 3px 0 13px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--practice-line);
+  color: var(--practice-ink);
+}
+
+:root[data-theme="light"] .practice-navigation,
+[data-theme="light"] .practice-navigation {
+  --practice-ink: #19324b;
+  --practice-muted: #566c83;
+  --practice-line: rgba(50, 83, 120, .22);
+  --practice-focus: #1967c2;
+}
+
+.practice-navigation__label {
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: -.01em;
+  font-weight: 700;
+  color: var(--practice-muted);
+}
+
+.practice-navigation__tabs {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  gap: 4px;
+  padding: 4px;
+  box-sizing: border-box;
+  border: 1px solid var(--practice-line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--practice-ink) 5%, transparent);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.practice-navigation__tabs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--practice-muted);
+  font-size: 13px;
+  font-weight: 620;
+  line-height: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .16s ease, color .16s ease;
+}
+
+.practice-navigation__tabs a:hover {
+  color: var(--practice-ink);
+  background: color-mix(in srgb, var(--practice-ink) 8%, transparent);
+}
+
+.practice-navigation__tabs a[aria-current="page"] {
+  color: var(--practice-ink);
+  background: color-mix(in srgb, var(--practice-focus) 17%, transparent);
+  border-color: color-mix(in srgb, var(--practice-focus) 34%, transparent);
+  font-weight: 690;
+}
+
+.practice-navigation__tabs a:focus-visible {
+  outline: 3px solid var(--practice-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .practice-navigation {
+    align-items: stretch;
+    gap: 8px;
+    padding: 0 0 10px;
+    margin-bottom: 10px;
+  }
+  .practice-navigation__tabs {
+    width: 100%;
+  }
+  .practice-navigation__tabs a {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .practice-navigation__tabs a {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-navigation__tabs a { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .practice-navigation__tabs { border-color: ButtonText; }
+  .practice-navigation__tabs a[aria-current="page"] {
+    border-color: Highlight;
+    color: Highlight;
+    background: Canvas;
+  }
+}
