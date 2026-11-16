@@ -49,3 +49,24 @@ Selected, bookmarked, ineligible, loading, empty, error, offline, submitted and 
 - **THEN** focus order follows search, filters, results, selected detail and actions logically
 - **AND** nested bookmark/action controls do not trigger unintended row selection
 
+
+
+### Requirement: Task detail workflow uses accessible roving tabs
+
+The four task-detail workflow sections (overview, criteria, solution and review) SHALL be represented by an accessible tablist with exactly one selected tab and one tab stop in the tab set. Left/right and up/down arrow keys SHALL select and focus adjacent tabs with wraparound; Home and End SHALL focus the first and last tab. Activating sections SHALL NOT mutate assignment, consent, review or verification state. The associated tabpanel SHALL expose a programmatic name and be keyboard reachable.
+
+#### Scenario: Keyboard user inspects a task
+
+- **WHEN** an authorized participant opens task details, focuses the "О задаче" tab and presses Right, End, Home and Left
+- **THEN** focus and the accessible selected state follow the requested sections in their documented order
+- **AND** the associated panel is announced without any application or review side effect
+
+### Requirement: Workflow controls are readable and touch-operable in all visual modes
+
+Task-detail tabs, primary workflow actions and stage-plan disclosure SHALL provide at least 44 CSS pixels of hit-area height across 320, 390 and 1440 CSS pixel widths. Light mode SHALL use an opaque pale surface with legible labels and a distinct selected state; blue and midnight SHALL retain their established semantic accents. Reduced-motion mode SHALL not require animations for comprehension.
+
+#### Scenario: Participant switches sections on a narrow light-theme screen
+
+- **WHEN** a participant opens task details at 320 CSS pixels with the light theme
+- **THEN** every workflow section is reachable without horizontal page overflow
+- **AND** the selected tab and task panel remain visually distinct and readable with 44 CSS pixel minimum hit targets
