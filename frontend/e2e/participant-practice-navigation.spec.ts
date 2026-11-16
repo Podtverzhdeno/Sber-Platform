@@ -107,7 +107,7 @@ test("Practice navigation remains usable during catalog API outage", async ({ pa
   const nav = page.getByRole("navigation", { name: "Подразделы практики" });
   await expect(nav.getByRole("link", { name: "Мои проекты" })).toBeVisible();
   await nav.getByRole("link", { name: "Мои проекты" }).click();
-  await expect(page).toHaveURL(/\\/workspace\\/4$/);
+  await expect(page).toHaveURL(/\/workspace\/4$/);
 });
 
 test("Practice navigation remains usable during project API outage", async ({ page }) => {
@@ -118,5 +118,5 @@ test("Practice navigation remains usable during project API outage", async ({ pa
   const nav = page.getByRole("navigation", { name: "Подразделы практики" });
   await expect(nav.getByRole("link", { name: "Задачи" })).toBeVisible();
   await nav.getByRole("link", { name: "Задачи" }).click();
-  await expect(page).toHaveURL(/\\/workspace\\/3$/);
+  await expect(page).toHaveURL(/\/workspace\/3$/);
 });
