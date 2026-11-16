@@ -290,3 +290,111 @@
   .p2-content-grid:not(.p2-content-grid--single) .p2-project { grid-template-columns:1fr; }
   .p2-content-grid:not(.p2-content-grid--single) .p2-project-art { max-height:170px; }
 }
+
+/* Apple HIG Materials + local Apple UI kit/06-cases/06-data-and-dashboards:
+   solid content surfaces, restrained semantic accents, consistent contrast.
+   This is an Impulse web interpretation, not native Apple UI-kit parity. */
+html[data-theme="light"] .p2-root {
+  --p2-teal:#147e86; --p2-line:#dce5ee; --p2-card:#fff; --p2-soft:#f4f8fb;
+  color:#203448;
+}
+html[data-theme="light"] .p2-root :is(h1,h2,h3) {color:#1d3449}
+html[data-theme="light"] .p2-root :is(.p2-overline,.p2-person>p,.p2-person-about) {color:#546879}
+html[data-theme="light"] .p2-root :is(.p2-panel,.p2-modal) {
+  color:#203b50; background:#fff; border-color:#dce5ed;
+  box-shadow:0 3px 17px #213b560b;
+}
+html[data-theme="light"] .p2-root .p2-hero {
+  color:#213b50; background:#f8fafc; border-color:#dce6ee; box-shadow:none;
+}
+html[data-theme="light"] .p2-root .p2-hero::before {display:none}
+html[data-theme="light"] .p2-root .p2-avatar {
+  background:#e9f3f6; color:#176b77; border-color:#d5e4eb; box-shadow:none;
+}
+html[data-theme="light"] .p2-root .p2-avatar i {border-color:#f8fafc}
+html[data-theme="light"] .p2-root :is(.p2-identity-badge,.p2-verified,.p2-project-status) {
+  color:#17694e; background:#eaf7ef; border-color:#c3dfce;
+}
+html[data-theme="light"] .p2-root .p2-project-status:not(.is-accepted) {
+  color:#53697a;background:#f0f5f8;border-color:#dce6ed;
+}
+html[data-theme="light"] .p2-root .p2-primary {
+  color:#fff!important; background:#18799c; border-color:#18799c; box-shadow:none;
+}
+html[data-theme="light"] .p2-root .p2-primary:hover {background:#146482;box-shadow:0 5px 14px #1849691d}
+html[data-theme="light"] .p2-root .p2-outline {
+  color:#29495c!important; background:#fff; border-color:#cddde7;
+}
+html[data-theme="light"] .p2-root .p2-outline:hover {background:#eef5f9}
+html[data-theme="light"] .p2-root :is(.p2-skill-chips span,.p2-about-chips span) {
+  color:#34566c;background:#eef6f9;border-color:#d7e5ed;
+}
+html[data-theme="light"] .p2-root .p2-metric {
+  color:#203b51;background:#fff;border-color:#dce5ed;box-shadow:none;
+}
+html[data-theme="light"] .p2-root .p2-metric strong {color:#20384d}
+html[data-theme="light"] .p2-root .p2-metric small {color:#52697b}
+html[data-theme="light"] .p2-root .p2-metric-icon,
+html[data-theme="light"] .p2-root :is(.p2-certificate-symbol,.p2-trust-icon) {
+  color:#18788a;background:#eaf4f7;
+}
+html[data-theme="light"] .p2-root .p2-tabs {
+  background:#f2f6fa;border-color:#d9e4eb;
+}
+html[data-theme="light"] .p2-root .p2-tabs button {color:#566b7c}
+html[data-theme="light"] .p2-root .p2-tabs button:is(:hover,.is-active) {
+  color:#23536c;background:#fff;
+}
+html[data-theme="light"] .p2-root .p2-tabs button.is-active {
+  box-shadow:0 1px 5px #24475c12;
+}
+html[data-theme="light"] .p2-root .p2-tabs button.is-active::after {
+  background:#19819a; box-shadow:none; height:2px;
+}
+html[data-theme="light"] .p2-root .p2-panel-heading>span {color:#24546c}
+html[data-theme="light"] .p2-root :is(.p2-panel-heading>button,.p2-show-all) {color:#176c89}
+html[data-theme="light"] .p2-root :is(.p2-project,.p2-certificate,.p2-trophies a) {
+  color:#254156;background:#f8fafc;border-color:#e0e8ee;box-shadow:none;
+}
+html[data-theme="light"] .p2-root :is(.p2-project-top h3,.p2-project-facts,.p2-certificate-description strong,.p2-trophies strong) {color:#254257}
+html[data-theme="light"] .p2-root :is(.p2-project-info>p,.p2-certificate-description small,.p2-certificate-description em,.p2-trophies small,.p2-about-panel>p) {color:#526a7c}
+html[data-theme="light"] .p2-root .p2-passport-body {background:#f8fafc;border-color:#dce6ec}
+html[data-theme="light"] .p2-root .p2-radar-wrap {border-color:#d8e4ea}
+html[data-theme="light"] .p2-root .p2-evidence-chart>strong {color:#244153}
+html[data-theme="light"] .p2-root :is(.p2-evidence-chart>small,.p2-skill-extra,.p2-passport-count small,.p2-learning-subtitle,.p2-inline-empty,.p2-empty,.p2-visibility-panel>p,.p2-trust-list small) {color:#546c7c}
+html[data-theme="light"] .p2-root .p2-empty strong {color:#203a50}
+html[data-theme="light"] .p2-root :is(.p2-evidence-bar>span,.p2-evidence-bar>em) {color:#16738b}
+html[data-theme="light"] .p2-root :is(.p2-evidence-bar>i,.p2-skill-level i) {background:#dfeaf1}
+html[data-theme="light"] .p2-root .p2-skill-level em {color:#344d61}
+html[data-theme="light"] .p2-root .p2-passport-state {color:#526b7c;border-color:#d7e6ee}
+html[data-theme="light"] .p2-root .p2-passport-state button {background:#e9f5f8;color:#176d86;border-color:#a7d0d5}
+html[data-theme="light"] .p2-root .p2-visibility-controls {background:#f8fafc;border-color:#dce6ed}
+html[data-theme="light"] .p2-root .p2-visibility-controls label {color:#283f53}
+html[data-theme="light"] .p2-root .p2-visibility-controls label+label {border-color:#e1e9ee}
+html[data-theme="light"] .p2-root .p2-visibility-controls label:hover {background:#eef5f8}
+html[data-theme="light"] .p2-root .p2-visibility-controls input {accent-color:#167d91}
+html[data-theme="light"] .p2-root .p2-visibility-share {color:#176d89;background:#eff6f9;border-color:#d1e2ea}
+html[data-theme="light"] .p2-root .p2-trust-list button {color:#274358}
+html[data-theme="light"] .p2-root .p2-trust-list button>svg {color:#158b78}
+html[data-theme="light"] .p2-root .p2-trophy-icon {background:#fff5df;color:#97682c}
+html[data-theme="light"] .p2-root :is(.p2-document-list,.p2-document-list a,.p2-skill-detail,.p2-skill-evidence,.p2-study-certificates) {border-color:#dde8ee}
+html[data-theme="light"] .p2-root .p2-document-list a {color:#2b4b62}
+html[data-theme="light"] .p2-root :is(.p2-document-list small,.p2-skill-detail span,.p2-skill-detail small,.p2-skill-evidence>p,.p2-passport-disclaimer) {color:#566d7e}
+html[data-theme="light"] .p2-root .p2-skill-detail>div strong {color:#233e53}
+html[data-theme="light"] .p2-root .p2-skill-detail em {color:#0d7477}
+html[data-theme="light"] .p2-root :is(.p2-skill-evidence details,.p2-skill-evidence-list>div) {
+  background:#f8fafc;border-color:#dce8ee;
+}
+html[data-theme="light"] .p2-root .p2-skill-evidence summary {color:#17738b}
+html[data-theme="light"] .p2-root .p2-skill-evidence-list strong {color:#254054}
+html[data-theme="light"] .p2-root :is(.p2-skill-evidence-list small,.p2-skill-evidence-list p) {color:#536b7d}
+html[data-theme="light"] .p2-root .p2-modal {background:#fff;border-color:#dce6ee;box-shadow:0 24px 70px #1d3d5c28}
+html[data-theme="light"] .p2-root .p2-modal h2 {color:#1d384f}
+html[data-theme="light"] .p2-root .p2-modal h3 {color:#0d7188}
+html[data-theme="light"] .p2-root :is(.p2-modal p,.p2-modal li) {color:#425e71}
+html[data-theme="light"] .p2-root .p2-modal li {border-color:#dce6ee}
+html[data-theme="light"] .p2-root .p2-modal .p2-modal-note {color:#5a7082}
+html[data-theme="light"] .p2-root .p2-modal-close {color:#365a73;background:#eef5f9;border-color:#d1e2e9}
+html[data-theme="light"] .p2-root .p2-warning {background:#fff8ea;color:#775019;border-color:#e8d7aa}
+html[data-theme="light"] .p2-root .p2-notice {background:#f0faf6;color:#1b614b;border-color:#b9e0cb}
+html[data-theme="light"] .p2-root :is(button,a,input):focus-visible {outline-color:#1672b9}
