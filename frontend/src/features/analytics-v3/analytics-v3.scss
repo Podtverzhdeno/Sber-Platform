@@ -302,3 +302,332 @@
   :root[data-theme="light"] .analytics-v3 .av3-study-metrics>div {min-width:0;padding:10px}
   :root[data-theme="light"] .analytics-v3 .av3-study-course {min-width:0}
 }
+
+
+/*
+ * Analytics > Skill Passport: light Apple-style material for the nested
+ * legacy reference composition. Keep the original standalone reference
+ * stylesheet and all blue/midnight views untouched (AN-08 owns that file).
+ * The old child classes hardcode navy and cyan; inherited shell tokens
+ * cannot repair them without this deliberately scoped surface map.
+ */
+:root[data-theme="light"] .analytics-v3 .analytics-reference {
+  --ref-bg: #f7fafc;
+  --ref-card: #fff;
+  --ref-edge: #d8e4ee;
+  --ref-txt: #213b50;
+  --ref-muted: #506779;
+  --ref-cyan: #126c79;
+  --ref-green: #116d60;
+  --ref-orange: #8b5d18;
+  color: var(--ref-txt);
+  color-scheme: light;
+  background: transparent;
+
+  :is(h1, h2, h3, .ref-card-title h2, .ref-passport-top h2) {
+    color: var(--ref-txt);
+  }
+  :is(.ref-panel, .ref-passport, .ref-action, .ref-path-hero, .ref-practice, .ref-growth) {
+    color: var(--ref-txt);
+    background: #fff;
+    background-image: none;
+    border-color: var(--ref-edge);
+    box-shadow: 0 2px 10px rgb(24 65 98 / 4%);
+  }
+  :is(.ref-kpi, .ref-matrix-list, .ref-evidence-row, .ref-personal-facts,
+      .ref-evidence-count > div, .ref-route-steps > div, .ref-gap-row,
+      .ref-practice-steps > span, .ref-loading, .ref-no-series, .ref-evidence-empty) {
+    color: var(--ref-txt);
+    background: #f4f8fc;
+    background-image: none;
+    border-color: #d6e3ed;
+    box-shadow: none;
+  }
+  .ref-kpi {
+    border-radius: 12px;
+  }
+  .ref-kpi > :is(span, b) {
+    color: var(--ref-txt);
+  }
+  .ref-kpi > small {
+    color: #126a61;
+  }
+  .ref-kpi > i {
+    color: #176f8d;
+  }
+  :is(.ref-cap, .ref-matrix-list h3, .ref-evidence-row em,
+      .ref-personal-facts > strong) {
+    color: #126b74;
+  }
+  :is(.ref-page-header p, .ref-card-title p, .ref-filters label, .ref-fresh,
+      .ref-legend, .ref-chart-note, .ref-disclaimer, .ref-no-series,
+      .ref-evidence-empty, .ref-footer-note, .ref-project-disclaimer,
+      .ref-quiet, .ref-source-notices .ref-loading, .ref-matrix-list > p,
+      .ref-evidence-row small, .ref-personal-facts small,
+      .ref-personal-facts > strong span, .ref-passport-top p,
+      .ref-passport-info, .ref-passport-summary, .ref-action p,
+      .ref-growth p, .ref-practice p, .ref-path-hero p,
+      .ref-route-title, .ref-route-steps > div > small, .ref-gap-row p,
+      .ref-evidence-count span, .ref-warning p, .ref-section-intro > span,
+      .ref-trend-note, .ref-month-bar) {
+    color: var(--ref-muted);
+  }
+  :is(.ref-passport-info b, .ref-passport-summary b,
+      .ref-personal-facts b, .ref-evidence-row b, .ref-gap-row strong,
+      .ref-route-steps > div > b) {
+    color: var(--ref-txt);
+  }
+  .ref-passport-crest {
+    color: #126b7d;
+    background: #e6f3f8;
+    background-image: none;
+    border: 1px solid #cce1eb;
+  }
+  .ref-big-value {
+    color: #203c51;
+  }
+  .ref-progress,
+  .ref-meter {
+    background: #d9e8f1;
+  }
+  .ref-passport-summary {
+    border-top-color: var(--ref-edge);
+  }
+  .ref-personal-facts {
+    border-radius: 12px;
+  }
+  .ref-personal-facts > strong {
+    font-size: 12px;
+  }
+  /* Computed browser QA caught 4.29:1 on the nested fact captions.
+     Use an explicit ink token; small text must clear 4.5:1 in practice. */
+  .ref-personal-facts > div > span > small {
+    /* A global small-text rule wins in the integrated CSS cascade without
+       this explicit override. Keep these 11px captions readable on mist. */
+    color: #213b50 !important;
+  }
+  :is(.ref-switch, .ref-pages, .ref-filters select, .ref-fresh) {
+    color: var(--ref-txt);
+    background: #f2f6fa;
+    background-image: none;
+    border-color: var(--ref-edge);
+    box-shadow: none;
+  }
+  .ref-pages button,
+  .ref-switch button {
+    color: #3f5b72;
+    min-height: 44px;
+  }
+  .ref-pages button.selected,
+  .ref-switch button.active {
+    color: #1a4d7c;
+    background: #fff;
+    background-image: none;
+    border-color: #c6dceb;
+    box-shadow: 0 1px 4px rgb(33 69 102 / 11%);
+  }
+  :is(.ref-small-link, .ref-ghost-cta) {
+    color: #155e92;
+    background: #eef5fc;
+    background-image: none;
+    border-color: #c7dceb;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ref-primary-cta {
+    color: #fff;
+    background: #17649b;
+    background-image: none;
+    border: 1px solid #145887;
+    min-height: 44px;
+    box-shadow: none;
+  }
+  .ref-primary-cta:hover {
+    background: #104e7f;
+    filter: none;
+  }
+  .ref-step-meta,
+  .ref-section-intro > span {
+    color: #196a6a;
+    background: #e9f4f3;
+    border-color: #c9e2dc;
+  }
+  .ref-skill-row {
+    color: var(--ref-txt);
+    border-bottom-color: #dce7ee;
+    min-height: 44px;
+  }
+  :is(.ref-skill-no, .ref-gap-num, .ref-route-steps > div > span) {
+    color: #126b65;
+    background: #e1f3ee;
+  }
+  .ref-skill-row > small.done {
+    color: #0e6757;
+    background: #e0f4e9;
+    border-color: #bce2ce;
+  }
+  .ref-skill-row > small.pending {
+    color: #82551b;
+    background: #fff4df;
+    border-color: #e9d6b0;
+  }
+  .ref-skill-activity {
+    color: #126d66;
+  }
+  .ref-legend,
+  .ref-evidence-row small,
+  .ref-chart-note {
+    font-size: 11px;
+  }
+  .ref-evidence-icon,
+  .ref-growth-icon {
+    color: #126c74;
+    background: #e0f3f2;
+  }
+  .ref-evidence-count b {
+    color: #0e6d60;
+  }
+  .ref-route-steps > div.active {
+    color: var(--ref-txt);
+    background: #fff6e8;
+    border-color: #e6d3b1;
+  }
+  .ref-route-steps > div.locked {
+    opacity: .82;
+  }
+  .ref-donut > div {
+    color: var(--ref-txt);
+    background: #fff;
+  }
+  .ref-donut small {
+    color: var(--ref-muted);
+  }
+  .ref-alert,
+  .ref-warning {
+    color: #7b5020;
+    background: #fff6e9;
+    border-color: #ead3ac;
+  }
+  .ref-alert button {
+    color: #165b84;
+    border-color: #c8dbe7;
+  }
+  .ref-loading {
+    color: var(--ref-muted);
+  }
+  :is(button, select, a, .ref-radar-skill):focus-visible {
+    outline: 2px solid #175eaa;
+    outline-offset: 2px;
+  }
+  .ref-radar svg > polygon,
+  .ref-radar svg > line[stroke="#244760"] {
+    stroke: #c6d8e5;
+  }
+  .ref-radar svg > text,
+  .ref-radar-skill > text {
+    fill: #34566c;
+  }
+  /* WCAG non-text contrast: the old neon data lines disappear on white. */
+  .ref-radar svg line[stroke="#2ce8b5"],
+  .ref-trend svg polyline[stroke="#28e9cc"] {
+    stroke: #0b7169;
+  }
+  .ref-radar svg line[stroke="#ffae2b"] {
+    stroke: #a16316;
+  }
+  .ref-radar-skill circle[fill="#31eaba"] {
+    fill: #0c766c;
+    stroke: #fff;
+  }
+  .ref-radar-skill circle[fill="#ffb844"] {
+    fill: #a16316;
+  }
+  .ref-radar-activity-mark circle {
+    fill: #11677b;
+    stroke: #fff;
+  }
+  .ref-trend svg circle[fill="#28e9cc"] {
+    fill: #0b7169;
+  }
+  .ref-trend svg text[fill="#8caabe"] {
+    fill: #456176;
+  }
+  .ref-trend svg line[stroke="#183a4e"] {
+    stroke: #b9d0de;
+  }
+  /* Tiny chart legends and completion bar are data, not decoration. */
+  .ref-dot {
+    background: #0b7169;
+  }
+  .ref-dot.amber {
+    background: #a16316;
+  }
+  .ref-dot.activity {
+    background: #11677b;
+  }
+  .ref-progress > i {
+    background: linear-gradient(90deg, #0b7169, #1b6ba2);
+  }
+  .ref-meter > i {
+    background: #a16316;
+  }
+  .ref-bar-pair i {
+    background: linear-gradient(0deg, #0e716f, #177f80);
+  }
+  .ref-bar-pair b {
+    background: linear-gradient(0deg, #185b91, #257ab1);
+  }
+  .ref-meter > span,
+  .ref-meter > div {
+    background: linear-gradient(90deg, #0d756c, #197ca2);
+  }
+  .ref-radar-center rect {
+    fill: #e3f0f5;
+    stroke: #b5d1df;
+  }
+  .ref-radar-center text:first-of-type {
+    fill: #0c6975;
+  }
+  .ref-radar-center text:last-of-type {
+    fill: #526a7d;
+  }
+  .ref-radar-skill:focus-visible > text {
+    fill: #0f548c;
+  }
+  .ref-radar-skill:focus-visible .ref-radar-activity-mark text {
+    /* The count is white on a dark filled circle even on keyboard focus. */
+    fill: #fff;
+  }
+  .ref-all-evidence {
+    scrollbar-color: #a7bdcd #f3f8fb;
+  }
+  .ref-source-notices > * {
+    box-shadow: 0 8px 22px rgb(25 49 71 / 13%);
+  }
+
+  @media (max-width: 480px) {
+    .ref-switch {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      width: 100%;
+    }
+    .ref-switch button {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .ref-kpi > small,
+    .ref-skill-row > small,
+    .ref-personal-facts small {
+      font-size: 11px;
+    }
+    .ref-passport-info > span,
+    .ref-passport-summary {
+      flex-wrap: wrap;
+    }
+    .ref-passport-info b {
+      overflow-wrap: anywhere;
+    }
+  }
+}
