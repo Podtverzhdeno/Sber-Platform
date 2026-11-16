@@ -33,7 +33,7 @@ for(const mode of ["light","blue","midnight"] as const)for(const width of [320,3
     const d=await surface(page,".ach-gallery-drawer");
     if(mode==="light")expect(d.bg).toBe("rgb(255, 255, 255)");
     else expect(luminance(d.bg)).toBeLessThan(.14);
-    await drawer.getByRole("tab",{name:"Доказательства"}).click();
+    await drawer.getByRole("tab",{name:"Материалы"}).click();
     await expect(drawer.getByRole("tabpanel")).toBeVisible();
     await drawer.getByRole("button",{name:"Закрыть подробности"}).click();
     await page.getByRole("button",{name:"Добавить достижение"}).first().click();
