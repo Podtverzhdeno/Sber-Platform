@@ -482,3 +482,58 @@
   .development-hub__course-content { flex: 1 1 130px; }
   .development-hub__course-link { margin-inline-start: auto; }
 }
+
+/* Light grades dialog — its legacy gradient and option tiles otherwise stay dark. */
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-drawer,
+  .trajectory-v2-role-dialog,
+  .trajectory-v2-grades-dialog,
+  .trajectory-v2-grade-explanation,
+  .trajectory-v2-grade-option,
+  .trajectory-v2-grade-next-note,
+  .trajectory-v2-actions ul,
+  .trajectory-v2-grades-list > p
+) {
+  background: #ffffff;
+  background-image: none;
+  border-color: #dfe5ed;
+  color: #1c2938;
+}
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-grade-option[aria-pressed="true"],
+  .trajectory-v2-grades-list li[data-current="true"]
+) {
+  background: #edf5ff;
+  background-image: none;
+  border-color: #377aca;
+  color: #183c68;
+}
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-grades-heading p,
+  .trajectory-v2-grade-option small,
+  .trajectory-v2-grade-explanation > p,
+  .trajectory-v2-grade-expectations p,
+  .trajectory-v2-grade-explanation-progress small,
+  .trajectory-v2-grades-dialog > p,
+  .trajectory-v2-grade-next-note
+) { color: #526474; }
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 .trajectory-v2-grades-dialog > header button {
+  background: #f2f5f9;
+  color: #1c2938;
+  border: 1px solid #dfe5ed;
+}
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-grade-dot,
+  .trajectory-v2-grades-symbol
+) {
+  background: #edf5ff;
+  color: #245d96;
+  border-color: #bad1eb;
+}
+.development-hub__trajectory .trajectory-v2 .trajectory-v2-grades-dialog > header button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
