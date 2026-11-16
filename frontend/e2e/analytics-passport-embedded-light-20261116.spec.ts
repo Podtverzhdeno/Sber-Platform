@@ -105,6 +105,16 @@ async function checkTextContrast(page: Page, foreground: string, surface: string
     foreground + " contrast on " + surface).toBeGreaterThanOrEqual(4.5);
 }
 
+async function checkSvgContrast(page: Page, selector: string, property: "fill" | "stroke", minimum: number) {
+  const paint = await page.locator(selector).first()
+    .evaluate((node, key) => getComputedStyle(node)[key], property);
+  const onWhite = luminosity("rgb(255, 255, 255)");
+  const dataInk = luminosity(paint);
+  const contrast = (Math.max(dataInk, onWhite) + .05) / (Math.min(dataInk, onWhite) + .05);
+  expect(contrast, selector + " " + property + " on white (" + paint + ")")
+    .toBeGreaterThanOrEqual(minimum);
+}
+
 for (const width of [320, 390, 1440]) {
   test("light Skill Passport nested surfaces at " + String(width) + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: width < 500 ? 844 : 900 });
@@ -136,6 +146,10 @@ for (const width of [320, 390, 1440]) {
     const chartLabel = await passport.locator(".ref-radar-skill > text").first()
       .evaluate(el => getComputedStyle(el).fill);
     expect(luminosity(chartLabel), "Radar label should be dark on white").toBeLessThan(0.18);
+    await checkSvgContrast(page, root + ' .ref-radar svg line[stroke="#2ce8b5"]', "stroke", 3);
+    await checkSvgContrast(page, root + ' .ref-radar svg line[stroke="#ffae2b"]', "stroke", 3);
+    await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#31eaba"]', "fill", 3);
+    await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#ffb844"]', "fill", 3);
 
     const viewport = await passport.boundingBox();
     expect(viewport).not.toBeNull();
@@ -157,6 +171,11 @@ for (const width of [320, 390, 1440]) {
     await chartGroup.getByRole("button", { name: "Гистограмма" }).click();
     await expect(passport.locator(".ref-skill-bars"))
       .toBeVisible();
+    await chartGroup.getByRole("button", { name: "Тренд" }).click();
+    await expect(passport.locator(".ref-trend svg")).toBeVisible();
+    await checkSvgContrast(page, root + ' .ref-trend polyline[stroke="#28e9cc"]', "stroke", 3);
+    await checkSvgContrast(page, root + ' .ref-trend circle[fill="#28e9cc"]', "fill", 3);
+    await checkSvgContrast(page, root + ' .ref-trend text[fill="#8caabe"]', "fill", 4.5);
   });
 }
 
