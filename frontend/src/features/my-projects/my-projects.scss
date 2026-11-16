@@ -1458,6 +1458,9 @@
   }
   /* Stage completion percentages were pale teal on an opaque white card. */
   .mp-ref-stage em { color: #086d60; }
+  /* Metadata keeps an explicit dark-theme foreground in legacy rules. */
+  .mp-key-facts > span,
+  .mp-team-member small { color: var(--mp-ref-muted); }
   .mp-overview-checkpoint small,
   .mp-mini-stat span,
   .mp-progress-stage small,
