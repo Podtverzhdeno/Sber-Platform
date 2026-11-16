@@ -1,0 +1,21 @@
+# FIX-TRAJECTORY-LIGHT-REFERENCE-CARDS-20261116
+
+- task_id: FIX-TRAJECTORY-LIGHT-REFERENCE-CARDS-20261116
+- session_id: gpt6-trajectory-light-reference-20261116
+- status: IN_PROGRESS
+- started_at: 2026-11-16T16:56:00+03:00
+- heartbeat_at: 2026-11-16T16:56:00+03:00
+- base_revision: latest main at branch creation
+- owner_request: on supplied screenshot, AI Engineer role/path/stage/summary dark navy cards remain in selected light appearance; remove dark surfaces while preserving reference composition
+- evidence: trajectory-v2.scss legacy fixed #071b2b/#071e30 backgrounds and near-white #f0f7ff for role detail/stage heading, even with html[data-theme=light]. Screenshot shows poor contrast and dark cards.
+- write_scope:
+  - frontend/src/features/trajectory-v2/trajectory-v2.scss (append light-only overrides)
+  - frontend/e2e/trajectory-light-reference-cards-20261116.spec.ts (new)
+  - frontend/playwright.trajectory-light-20261116.config.mjs (new)
+  - .github/workflows/trajectory-light-20261116-qa.yml (new)
+  - .agents/coordination/claims/FIX-TRAJECTORY-LIGHT-REFERENCE-CARDS-20261116.lock/status.md
+- excluded: global App.tsx/main.tsx/impulse-next.scss; other files under trajectory; data/API/RBAC, dark/blue/midnight UI, stage business logic, old visual snapshots
+- coordination: historical TRJ-PR52-MAIN-INTEGRATION-20261025 IN_PROGRESS but no heartbeat in >20 days, original work already in main; this owner-directed independent light-theme regression does not touch their branches/claims
+- acceptance: actual computed CSS light surfaces and WCAG contrast for role cards, selected role detail, stage details, progress and buttons at 320/390/1440; dark mode retains navy; mobile no body horizontal overflow; source geometry / route unchanged
+- verification: scoped ESLint, TypeScript, Vite build, Playwright Chromium, GitHub Actions exact-head and independent review before release
+- status_note: do not self-approve or claim Railway deployed before merge/production status verified
