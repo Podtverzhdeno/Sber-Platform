@@ -337,3 +337,148 @@
 .development-hub__practice-explanation summary { color: var(--dh-text); font-size: 13px; font-weight: 600; min-height: 44px; display: list-item; padding: 12px 0; cursor: pointer; }
 .development-hub__practice-explanation summary:focus-visible { outline: 2px solid var(--dh-accent); outline-offset: 2px; border-radius: 4px; }
 .development-hub__practice-explanation p { margin: 0 0 12px; }
+
+/* Light mode guard: TrajectoryV2 still contains dark reference literals.
+ * Scope corrections to Development so other role workspaces keep their skins.
+ * Inspired by Apple HIG hierarchy, adaptable layouts and grouped surfaces. */
+:root[data-theme="light"] .development-hub__trajectory .trajectory-v2 {
+  --trj-bg: #f7f9fc;
+  --trj-panel: #ffffff;
+  --trj-panel-raised: #f7f9fc;
+  --trj-line: #dfe5ed;
+  --trj-text: #1c2938;
+  --trj-muted: #526474;
+  --trj-teal: #087e84;
+  --trj-blue: #1762b1;
+  color: var(--trj-text);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-role-card,
+  .trajectory-v2-role-detail,
+  .trajectory-v2-stage-detail,
+  .trajectory-v2-reference-sidebar > section,
+  .trajectory-v2-stage-meta dl > div,
+  .trajectory-v2-statistics-grid > div,
+  .trajectory-v2-activities,
+  .trajectory-v2-study-summary,
+  .trajectory-v2-cycle-path,
+  .trajectory-v2-cycle-course,
+  .trajectory-v2-cycle-practice,
+  .trajectory-v2-optional-actions
+) {
+  background: #ffffff;
+  background-image: none;
+  color: var(--trj-text);
+  border-color: var(--trj-line);
+  box-shadow: none;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-role-card[aria-pressed="true"],
+  .trajectory-v2-role-card[data-role-state="learning"],
+  .trajectory-v2-stage[data-stage-state="current"],
+  .trajectory-v2-cycle-course[data-attention="new"]
+) {
+  background: #edf5ff;
+  background-image: none;
+  border-color: #377aca;
+  color: #183c68;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-role-card strong,
+  .trajectory-v2-role-detail h3,
+  .trajectory-v2-stage-header h3,
+  .trajectory-v2-stage-block h4,
+  .trajectory-v2-reference-sidebar h3,
+  .trajectory-v2-cycle-path > header h3,
+  .trajectory-v2-cycle-course strong,
+  .trajectory-v2-cycle-practice strong,
+  .trajectory-v2-next-panel > strong
+) { color: var(--trj-text); }
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-role-state,
+  .trajectory-v2-role-card small,
+  .trajectory-v2-stage-header small,
+  .trajectory-v2-stage-header p,
+  .trajectory-v2-stage-meta dt,
+  .trajectory-v2-stage-meta dd,
+  .trajectory-v2-study-caption,
+  .trajectory-v2-study-caption span,
+  .trajectory-v2-reference-sidebar p,
+  .trajectory-v2-grade-progress small,
+  .trajectory-v2-cycle-path > p,
+  .trajectory-v2-cycle-course small,
+  .trajectory-v2-cycle-practice p,
+  .trajectory-v2-optional-actions small,
+  .trajectory-v2-passport-disclaimer
+) { color: var(--trj-muted); }
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 :is(
+  .trajectory-v2-role-info-button,
+  .trajectory-v2-optional-archive,
+  .trajectory-v2-cycle-practice-link
+) {
+  color: #145b93 !important;
+  background: #f2f7fd !important;
+  border-color: #c7d9ea !important;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-grade-ring {
+  background: #f2f7fd;
+  color: var(--trj-text);
+  border-color: #087e84;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-grade-ring small {
+  color: var(--trj-muted);
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage-detail {
+  border-left: 3px solid #86b4e4;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage[data-stage-state="current"] strong {
+  color: #155a92;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage[data-stage-state="locked"] strong {
+  color: #586a79;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage::after {
+  background: #f0f4fa;
+  border-color: #b5c7d7;
+  color: #466477;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage[data-stage-state="completed"]::after {
+  background: #d8f1e9;
+  border-color: #4aab93;
+  color: #11634e;
+}
+:root[data-theme="light"] .workspace-content .development-hub__trajectory .trajectory-v2 .trajectory-v2-stage[data-stage-state="current"]::after {
+  background: #d9eaff;
+  border-color: #377aca;
+  color: #12568c;
+  box-shadow: 0 0 0 4px #edf5ff;
+}
+/* Narrow screens: show every destination, not a partially hidden scroll tab. */
+@media (max-width: 600px) {
+  .development-hub__tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    overflow: visible;
+    max-width: 100%;
+    padding-bottom: 10px;
+  }
+  .development-hub__tabs :is(button, a) {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 5px;
+    text-align: center;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .development-hub__tabs:not(:has(a)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .development-hub__level-track { gap: 3px; }
+  .development-hub__level-track li { gap: 5px; }
+  .development-hub__level-track span { width: 36px; height: 36px; }
+  .development-hub__courses li { flex-wrap: wrap; }
+  .development-hub__course-content { flex: 1 1 130px; }
+  .development-hub__course-link { margin-inline-start: auto; }
+}
