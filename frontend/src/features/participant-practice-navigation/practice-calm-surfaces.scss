@@ -1,0 +1,304 @@
+/*
+ * Practice · first-fold hierarchy for the REAL task catalog.
+ * UI-only overlay: task matching, applications, terms, filters, projects and
+ * portfolios continue using the existing domain components and endpoints.
+ *
+ * Apple HIG references: Layout, Lists and tables, Search fields, Controls.
+ * Navigation chrome may be translucent; data/results remain opaque.
+ */
+.catalog-v2 {
+  min-width: 0;
+}
+
+.catalog-v2 .catalog-v2-heading {
+  gap: 12px 20px;
+  align-items: flex-start;
+}
+
+.catalog-v2 .catalog-v2-heading h1 {
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-weight: 760;
+  letter-spacing: -.027em;
+  line-height: 1.15;
+}
+
+.catalog-v2 .catalog-v2-heading > div:first-child > p:last-child {
+  max-width: 760px;
+  line-height: 1.48;
+}
+
+.catalog-v2 .catalog-v2-help summary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 650;
+}
+
+.catalog-v2 .catalog-v2-help summary:focus-visible {
+  outline: 2px solid var(--catalog-accent);
+  outline-offset: 2px;
+}
+
+.catalog-v2 .catalog-v2-kpi {
+  min-width: 0;
+  border-radius: 15px;
+  box-shadow: none;
+}
+
+.catalog-v2 .catalog-v2-kpi strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+}
+
+.catalog-v2 .catalog-v2-kpi b {
+  font-weight: 690;
+}
+
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks,
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout button,
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander {
+  min-height: 44px;
+  box-sizing: border-box;
+  border-radius: 11px;
+}
+
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout button[aria-pressed="true"] {
+  font-weight: 720;
+}
+
+.catalog-v2 .catalog-v2-secondary-filters[data-open="true"] {
+  border-radius: 14px;
+}
+
+.catalog-v2 .catalog-v2-secondary-filters input:not([type="checkbox"]),
+.catalog-v2 .catalog-v2-secondary-filters select,
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters input,
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters select {
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+/* Light is white; merely lowering opacity on old dark gradients is not enough. */
+:root[data-theme="light"] .catalog-v2 {
+  --catalog-ink: #20374c;
+  --catalog-muted: #566d82;
+  --catalog-surface: #fff;
+  --catalog-border: #dbe5ee;
+  --catalog-soft: #f1f6fb;
+  --catalog-highlight: #226caf;
+  --catalog-accent: #246bb4;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-kpi,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filters,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-card,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-detail,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-table-row {
+  color: #20374c;
+  background-color: #fff;
+  border-color: #dbe5ee;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-kpi-icon,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-kpi-ring,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-kpi .catalog-v2-kpi-icon--blue {
+  background-color: #edf4fc;
+  color: #246fac;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-kpi .catalog-v2-kpi-icon--gold {
+  color: #915f18;
+  background-color: #fff4df;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout {
+  background: #eef3f8;
+  border: 1px solid #dbe4ee;
+  border-radius: 12px;
+  padding: 3px;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout button {
+  color: #4d647b;
+  background: transparent;
+  border-color: transparent;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout button[aria-pressed="true"] {
+  color: #1c354e;
+  background: #fff;
+  border-color: #dae5f1;
+  box-shadow: 0 1px 4px rgb(30 60 90 / 8%);
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-help summary {
+  color: #1d567f;
+  background: #f3f8fc;
+  border-color: #d9e7f1;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks[aria-pressed="true"] {
+  color: #1e5e97;
+  background: #eaf3ff;
+  border-color: #bcd6f2;
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-help > p,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-secondary-filters[data-open="true"] {
+  color: #344e65;
+  background: #fff;
+  border-color: #dbe5ef;
+  box-shadow: 0 8px 22px rgb(32 61 89 / 8%);
+}
+
+:root[data-theme="light"] .catalog-v2 .catalog-v2-secondary-filters input:not([type="checkbox"]),
+:root[data-theme="light"] .catalog-v2 .catalog-v2-secondary-filters select,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters input,
+:root[data-theme="light"] .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters select {
+  color: #244058;
+  background: #fff;
+  border-color: #d6e3ed;
+}
+
+@media (max-width: 1020px) {
+  .catalog-v2 .catalog-v2-heading {
+    gap: 10px;
+  }
+  .catalog-v2 .catalog-v2-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .catalog-v2 {
+    gap: 11px;
+  }
+
+  .catalog-v2 .catalog-v2-heading {
+    gap: 10px;
+  }
+  .catalog-v2 .catalog-v2-heading h1 {
+    font-size: clamp(23px, 6.5vw, 28px);
+    line-height: 1.16;
+  }
+  .catalog-v2 .catalog-v2-heading > div:first-child > p:last-child {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .catalog-v2 .catalog-v2-help {
+    align-self: stretch;
+  }
+  .catalog-v2 .catalog-v2-help summary {
+    width: fit-content;
+    max-width: 100%;
+  }
+  .catalog-v2 .catalog-v2-help > p {
+    left: 0;
+    right: auto;
+    width: min(320px, 86vw);
+  }
+
+  /* Four sourced values, no artificial summary or hiding unconfirmed stats. */
+  .catalog-v2 .catalog-v2-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .catalog-v2 .catalog-v2-kpi {
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+    min-height: 104px;
+    padding: 11px;
+    border-radius: 13px;
+  }
+  .catalog-v2 .catalog-v2-kpi-icon,
+  .catalog-v2 .catalog-v2-kpi-ring {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+  .catalog-v2 .catalog-v2-kpi-icon svg {
+    max-width: 19px;
+    max-height: 19px;
+  }
+  .catalog-v2 .catalog-v2-kpi strong {
+    font-size: 17px;
+    line-height: 1.1;
+  }
+  .catalog-v2 .catalog-v2-kpi b {
+    font-size: 11px;
+    line-height: 1.22;
+  }
+  .catalog-v2 .catalog-v2-kpi small {
+    display: block;
+    font-size: 10px;
+    line-height: 1.32;
+  }
+  .catalog-v2 .catalog-v2-filter-rail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: 7px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks {
+    justify-self: start;
+    max-width: 100%;
+    padding-inline: 9px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout {
+    justify-self: end;
+    margin: 0;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout button {
+    min-width: 0;
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander {
+    grid-column: 1 / -1;
+    justify-content: center;
+    width: 100%;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 10px;
+    margin-top: 0;
+  }
+  .catalog-v2 .catalog-v2-secondary-filters[data-open="true"] {
+    padding: 11px;
+  }
+}
+
+@media (max-width: 340px) {
+  .catalog-v2 .catalog-v2-kpi {
+    padding: 8px;
+    flex-direction: column;
+    min-height: 119px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-layout {
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2 .catalog-v2-filter-rail button,
+  .catalog-v2 .catalog-v2-kpi {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .catalog-v2 .catalog-v2-filter-rail button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
