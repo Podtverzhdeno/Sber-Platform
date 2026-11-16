@@ -2,7 +2,7 @@
 
 - task_id: CI-PARTICIPANT-GUIDE-ON-DEMAND-20261116
 - session_id: gpt6-impulse-guide-e2e-20261116-1826
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T18:26:00+03:00
 - heartbeat_at: 2026-11-16T18:26:00+03:00
 - base_revision: 85c6e3c4b95086ed0bdc43e5255d4a09f38c7543
@@ -19,4 +19,13 @@
   - npm scoped ESLint, TypeScript, Vite build
   - Chromium onboarding and help E2E on exact head via GitHub QA
   - independent code review required before merge
+- completed_files:
+  - frontend/e2e/participant-guide-reference.spec.ts
+  - frontend/playwright.participant-guide-minimal-20261116.config.mjs
+  - .github/workflows/participant-guide-minimal-20261116-qa.yml
+- evidence:
+  - `Participant guide minimal-shell QA` run 43904367908, exact head c532e8daf8c00fda29e3a1c3a88daafa8323a45a: SUCCESS (3/3 Chromium, ESLint, TS, Vite build)
+  - Frontend lint standalone gate SUCCESS on c532e8da
+  - full CI still includes independent Ruff/snapshot failures, not claimed green
+- remaining: independent code review on latest head and integration merge; status-only claim change must rerun exact-head QA
 - blockers: none
