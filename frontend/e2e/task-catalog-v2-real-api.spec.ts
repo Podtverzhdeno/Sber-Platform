@@ -94,8 +94,14 @@ async function realCatalog(page: Page): Promise<CatalogPage> {
 }
 
 async function openRealCatalog(page: Page): Promise<void> {
-  await page.goto("/");
-  await page.getByRole("link", { name: "Задачи", exact: true }).click();
+  // The shell now groups navigation into a drawer. Resolve the task index from
+  // the authenticated server-authorized navigation instead of the old sidebar.
+  const response = await page.context().request.get("/api/v1/me");
+  expect(response.status(), await response.text()).toBe(200);
+  const actor = (await response.json()) as { navigation: string[] };
+  const index = actor.navigation.indexOf("Задачи");
+  expect(index, "The seeded participant must be authorized for Задачи").toBeGreaterThanOrEqual(0);
+  await page.goto(`/workspace/${String(index)}`);
   await expect(
     page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
