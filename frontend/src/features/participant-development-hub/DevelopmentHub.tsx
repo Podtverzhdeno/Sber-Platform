@@ -101,6 +101,20 @@ export function StudyRequirements({
               </div>
               {bootcamp !== null && <Link to={bootcamp} className="development-hub__subtle-link">Все курсы</Link>}
             </div>
+            {level.curriculum_state === "published" && level.required_courses > 0 && (
+              <div className="development-hub__progress-block">
+                <div className="development-hub__progress-label">
+                  <span>Прогресс курсов</span>
+                  <strong>{Math.min(level.completed_courses, level.required_courses)} / {level.required_courses}</strong>
+                </div>
+                <progress
+                  className="development-hub__progress"
+                  max={level.required_courses}
+                  value={Math.max(0, Math.min(level.completed_courses, level.required_courses))}
+                  aria-label="Завершённые обязательные курсы"
+                />
+              </div>
+            )}
             {level.curriculum_state === "published" && requiredKeys.length > 0 ? (
               <ol className="development-hub__courses" data-testid="development-required-courses">
                 {requiredKeys.map((key, index) => {
@@ -145,8 +159,19 @@ export function StudyRequirements({
             <strong data-testid="development-practice-count">
               {String(level.credited_practices)} <span>из {String(level.required_practices)}</span>
             </strong>
-            <p>Отправленная работа учитывается в учебном уровне по действующей политике.
-              Независимая проверка компетенций и приёмка проекта отображаются отдельно.</p>
+            {level.required_practices > 0 && (
+              <progress
+                className="development-hub__progress development-hub__progress--practice"
+                max={level.required_practices}
+                value={Math.max(0, Math.min(level.credited_practices, level.required_practices))}
+                aria-label="Зачтённые практические работы"
+              />
+            )}
+            <details className="development-hub__practice-explanation">
+              <summary>Как учитывается практика</summary>
+              <p>Отправленная работа учитывается в учебном уровне по действующей политике.
+                Независимая проверка компетенций и приёмка проекта отображаются отдельно.</p>
+            </details>
             <small>Независимо проверено: {String(level.approved_practices)}</small>
             {level.advance_ready && (
               <p className="development-hub__ready" role="status">
