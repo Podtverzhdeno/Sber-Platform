@@ -324,20 +324,32 @@ test("customer applications identify and filter by project", async ({ page }) =>
   await expect(page.locator(".application-project b")).toHaveText(Array(await page.locator(".application-project b").count()).fill(selectedTitle??""));
 });
 
-test("customer analytics updates metrics for the selected period", async ({ page }) => {
+test("customer analytics period filters source-backed activity, not retired static KPI cards", async ({ page }) => {
+  const daysAgo = (days: number): string =>
+    new Date(Date.now() - days * 86_400_000).toISOString();
+  // The current customer activity surface uses a server-authored event stream.
+  // Use deterministic synthetic activity rather than outdated static KPIs.
+  await page.route("**/api/v1/customer/analytics/activity", route => route.fulfill({
+    json: {
+      generated_at: daysAgo(0), window_days: 365,
+      events: [
+        { id: "event-recent", kind: "project_created", occurred_at: daysAgo(3),
+          task_id: "test-recent", task_title: "Недавний тестовый проект" },
+        { id: "event-older", kind: "project_created", occurred_at: daysAgo(52),
+          task_id: "test-older", task_title: "Проект прошлого периода" },
+      ],
+    },
+  }));
+  await page.route("**/api/v1/customer/tasks", route => route.fulfill({ json: [] }));
   await openCustomer(page);
   await navigateCustomer(page, "Аналитика");
-  await page.getByRole("button", { name: /Последние 90 дней/ }).click();
-  await expect(page.getByRole("button", { name: /Последние 30 дней/ })).toBeVisible();
-  const business = page.locator(".cta-business");
-  await expect(business).toContainText("Активные задачи");
-  await expect(business).toContainText("8");
-  await expect(business).toContainText("+2");
-  await expect(business).toContainText("Команды в работе");
-  await expect(business).toContainText("12");
-  await expect(business).toContainText("Участники");
-  await expect(business).toContainText("47");
-  await expect(business).toContainText("Завершено задач");
-  await expect(business).toContainText("24");
-  await expect(page.locator(".cta-kpi-grid")).toContainText("612");
+
+  const period = page.getByRole("combobox", { name: "Период аналитики заказчика" });
+  await expect(period).toHaveValue("8");
+  const created = page.locator(".ca3-metric").filter({ hasText: "Создано проектов" });
+  await period.selectOption("4");
+  await expect(created.locator("strong")).toHaveText("1");
+  await period.selectOption("12");
+  await expect(created.locator("strong")).toHaveText("2");
+  await expect(page.locator(".ca3-heatmap-card")).toContainText("Последние 12 недель");
 });
