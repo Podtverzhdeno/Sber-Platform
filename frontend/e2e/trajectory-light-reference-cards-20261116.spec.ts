@@ -1,0 +1,330 @@
+import { expect, test, type Page } from "@playwright/test";
+
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
+import type { DevelopmentOverviewView } from "../src/features/participant-home-v2/client";
+
+const actor = {
+  person_id: "00000000-0000-0000-0000-000000000001",
+  display_name: "Алекс Речной",
+  active_role: "participant",
+  assigned_roles: ["participant"],
+  scopes: [],
+  consent_scopes: [],
+  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио"],
+  csrf_token: "trajectory-light-regression",
+};
+const roles: DevelopmentOverviewView["roles"] = [
+  { track_key: "product", title: "AI Engineer", state: "active", attempt_number: 1, completed_milestones: 3, total_milestones: 7 },
+  { track_key: "ml", title: "AI Product Engineer", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 7 },
+  { track_key: "python", title: "Python Engineer", state: "active", attempt_number: 1, completed_milestones: 2, total_milestones: 7 },
+];
+const milestones = [
+  "Python & AI Foundations",
+  "LLM API & Prompting",
+  "RAG Pipeline",
+  "Tool Calling & Agents",
+  "Quality Evaluation",
+  "Deployment & Monitoring",
+  "Реальный проект",
+].map((title, i) => ({
+  key: "step-" + String(i + 1),
+  position: i + 1,
+  title,
+  purpose: "Опубликованный этап",
+  skill: "Agent Engineering",
+  target_kind: "task",
+  target_key: "task-" + String(i + 1),
+  completed: i < 3,
+  ...(i === 3 ? { activities: ["Собрать вызов инструмента", "Обработать ошибку вызова"], deliverable: "Рабочий агент" } : {}),
+}));
+const baseline = overviewFixture.next_outcome;
+if (baseline === null) throw new Error("Missing expected next outcome in fixture");
+const overview: DevelopmentOverviewView = {
+  ...overviewFixture,
+  roles,
+  next_outcome: {
+    ...baseline,
+    trajectory_key: "product",
+    trajectory_title: "AI Engineer",
+    milestone_key: "step-4",
+    milestone_position: 4,
+    target_kind: "task",
+    target_key: "task-4",
+    target_title: "Tool Calling & Agents",
+  },
+};
+
+async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false, demoPortfolio = false, populatedLearning = false) {
+  await page.addInitScript((theme: string) => {
+    localStorage.setItem("impulse-theme", theme);
+    localStorage.setItem("impulse-visual-mode", theme === "light" ? "light" : "midnight");
+  }, mode);
+  let loggedIn = false;
+  await page.route("**/api/v1/**", route => route.fulfill({ status: 404, json: { code: "NOT_MOCKED" } }));
+  await page.route("**/api/v1/config", route => route.fulfill({ json: { demo_mode: true } }));
+  await page.route("**/api/v1/auth/personas", route => route.fulfill({
+    json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }],
+  }));
+  await page.route("**/api/v1/me", route => loggedIn
+    ? route.fulfill({ json: actor })
+    : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", route => {
+    loggedIn = true;
+    return route.fulfill({ json: actor });
+  });
+  await page.route("**/api/v1/participant/me/development-overview", route => route.fulfill({ json: overview }));
+  await page.route("**/api/v1/me/roadmaps", route => route.fulfill({ json: [
+    { track_key: "product", policy_version: 1, replacement_reason: null, milestones, next_step: milestones[3] },
+  ] }));
+  await page.route("**/api/v1/me/talent-passport", route => route.fulfill({ json: { verified_courses: [], skills: [], cases: [] } }));
+  if (demoPortfolio) {
+    await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
+      demo_data: true, courses: [], contributions: [],
+    } }));
+  }
+  if (populatedLearning) {
+    await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => route.fulfill({ json: {
+      started_courses: 1, finished_courses: 0, completed_lessons: 1,
+      approved_practices: 0, credited_practices: 0,
+      courses: [{
+        course_key: "course-demo-agent", title: "Основы AI-агентов",
+        completed_units: 1, total_units: 5, finished: false,
+        finished_at: null, certificate_id: null, updated_at: "2026-11-16T00:00:00Z",
+        practice_status: null, practical_certificate_id: null,
+      }],
+    } }));
+  }
+  if (readyToAdvance) {
+    await page.route("**/api/v1/me/bootcamp/impulse-level?*", route => route.fulfill({ json: {
+      track_key: "product", level: 1, cycle_number: 2, curriculum_state: "published",
+      completed_courses: 2, required_courses: 2,
+      approved_practices: 1, credited_practices: 1, required_practices: 1,
+      advance_ready: true, history: [], policy_version: 1,
+      max_level: 3, required_course_keys: ["course-a", "course-b"],
+    } }));
+  }
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.goto("/workspace/1?role=product", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(3);
+  await expect(page.locator(".trajectory-v2-role-detail")).toBeVisible();
+}
+
+function luminance(value: string) {
+  const rgb = value.match(/^rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  let values: number[];
+  if (rgb) values = rgb.slice(1, 4).map(Number);
+  else {
+    const srgb = value.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+    if (!srgb) throw new Error("Unexpected computed CSS color: " + value);
+    values = srgb.slice(1, 4).map(v => Number(v) * 255);
+  }
+  const channels = values.map(n => {
+    const v = n / 255;
+    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+}
+
+async function lightSurface(page: Page, selector: string) {
+  const background = await page.locator(selector).first().evaluate(el => getComputedStyle(el).backgroundColor);
+  expect(luminance(background), selector + ": expected light surface, got " + background).toBeGreaterThan(0.8);
+}
+
+async function contrast(page: Page, textSelector: string, surfaceSelector: string) {
+  const ink = await page.locator(textSelector).first().evaluate(el => getComputedStyle(el).color);
+  const background = await page.locator(surfaceSelector).first().evaluate(el => getComputedStyle(el).backgroundColor);
+  const a = luminance(ink), b = luminance(background);
+  expect((Math.max(a, b) + .05) / (Math.min(a, b) + .05), textSelector + ": AA contrast").toBeGreaterThanOrEqual(4.5);
+}
+
+for (const width of [320, 390, 1440]) {
+  test("light reference trajectory cards and text at " + String(width) + "px", async ({ page }) => {
+    await page.setViewportSize({ width, height: width < 500 ? 760 : 900 });
+    await showTrajectory(page, "light");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    for (const selector of [
+      ".trajectory-v2-role-card[data-tone='primary']",
+      ".trajectory-v2-role-card[data-tone='unselected']",
+      ".trajectory-v2-role-detail",
+      ".trajectory-v2-stage-detail",
+      ".trajectory-v2-reference-sidebar > section",
+      ".trajectory-v2-milestone-node",
+    ]) {
+      await lightSurface(page, ".workspace-content .trajectory-v2 " + selector);
+    }
+    await contrast(page, ".trajectory-v2-role-detail h3", ".trajectory-v2-role-detail");
+    await contrast(page, ".trajectory-v2-stage-header h3", ".trajectory-v2-stage-detail");
+    await contrast(page, ".trajectory-v2-stage .trajectory-v2-milestone-title", ".trajectory-v2-role-detail");
+    await contrast(page, ".trajectory-v2-role-card[data-tone='unselected'] strong", ".trajectory-v2-role-card[data-tone='unselected']");
+
+    const info = page.getByRole("button", { name: /^О роли/ });
+    await expect(info).toBeVisible();
+    const buttonSurface = await info.evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(luminance(buttonSurface)).toBeGreaterThan(0.8);
+
+    const documentOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(documentOverflow, "no page-level horizontal scrolling").toBeLessThanOrEqual(2);
+  });
+}
+
+test("dark trajectory preserves midnight reference visuals", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 760 });
+  await showTrajectory(page, "dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const role = page.locator(".trajectory-v2-role-card[data-tone='primary']").first();
+  await expect(role).toBeVisible();
+  // The reference uses both solid navy fills and dark gradients.
+  // Assert the actual night surface, not a particular CSS paint mechanism.
+  const roleSurface = await role.evaluate(el => ({
+    color: getComputedStyle(el).backgroundColor,
+    image: getComputedStyle(el).backgroundImage,
+  }));
+  expect(roleSurface.image !== "none" || luminance(roleSurface.color) < 0.2).toBe(true);
+  const detail = page.locator(".trajectory-v2-stage-detail").first();
+  const stageSurface = await detail.evaluate(el => ({
+    color: getComputedStyle(el).backgroundColor,
+    image: getComputedStyle(el).backgroundImage,
+  }));
+  expect(stageSurface.image !== "none" || luminance(stageSurface.color) < 0.2).toBe(true);
+});
+
+
+test("mobile light role details and grade dialogs remain bright", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.getByRole("button", { name: /^О роли/ }).click();
+  const roleDialog = page.locator(".trajectory-v2-role-dialog");
+  await expect(roleDialog).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-role-dialog");
+  await lightSurface(page, ".trajectory-v2-role-intro-grid > section");
+  await contrast(page, ".trajectory-v2-role-dialog h2", ".trajectory-v2-role-dialog");
+  await contrast(page, ".trajectory-v2-role-intro-hero h3", ".trajectory-v2-role-intro-hero");
+  await contrast(page, ".trajectory-v2-role-intro-card h3", ".trajectory-v2-role-intro-card");
+  const roleTabs = roleDialog.getByRole("tab");
+  await expect(roleTabs).toHaveCount(6);
+  await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='true']", ".trajectory-v2-role-dialog");
+  await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='false']", ".trajectory-v2-role-dialog");
+  const purposeTab = roleTabs.nth(1);
+  await purposeTab.click();
+  await expect(purposeTab).toHaveAttribute("aria-selected", "true");
+  await expect(roleDialog.locator(".trajectory-v2-role-panel")).not.toBeEmpty();
+  await contrast(page, ".trajectory-v2-role-panel", ".trajectory-v2-role-dialog");
+  await roleDialog.getByRole("button", { name: "Закрыть" }).click();
+
+  await page.getByRole("button", { name: /Все уровни/ }).click();
+  const grades = page.locator(".trajectory-v2-grades-dialog");
+  await expect(grades).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-grades-dialog");
+  await lightSurface(page, ".trajectory-v2-grade-option");
+  await lightSurface(page, ".trajectory-v2-grade-explanation");
+  await contrast(page, ".trajectory-v2-grades-dialog h2", ".trajectory-v2-grades-dialog");
+  await contrast(page, ".trajectory-v2-grades-heading p", ".trajectory-v2-grades-dialog");
+  const box = await grades.boundingBox();
+  expect(box).not.toBeNull();
+  if (box) {
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(391);
+  }
+});
+
+
+test("light milestone activity plan uses readable foreground for actual list items", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.locator(".trajectory-v2-stage").nth(3).click();
+  const activities = page.getByTestId("trajectory-stage-activities");
+  await expect(activities).toBeVisible();
+  await expect(activities.locator("li")).toHaveCount(2);
+  await lightSurface(page, ".trajectory-v2-activities");
+  await contrast(page, ".trajectory-v2-activities li > span:last-child", ".trajectory-v2-activities");
+  await contrast(page, ".trajectory-v2-deliverable strong", ".trajectory-v2-activities");
+});
+
+
+test("light expanded statistics and populated stage drawer have readable text", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light", false, true);
+  const stats = page.getByTestId("trajectory-user-statistics");
+  await stats.locator("summary").click();
+  await expect(stats).toHaveAttribute("open", "");
+  await expect(stats.locator(".trajectory-v2-stats-origin")).toBeVisible();
+  await contrast(page, ".trajectory-v2-stats-origin", ".trajectory-v2-reference-sidebar > section");
+  await expect(stats.locator(".trajectory-v2-statistics-grid dt")).toHaveCount(6);
+  await lightSurface(page, ".trajectory-v2-statistics-grid > div");
+  await contrast(page, ".trajectory-v2-statistics-grid dt", ".trajectory-v2-statistics-grid > div");
+  await contrast(page, ".trajectory-v2-statistics-grid dd", ".trajectory-v2-statistics-grid > div");
+
+  await page.locator(".trajectory-v2-stage").nth(3).click();
+  await page.locator(".trajectory-v2-task-action").first().click();
+  const drawer = page.locator(".trajectory-v2-drawer");
+  await expect(drawer).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-section h3", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-heading small", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-section p", ".trajectory-v2-drawer");
+  await expect(drawer.locator(".trajectory-v2-drawer-activities li")).toHaveCount(2);
+  await contrast(page, ".trajectory-v2-drawer-activities li", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-metrics strong", ".trajectory-v2-drawer-metrics > div");
+  await drawer.getByRole("button", { name: "Закрыть" }).first().click();
+  await expect(drawer).toBeHidden();
+});
+
+
+test("light next-step subtitle and sidebar entry points meet AA contrast", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  const next = page.locator(".trajectory-v2-next-task-description");
+  await expect(next.locator("small")).toBeVisible();
+  await contrast(page, ".trajectory-v2-next-task-description small", ".trajectory-v2-next-task");
+  await expect(page.locator(".trajectory-v2-all-grades-link")).toBeVisible();
+  await contrast(page, ".trajectory-v2-all-grades-link", ".trajectory-v2-reference-sidebar > section");
+  const retry = page.locator(".trajectory-v2-level-error button");
+  await expect(retry).toBeVisible();
+  await expect(retry).toHaveText("Повторить");
+  await contrast(page, ".trajectory-v2-level-error button", ".trajectory-v2-reference-sidebar > section");
+  await expect(page.locator(".trajectory-v2-passport-panel > header button")).toBeVisible();
+  await contrast(page, ".trajectory-v2-passport-panel > header button", ".trajectory-v2-passport-panel");
+});
+
+test("light embedded learning summary with saved course uses readable colors", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light", false, false, true);
+  const panel = page.getByTestId("learning-progress-bridge");
+  await expect(panel).toBeVisible();
+  await lightSurface(page, ".learning-progress-bridge");
+  await expect(panel.getByText("Основы AI-агентов")).toBeVisible();
+  await contrast(page, ".learning-progress-bridge h3", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge header a", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge__metrics strong", ".learning-progress-bridge__metrics > div");
+  await contrast(page, ".learning-progress-bridge__courses strong", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge__courses li span", ".learning-progress-bridge");
+  await contrast(page, ".learning-progress-bridge > small", ".learning-progress-bridge");
+});
+
+test("light optional-trajectory action failure retains accessible error ink", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  await page.route("**/api/v1/me/tracks/optional", route => route.fulfill({
+    status: 403, json: { code: "OPTIONAL_DENIED", message: "Дополнительная роль недоступна" },
+  }));
+  await page.locator(".trajectory-v2-role-card[data-tone='unselected']").click();
+  const actions = page.getByTestId("trajectory-optional-actions");
+  await expect(actions).toBeVisible();
+  await actions.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  const warning = actions.getByRole("alert");
+  await expect(warning).toBeVisible();
+  await contrast(page, ".trajectory-v2-optional-actions p[role='alert']", ".trajectory-v2-optional-actions");
+});
+
+test("light ready-to-advance learning cycle uses readable status ink", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light", true);
+  const ready = page.locator(".trajectory-v2-cycle-ready");
+  await expect(ready).toBeVisible();
+  await expect(ready).toContainText("Следующий этап");
+  await lightSurface(page, ".trajectory-v2-cycle-path");
+  await contrast(page, ".trajectory-v2-cycle-ready", ".trajectory-v2-cycle-path");
+});

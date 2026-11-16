@@ -1,0 +1,57 @@
+name: Trajectory reference light mode QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/trajectory-v2/trajectory-v2.scss"
+      - "frontend/e2e/trajectory-light-reference-cards-20261116.spec.ts"
+      - "frontend/playwright.trajectory-light-20261116.config.mjs"
+      - ".github/workflows/trajectory-light-20261116-qa.yml"
+      - ".agents/coordination/claims/FIX-TRAJECTORY-LIGHT-REFERENCE-CARDS-20261116.lock/status.md"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/trajectory-v2/trajectory-v2.scss"
+      - "frontend/e2e/trajectory-light-reference-cards-20261116.spec.ts"
+      - ".github/workflows/trajectory-light-20261116-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  trajectory-light:
+    name: Role, stage and progress cards — 320/390/1440, dark preserved
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint and typecheck
+        run: |
+          npx eslint e2e/trajectory-light-reference-cards-20261116.spec.ts playwright.trajectory-light-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Build production frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check trajectory light and dark appearance
+        run: npx playwright test --config=playwright.trajectory-light-20261116.config.mjs --project=chromium
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trajectory-light-qa
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
