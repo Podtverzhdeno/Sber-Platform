@@ -82,7 +82,7 @@ for (const width of [320, 390, 768, 1440]) {
     for (const selector of [".ev-event-main h3", ".ev-event-meta", ".ev-match-title"]) {
       const colors = await card.locator(selector).first().evaluate(el => ({
         fg: getComputedStyle(el).color,
-        bg: getComputedStyle(el.closest(".ev-event-card")!).backgroundColor,
+        bg: getComputedStyle(el.closest(".ev-event-card") ?? el).backgroundColor,
       }));
       expect(contrast(colors.fg, colors.bg), selector + " must remain readable").toBeGreaterThanOrEqual(4.5);
     }
@@ -90,7 +90,7 @@ for (const width of [320, 390, 768, 1440]) {
     for (const selector of ["b", "small", ".ev-average-ring strong"]) {
       const colors = await metrics.locator(selector).first().evaluate(el => ({
         fg: getComputedStyle(el).color,
-        bg: getComputedStyle(el.closest(".ev-metrics")!).backgroundColor,
+        bg: getComputedStyle(el.closest(".ev-metrics") ?? el).backgroundColor,
       }));
       expect(contrast(colors.fg, colors.bg), "metrics " + selector + " must be readable").toBeGreaterThanOrEqual(4.5);
     }
