@@ -21,7 +21,7 @@ const work = projects.map(item=>({
   contributions: item.status==="in_progress" ? [{ id:"contribution-1", version:1, personal_summary:"Подготовлен воспроизводимый модуль рекомендаций", artifact_keys:[], status:"reported" }] : [],
   decisions: [], allowed_artifacts: ["git-commit", "report"],
 }));
-async function fixture(page: Page, requestedView: "cards" | "list" = "cards") {
+async function fixture(page: Page, requestedView: "cards" | "list" = "cards", expectedTheme?: "light" | "blue" | "midnight") {
   await page.clock.setFixedTime(new Date("2026-10-25T12:00:00Z"));
   let authenticated=false;
   await page.route("**/api/v1/config", route=>route.fulfill({json:{demo_mode:true,honor_board_enabled:false}}));
@@ -43,6 +43,10 @@ async function fixture(page: Page, requestedView: "cards" | "list" = "cards") {
   });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  if (expectedTheme) {
+    await expect(page.locator("html")).toHaveAttribute("data-impulse-visual-mode", expectedTheme);
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toBeAttached();
+  }
   // The desktop and mobile shell use the same branded overlay-only navigation.
   await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
   const drawer = page.getByRole("dialog", { name: "Главное меню" });
@@ -682,7 +686,7 @@ for (const mode of ["light", "blue", "midnight"] as const) {
         localStorage.setItem("impulse-visual-mode",value);
         localStorage.setItem("impulse-theme",value==="light"?"light":"dark");
       },mode);
-      await fixture(page);
+      await fixture(page,"cards",mode);
       await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
       await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
       await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
