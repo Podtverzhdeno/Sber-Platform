@@ -2391,7 +2391,30 @@
   padding: 12px 0 0;
   border-top: 1px solid var(--catalog-border);
 }
-.catalog-v2-consent label { font-size: 0.75rem; }
+/* The consent checkbox and its complete copy share a single vertical center.
+   The old flex-start layout combined with input margin-top offset the control
+   from the text, especially in the sticky mobile footer. */
+.catalog-v2-conditions .catalog-v2-consent > label {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  min-height: 44px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.catalog-v2-conditions .catalog-v2-consent > label input[type="checkbox"] {
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  align-self: center;
+}
+.catalog-v2-conditions .catalog-v2-consent-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .catalog-v2-conditions-actions {
   display: flex;
   gap: 10px;
