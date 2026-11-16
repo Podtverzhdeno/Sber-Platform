@@ -2,7 +2,7 @@
 
 - task_id: QA-FIVE-SECTION-THEME-MOBILE-20261116
 - session_id: gpt6-20261116-five-section-theme-nav-isolated
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T11:37:00+03:00
 - heartbeat_at: 2026-11-16T11:37:00+03:00
 - base_revision: 7265b04738043a8140b141fc6cb395da9989c016
@@ -14,5 +14,15 @@
 - excluded: frontend/src/**; existing e2e specs; other claims; snapshots; deployment and production
 - acceptance: six browser variations (320px and desktop; light/blue/midnight), five authorized group links and return Home, no phone horizontal overflow, correct semantic contrast; denied link hidden, accessible Escape
 - capability: openspec/changes/participant-five-section-content-first-20261115/specs/participant-five-section-content-first/spec.md
-- progress: branch claimed; inspected all active coordination statuses; independent new E2E file, no shared code changes
+- progress: new isolated E2E created and extended to 320/390/1440 px in light/blue/midnight modes
+- changed_files: frontend/e2e/five-section-theme-mobile-20261116.spec.ts and this own claim only
+- acceptance_evidence:
+  - Chromium on base 7265b047 + exact final test contents: 10/10 PASS (five section links x nine viewport/theme configurations plus denied Rating)
+  - Previous focused run 7/7 PASS before adding 390px cases
+  - Scoped ESLint final revision: PASS, zero warnings
+  - git diff --check: PASS, zero errors (local Git only notes future LF/CRLF conversion)
+  - Frontend TypeScript first version: PASS; final post-390 check RUNNING; update result when known
+- verification_limits: deterministic server-authorized Playwright fixture, not live Railway login; semantic text/surface contrast checked, not full pixel image equivalence or every nested element
+- integration: main changed independently from 7265b047 to fb412382 (Help mobile picker) while tests ran; no overlap in owned files, exact integration SHA QA and independent reviewer still required
+- next_step: independent reviewer check diff and behavior, then integration lane to merge/test exact revision; no author production deploy
 - blockers: none for isolated E2E; reviewer required for acceptance and merge
