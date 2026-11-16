@@ -41,7 +41,6 @@ if (baseline === null) throw new Error("Missing expected next outcome in fixture
 const overview: DevelopmentOverviewView = {
   ...overviewFixture,
   roles,
-  primary_trajectory_key: "product",
   next_outcome: {
     ...baseline,
     trajectory_key: "product",
