@@ -11,6 +11,7 @@
 - write_scope:
   - frontend/src/features/messenger/reference.scss
   - frontend/src/features/messenger/theme-mobile-regression.test.tsx
+  - frontend/e2e/messages-light-mobile-20261116.spec.ts
   - .agents/coordination/claims/OWNER-MESSENGER-MOBILE-LIGHT-20261116.lock/status.md
 - excluded:
   - frontend/src/features/collaboration.tsx (IMPULSE-COMMUNITY-REDESIGN REVIEW)
