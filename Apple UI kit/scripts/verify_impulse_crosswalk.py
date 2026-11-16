@@ -17,7 +17,7 @@ from pathlib import Path
 
 def git_blob_sha(raw: bytes) -> str:
     header = b"blob " + str(len(raw)).encode("ascii") + b"\0"
-    return hashlib.sha1(header + raw).hexdigest()
+    return hashlib.sha1(header + raw, usedforsecurity=False).hexdigest()
 
 
 def verify(
