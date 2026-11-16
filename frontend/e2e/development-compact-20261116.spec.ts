@@ -142,7 +142,7 @@ for(const mode of ["light","blue","midnight"] as const){
           if (!title) throw new Error("Role details heading missing");
           return {
             tabs: tabs.map(tab => ({
-              label: tab.textContent?.trim() ?? "",
+              label: tab.textContent.trim(),
               color: getComputedStyle(tab).color,
               ratio: contrast(getComputedStyle(tab).color, bg),
             })),
