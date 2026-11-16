@@ -22,7 +22,7 @@ async function openSettings(page: Page, mode: Mode) {
     localStorage.setItem("impulse-visual-mode", value);
     localStorage.setItem("impulse-theme", value === "light" ? "light" : "dark");
   }, mode);
-  let authenticated = false;
+  let authenticated = true;
   await page.route("**/api/v1/**", route => route.fulfill({status:404,json:{code:"NOT_AVAILABLE"}}));
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true,honor_board_enabled:false}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({json:[{
@@ -40,8 +40,6 @@ async function openSettings(page: Page, mode: Mode) {
     hr_basic:true,hr_skills:true,hr_projects:true,hr_achievements:true,
     hr_learning:true,hr_contacts:false,
   }}}));
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator('[data-persona="settings-synthetic"]').click();
   await page.goto("/workspace/2", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".participant-settings.additional-page")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-impulse-visual-mode",mode);
