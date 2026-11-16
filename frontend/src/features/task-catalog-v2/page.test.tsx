@@ -78,11 +78,14 @@ afterAll(() => {
 });
 
 describe("task catalog v2", () => {
-  it("defaults to a list and still supports explicit card layout", async () => {
+  it("defaults to cards and supports switching between layouts", async () => {
     renderCatalog("/workspace/2");
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
-    expect(document.querySelector(".catalog-v2-results--list")).not.toBeNull();
+    expect(document.querySelector(".catalog-v2-results--cards")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Карточки" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Список" }));
     expect(screen.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
+    expect(document.querySelector(".catalog-v2-results--list")).not.toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Карточки" }));
     expect(screen.getByRole("button", { name: "Карточки" })).toHaveAttribute("aria-pressed", "true");
     expect(document.querySelector(".catalog-v2-results--cards")).not.toBeNull();
