@@ -97,3 +97,26 @@ test("empty Projects hides task CTA when catalog is not authorized", async ({ pa
   await expect(page.getByRole("button", { name: "Перейти к задачам" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Подразделы практики" }).getByRole("link")).toHaveCount(2);
 });
+
+
+test("Practice navigation remains usable during catalog API outage", async ({ page }) => {
+  await signIn(page);
+  await page.route("**/api/v1/me/task-recommendations?*", route =>
+    route.fulfill({ status: 503, json: { code: "CATALOG_UNAVAILABLE" } }));
+  await page.goto("/workspace/3");
+  const nav = page.getByRole("navigation", { name: "Подразделы практики" });
+  await expect(nav.getByRole("link", { name: "Мои проекты" })).toBeVisible();
+  await nav.getByRole("link", { name: "Мои проекты" }).click();
+  await expect(page).toHaveURL(/\\/workspace\\/4$/);
+});
+
+test("Practice navigation remains usable during project API outage", async ({ page }) => {
+  await signIn(page);
+  await page.route("**/api/v1/me/work", route =>
+    route.fulfill({ status: 503, json: { code: "WORK_UNAVAILABLE" } }));
+  await page.goto("/workspace/4");
+  const nav = page.getByRole("navigation", { name: "Подразделы практики" });
+  await expect(nav.getByRole("link", { name: "Задачи" })).toBeVisible();
+  await nav.getByRole("link", { name: "Задачи" }).click();
+  await expect(page).toHaveURL(/\\/workspace\\/3$/);
+});
