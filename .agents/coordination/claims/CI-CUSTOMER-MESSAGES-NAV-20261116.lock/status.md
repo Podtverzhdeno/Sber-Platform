@@ -2,7 +2,7 @@
 
 - task_id: CI-CUSTOMER-MESSAGES-NAV-20261116
 - session_id: gpt6-ci-customer-messages-nav-20261116
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T11:15:00+03:00
 - heartbeat_at: 2026-11-16T11:15:00+03:00
 - base_revision: 94a8532b7fbe219c03344d7c8bb7ca4a6f52bbb9
@@ -16,5 +16,13 @@
 - verification:
   - three failing customer-messenger Chromium E2E scenarios
   - scoped ESLint, git diff --check
-- progress: verified CI run 43826678843 fails on hidden legacy navigation and actor fixture which allows Home only; SDD CalmNavigation requires server-authorized routes and overlay menu
+- progress: fixed stale customer role navigation fixture, replaced hidden sidebar actions with current authorized overlay flow, and installed message stubs before login/prefetch
+- verification_evidence:
+  - Local Chromium focused customer message journey: 2/2 PASS (send and history, context)
+  - Local Chromium focused customer dialog isolation journey: 1/1 PASS
+  - Frontend TypeScript: PASS
+  - Scoped ESLint: PASS
+  - Full 15-case customer file: NOT VERIFIED; local backend port 8000 unavailable and early broad run aborted after repeat failures, including old AI assistant route/menu behavior
+  - Customer-messages CI should be rerun on exact integration SHA; no backend/API/ACL production code modified
+- handoff: independent reviewer to inspect exact diff and merge against current main; no self-review or unilateral production release
 - blockers: no independent reviewer; PR #214 separate feature branch and screenshot baseline failures remain outside scope
