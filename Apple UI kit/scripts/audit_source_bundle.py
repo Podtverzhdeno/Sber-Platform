@@ -9,12 +9,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from html.parser import HTMLParser
-from pathlib import Path
 import re
 import sys
 import xml.etree.ElementTree as ET
-
+from html.parser import HTMLParser
+from pathlib import Path
 
 REQUIRED = (
     "README.md",

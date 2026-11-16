@@ -2,12 +2,13 @@
 """Check local Markdown/HTML links without network or Apple asset downloads."""
 
 from __future__ import annotations
+
 import argparse
+import re
+import sys
 from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path
-import re
-import sys
 from urllib.parse import unquote, urlsplit
 
 LINK = re.compile(r"!?\[[^\]\n]+\]\(([^)\s]+)(?:\s+['\"][^)]*['\"])?\)")

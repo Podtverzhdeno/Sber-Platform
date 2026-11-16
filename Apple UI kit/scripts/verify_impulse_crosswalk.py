@@ -7,11 +7,12 @@ Apple/Figma source-frame verification or a browser/visual test.
 """
 
 from __future__ import annotations
+
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 
 def git_blob_sha(raw: bytes) -> str:

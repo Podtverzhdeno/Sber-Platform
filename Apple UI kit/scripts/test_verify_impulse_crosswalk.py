@@ -2,10 +2,12 @@
 """Synthetic tests for the offline Impulse source-crosswalk verifier."""
 
 from __future__ import annotations
+
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
+
 from verify_impulse_crosswalk import git_blob_sha, verify
 
 

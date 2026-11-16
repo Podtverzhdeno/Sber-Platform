@@ -8,11 +8,12 @@ No Impulse API writes, Figma layer inspection, Apple font downloads, or external
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
+from pathlib import Path
 
 try:
-    from playwright.sync_api import sync_playwright, Error as PlaywrightError
+    from playwright.sync_api import Error as PlaywrightError
+    from playwright.sync_api import sync_playwright
 except ImportError:
     raise SystemExit("Install Playwright first: python -m pip install playwright")
 
