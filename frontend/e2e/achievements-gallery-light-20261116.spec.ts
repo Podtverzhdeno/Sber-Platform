@@ -15,7 +15,7 @@ async function start(page:Page,mode:"light"|"blue"|"midnight"){
   await expect(page.locator("html")).toHaveAttribute("data-impulse-visual-mode",mode);
   await expect(page.getByTestId("achievement-card")).toHaveCount(3);
 }
-async function surface(page:Page,selector:string){return page.locator(selector).first().evaluate(e=>({bg:getComputedStyle(e).backgroundColor,fg:getComputedStyle(e).color,left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right}));}
+async function surface(page:Page,selector:string){return page.locator(selector).first().evaluate(e=>({bg:getComputedStyle(e).backgroundColor,image:getComputedStyle(e).backgroundImage,fg:getComputedStyle(e).color,left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right}));}
 function luminance(s:string){const m=s.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);if(!m)throw Error(s);const [r,g,b]=m.slice(1,4).map(x=>{const n=Number(x)/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;});return r*.2126+g*.7152+b*.0722;}
 function contrast(a:string,b:string){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 for(const mode of ["light","blue","midnight"] as const)for(const width of [320,390,1440]){
@@ -23,7 +23,21 @@ for(const mode of ["light","blue","midnight"] as const)for(const width of [320,3
     await page.setViewportSize({width,height:850});await start(page,mode);
     for(const selector of [".ach-gallery-hero",".ach-gallery-stat",".ach-gallery-search",".ach-gallery-card"]){
       const x=await surface(page,selector);
-      if(mode==="light")expect(luminance(x.bg),selector).toBeGreaterThan(.65);
+      if(selector===".ach-gallery-hero"){
+        // Light hero is an opaque light GRADIENT: computed backgroundColor is
+        // transparent, so its rgba(0,0,0,0) is not a dark rendered surface.
+        if(mode==="light"){
+          expect(x.image).toContain("rgb(245, 249, 255)");
+          expect(x.image).toContain("rgb(238, 245, 253)");
+          for(const label of [".ach-gallery-copy h1",".ach-gallery-copy h1 span",".ach-gallery-copy p"]){
+            const text=await surface(page,label);
+            expect(contrast(text.fg,"rgb(238, 245, 253)"),label+" gradient-ink AA").toBeGreaterThanOrEqual(4.5);
+          }
+        }else{
+          expect(x.image).toContain("gradient(");
+          expect(x.image).not.toContain("rgb(245, 249, 255)");
+        }
+      }else if(mode==="light")expect(luminance(x.bg),selector).toBeGreaterThan(.65);
       else expect(luminance(x.bg),selector).toBeLessThan(.14);
       expect(x.left).toBeGreaterThanOrEqual(-2);expect(x.right).toBeLessThanOrEqual(width+2);
     }
