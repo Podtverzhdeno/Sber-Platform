@@ -1115,3 +1115,76 @@
  .mpv2 .mp-overview-next-body strong{font-size:13px}
  .mpv2 .mp-overview-next-body ol{display:grid}
 }
+
+
+/* Light catalogue: legacy nested table/card styles still used navy ink. */
+:root[data-theme="light"] .mpv2 {
+  --mp-list-surface: #ffffff;
+  --mp-list-soft: #f5f8fc;
+  --mp-list-active: #e9f3ff;
+  --mp-list-border: #d7e2ef;
+  --mp-list-text: #172c42;
+  --mp-list-muted: #53677b;
+  --mp-list-accent: #095eae;
+
+  .mp-table-scroll { background: var(--mp-list-surface); border-color: var(--mp-list-border); }
+  .mp-table thead th { background: #edf3fa; border-color: var(--mp-list-border); color: #29465f; }
+  .mp-table tbody td { background: var(--mp-list-surface); border-color: var(--mp-list-border); color: var(--mp-list-text); }
+  .mp-table tbody tr:hover td { background: var(--mp-list-active); }
+  .mp-table-project strong, .mp-table .mp-progress strong { color: var(--mp-list-text); }
+  .mp-table-project small, .mp-table-date small { color: var(--mp-list-muted); }
+  .mp-table-date svg { color: var(--mp-list-accent); }
+  .mp-table-benefits svg { background: var(--mp-list-active); }
+  .mp-table-benefits svg:nth-child(2) { background: #e5f0ff; }
+  .mp-table-benefits svg:nth-child(3) { background: #fff3d7; }
+
+  .mp-secondary, .mp-table-open, .mp-open-tile, .mp-icon-button, .mp-help,
+  .mp-filters button, .mp-layout button, .mp-select {
+    background: var(--mp-list-surface); border-color: #bbcee2; color: var(--mp-list-text);
+    box-shadow: none;
+  }
+  .mp-secondary:hover, .mp-table-open:hover, .mp-icon-button:hover, .mp-help:hover,
+  .mp-help[aria-expanded=true], .mp-filters button:hover, .mp-layout button:hover {
+    background: var(--mp-list-active); border-color: #83b2df; color: var(--mp-list-accent);
+  }
+  .mp-filters button.is-active, .mp-layout button.is-active {
+    background: var(--mp-list-active); border-color: #83b2df; color: var(--mp-list-accent); box-shadow: none;
+  }
+  .mp-select select { color: var(--mp-list-text); color-scheme: light; }
+  .mp-select select option { background: var(--mp-list-surface); color: var(--mp-list-text); }
+
+  .mp-help-banner {
+    color: var(--mp-list-text); background: var(--mp-list-active); border-color: #bad4e8;
+  }
+  .mp-help-banner strong { color: var(--mp-list-accent); }
+  .mp-list-search, .mp-card-search, .mp-card-list__header label {
+    background: var(--mp-list-surface); border-color: var(--mp-list-border); color: var(--mp-list-muted);
+  }
+  .mp-card-search input, .mp-list-search input, .mp-card-list__header input { color: var(--mp-list-text); }
+  .mp-card-search input::placeholder, .mp-list-search input::placeholder,
+  .mp-card-list__header input::placeholder { color: var(--mp-list-muted); opacity: 1; }
+
+  .mp-benefit-step { color: var(--mp-list-text); background: var(--mp-list-surface); border-color: var(--mp-list-border); }
+  .mp-benefit-step:hover { color: var(--mp-list-accent); background: var(--mp-list-active); border-color: #83b2df; box-shadow: none; }
+  .mp-benefit-step__text small, .mp-benefit-heading span { color: var(--mp-list-muted); }
+  .mp-benefit-step__index { color: var(--mp-list-accent); background: var(--mp-list-active); border-color: #bdd4ed; }
+  .mp-reward-popup { color: var(--mp-list-text); background: var(--mp-list-active); border-color: #bad4e8; }
+  .mp-reward-popup button { color: var(--mp-list-accent); }
+
+  .mp-project-card-heading small, .mp-project-card-meta, .mp-project-card-progress > div:first-child,
+  .mp-project-tile__bottom > span { color: var(--mp-list-muted); }
+  .mp-project-card-meta { border-color: var(--mp-list-border); }
+  .mp-project-card-progress .mp-progress strong, .mp-progress strong { color: var(--mp-list-text); }
+  .mp-project-card-rewards span, .mp-chip-row em {
+    color: var(--mp-list-accent); background: var(--mp-list-active); border-color: #c4d7ec;
+  }
+  .mp-project-card-actions .mp-primary--quiet { color: var(--mp-list-accent); background: #fff; border-color: #bcd1e6; }
+  .mp-preview__header p, .mp-preview__header > div > small,
+  .mp-preview__actions, .mp-preview__tabs button { color: var(--mp-list-muted); }
+  .mp-preview__tabs button.is-active, .mp-preview__tabs button:hover { color: var(--mp-list-accent); }
+  .mp-panel-inset, .mp-mini-reward {
+    color: var(--mp-list-text); background: var(--mp-list-soft); border-color: var(--mp-list-border);
+  }
+  .mp-panel-inset > p, .mp-mini-reward small { color: var(--mp-list-muted); }
+  .mp-mini-reward strong { color: var(--mp-list-text); }
+}
