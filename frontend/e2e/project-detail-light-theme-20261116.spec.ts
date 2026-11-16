@@ -123,6 +123,15 @@ for (const width of [320, 390, 1440]) {
       if (name === "Прогресс") {
         await expectLight(page, ".mpv2 .mp-ref-skill");
         await expectContrast(page, ".mp-ref-skill strong", ".mp-ref-skill");
+        // Completion labels and pending markers sit on white progress cards.
+        const stages = dialog.locator(".mp-ref-stage");
+        await expect(stages).toHaveCount(3);
+        for (const stage of await stages.all()) {
+          const labelColor = await stage.locator("em").evaluate(el => getComputedStyle(el).color);
+          const cardColor = await stage.locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' mp-ref-card ')][1]").evaluate(el => getComputedStyle(el).backgroundColor);
+          const a = linearLuminance(labelColor), b = linearLuminance(cardColor);
+          expect((Math.max(a, b) + .05) / (Math.min(a, b) + .05), "stage progress label contrast").toBeGreaterThanOrEqual(4.5);
+        }
       }
       if (name === "Мой вклад") {
         await expectLight(page, ".mpv2 .mp-ref-contrib-head");
