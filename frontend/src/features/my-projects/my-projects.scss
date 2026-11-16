@@ -1138,13 +1138,13 @@
   .mp-table-benefits svg:nth-child(2) { background: #e5f0ff; }
   .mp-table-benefits svg:nth-child(3) { background: #fff3d7; }
 
-  .mp-secondary, .mp-table-open, .mp-open-tile, .mp-icon-button,
+  .mp-secondary, .mp-table-open, .mp-open-tile, .mp-icon-button, .mp-help,
   .mp-filters button, .mp-layout button, .mp-select {
     background: var(--mp-list-surface); border-color: #bbcee2; color: var(--mp-list-text);
     box-shadow: none;
   }
-  .mp-secondary:hover, .mp-table-open:hover, .mp-open-tile:hover, .mp-icon-button:hover,
-  .mp-filters button:hover, .mp-layout button:hover {
+  .mp-secondary:hover, .mp-table-open:hover, .mp-icon-button:hover, .mp-help:hover,
+  .mp-help[aria-expanded=true], .mp-filters button:hover, .mp-layout button:hover {
     background: var(--mp-list-active); border-color: #83b2df; color: var(--mp-list-accent);
   }
   .mp-filters button.is-active, .mp-layout button.is-active {
@@ -1153,6 +1153,10 @@
   .mp-select select { color: var(--mp-list-text); color-scheme: light; }
   .mp-select select option { background: var(--mp-list-surface); color: var(--mp-list-text); }
 
+  .mp-help-banner {
+    color: var(--mp-list-text); background: var(--mp-list-active); border-color: #bad4e8;
+  }
+  .mp-help-banner strong { color: var(--mp-list-accent); }
   .mp-list-search, .mp-card-search, .mp-card-list__header label {
     background: var(--mp-list-surface); border-color: var(--mp-list-border); color: var(--mp-list-muted);
   }
