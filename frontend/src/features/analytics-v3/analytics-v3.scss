@@ -183,3 +183,122 @@
 .av3-cert-next .av3-todo > div > span{font-weight:800;color:#28e8d5;font-size:14px}
 .av3-requirements button em{max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .av3-show-all{margin:12px 0;}
+
+/* Results / Analytics: opaque HIG-style data surfaces, scoped to light mode.
+   Reference: Apple UI kit/06-cases/06-data-and-dashboards/README.md.
+   The shared .workspace--apple tokens handle top-level metrics and panels;
+   these rules complete nested data, forms and certification details. */
+:root[data-theme="light"] .analytics-v3 {
+  --av3-cyan:#147e88;
+  --av3-blue:#247da8;
+  --av3-muted:#5b6d7d;
+  color:#20384b;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-headline>span,.av3-headline>p,.av3-global-filters label,.av3-fresh) {
+  color:#52697b;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-global-filters select,.av3-small-btn,.av3-fresh) {
+  color:#284a60;
+  background:#fff;
+  border-color:#d2e0e9;
+  box-shadow:none;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-small-btn,.av3-global-filters select) {
+  min-height:40px;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-panel>header h2,.av3-study-results h2) {
+  color:#203b50;
+}
+:root[data-theme="light"] .analytics-v3 .av3-metric :is(strong,span) {color:#234057}
+:root[data-theme="light"] .analytics-v3 .av3-metric>svg {color:#167c88}
+:root[data-theme="light"] .analytics-v3 .av3-metric small {color:#526a7e}
+:root[data-theme="light"] .analytics-v3 :is(.av3-study-results,.av3-study-metrics>div,.av3-study-course) {
+  color:#263f53;
+  background:#fff;
+  background-image:none;
+  border-color:#dbe6ed;
+  box-shadow:none;
+}
+:root[data-theme="light"] .analytics-v3 .av3-study-results {
+  padding:16px;
+  border-radius:15px;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-study-metrics>div,.av3-study-course) {
+  background:#f7fafc;
+}
+:root[data-theme="light"] .analytics-v3 .av3-study-metrics b {color:#116c79}
+:root[data-theme="light"] .analytics-v3 :is(.av3-study-metrics span,.av3-study-note,.av3-study-results>header>small,.av3-study-course small,.av3-footnote,.av3-data-foot) {
+  color:#536a7d;
+}
+:root[data-theme="light"] .analytics-v3 .av3-study-results>header>div>span {color:#166e76}
+:root[data-theme="light"] .analytics-v3 .av3-study-course strong {color:#1f394d}
+:root[data-theme="light"] .analytics-v3 .av3-study-course progress {accent-color:#147c8c}
+:root[data-theme="light"] .analytics-v3 :is(.av3-awards button,.av3-milestones i,.av3-credential .av3-badge) {
+  color:#2a516a;
+  background:#f1f6f9;
+  background-image:none;
+  border-color:#d2e0e8;
+  box-shadow:none;
+  filter:none;
+}
+:root[data-theme="light"] .analytics-v3 .av3-milestones i.first {
+  color:#0a746e;
+  background:#e6f4f0;
+  border-color:#a5d6c7;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-milestones button,.av3-milestones strong,.av3-awards button,.av3-awards strong,.av3-credential-main strong,.av3-credential dd) {
+  color:#273e52;
+}
+:root[data-theme="light"] .analytics-v3 :is(.av3-awards small,.av3-awards em,.av3-milestones small,.av3-credential dt,.av3-credential-main p,.av3-next-body p,.av3-empty,.av3-todo>div) {
+  color:#536c7d;
+}
+:root[data-theme="light"] .analytics-v3 .av3-credential dl div {border-bottom-color:#dce6ee}
+:root[data-theme="light"] .analytics-v3 .av3-progress {background:#dce9ef}
+:root[data-theme="light"] .analytics-v3 .av3-progress i {background:#177b9a}
+:root[data-theme="light"] .analytics-v3 .av3-cert-progress strong {color:#116b58}
+:root[data-theme="light"] .analytics-v3 .av3-next-body>svg {
+  color:#167b83;
+  background:#e7f3f6;
+}
+:root[data-theme="light"] .analytics-v3 .av3-requirements button {
+  color:#2d465a;
+  border-bottom-color:#dce7ef;
+}
+:root[data-theme="light"] .analytics-v3 .av3-requirements button span {
+  color:#126f7a;
+  background:#eaf5f7;
+}
+:root[data-theme="light"] .analytics-v3 .av3-requirements i {background:#dce9ee}
+:root[data-theme="light"] .analytics-v3 .av3-requirements em {
+  color:#80531a;
+  background:#fff5df;
+  border-color:#ead5a7;
+}
+:root[data-theme="light"] .analytics-v3 .av3-missing-chart strong {color:#244155}
+:root[data-theme="light"] .analytics-v3 .av3-missing-chart {color:#407c8e}
+:root[data-theme="light"] .analytics-v3 .av3-alert {
+  color:#805322;
+  background:#fff7e9;
+  border-color:#e4cfab;
+}
+:root[data-theme="light"] .analytics-v3 .av3-alert button {color:#0c6e79}
+:root[data-theme="light"] .analytics-v3 .av3-dialog {
+  color:#213b50;
+  background:#fff;
+  background-image:none;
+  border-color:#d7e3eb;
+  box-shadow:0 24px 70px #142d4830;
+}
+:root[data-theme="light"] .analytics-v3 .av3-dialog h2 {color:#1f3a50}
+:root[data-theme="light"] .analytics-v3 .av3-dialog p {color:#526b7e}
+:root[data-theme="light"] .analytics-v3 .av3-dialog>button:first-child {
+  color:#33566e;
+}
+:root[data-theme="light"] .analytics-v3 :is(button,select,input):focus-visible {
+  outline-color:#247bb2;
+}
+@media (max-width:700px) {
+  :root[data-theme="light"] .analytics-v3 .av3-study-results {padding:12px}
+  :root[data-theme="light"] .analytics-v3 .av3-study-metrics>div {min-width:0;padding:10px}
+  :root[data-theme="light"] .analytics-v3 .av3-study-course {min-width:0}
+}
