@@ -164,7 +164,7 @@ for (const width of [320, 390, 820]) {
     await expect(page).toHaveURL(/\/workspace\/1$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/workspace\/2$/);
-    await expect(page.getByRole("navigation", { name: "Подразделы сообщества" }))
+    await expect(page.getByRole("navigation", { name: "Подразделы сообщества" })
       .getByRole("link", { name: "Сообщения" })).toHaveAttribute("aria-current", "page");
     await noOverflow(page);
   });
