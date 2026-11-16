@@ -224,7 +224,7 @@ for (const width of [320, 390, 1440]) {
       .toBeVisible();
     await checkMeterTargetContrast(page, root + " .ref-skill-bars .ref-meter");
     await chartGroup.getByRole("button", { name: "Тренд" }).click();
-    await expect(passport.locator(".ref-trend svg")).toBeVisible();
+    await expect(passport.locator(".ref-trend svg").first()).toBeVisible();
     await checkSvgContrast(page, root + ' .ref-trend polyline[stroke="#28e9cc"]', "stroke", 3);
     await checkSvgContrast(page, root + ' .ref-trend circle[fill="#28e9cc"]', "fill", 3);
     await checkSvgContrast(page, root + ' .ref-trend text[fill="#8caabe"]', "fill", 4.5);
