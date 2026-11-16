@@ -141,7 +141,11 @@ for(const mode of ["light","blue","midnight"] as const){
           const title = node.querySelector<HTMLElement>(".trajectory-v2-role-modal-heading h2");
           if (!title) throw new Error("Role details heading missing");
           return {
-            contrasts: tabs.map(tab => contrast(getComputedStyle(tab).color, bg)),
+            tabs: tabs.map(tab => ({
+              label: tab.textContent?.trim() ?? "",
+              color: getComputedStyle(tab).color,
+              ratio: contrast(getComputedStyle(tab).color, bg),
+            })),
             headingContrast: contrast(getComputedStyle(title).color, bg),
             tileBackgrounds: tiles.map(tile => toRgb(getComputedStyle(tile).backgroundColor)),
             tabBounds: tabs.map(tab => {
@@ -156,7 +160,9 @@ for(const mode of ["light","blue","midnight"] as const){
           };
         });
         expect(roleAppearance.headingContrast).toBeGreaterThanOrEqual(4.5);
-        for (const ratio of roleAppearance.contrasts) expect(ratio).toBeGreaterThanOrEqual(4.5);
+        for (const tab of roleAppearance.tabs) {
+          expect(tab.ratio, `Role tab "${tab.label}" foreground ${tab.color} on white`).toBeGreaterThanOrEqual(4.5);
+        }
         for (const rgb of roleAppearance.tileBackgrounds) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220);
         if (width <= 560) {
           expect(roleAppearance.layout).toBe("grid");
