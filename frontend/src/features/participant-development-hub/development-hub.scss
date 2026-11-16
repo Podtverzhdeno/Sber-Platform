@@ -282,6 +282,14 @@
   }
 }
 
+/* The mobile topbar wraps search onto its own row. Keep the first
+ * Development heading below that fixed row, instead of obscuring its label. */
+@media (max-width: 600px) {
+  .development-hub {
+    padding-top: 44px;
+  }
+}
+
 @media (max-width: 360px) {
   .development-hub__header {
     flex-wrap: wrap;
