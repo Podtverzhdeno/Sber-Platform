@@ -268,6 +268,10 @@ test("light next-step subtitle and sidebar entry points meet AA contrast", async
   await contrast(page, ".trajectory-v2-next-task-description small", ".trajectory-v2-next-task");
   await expect(page.locator(".trajectory-v2-all-grades-link")).toBeVisible();
   await contrast(page, ".trajectory-v2-all-grades-link", ".trajectory-v2-reference-sidebar > section");
+  const retry = page.locator(".trajectory-v2-level-error button");
+  await expect(retry).toBeVisible();
+  await expect(retry).toHaveText("Повторить");
+  await contrast(page, ".trajectory-v2-level-error button", ".trajectory-v2-reference-sidebar > section");
   await expect(page.locator(".trajectory-v2-passport-panel > header button")).toBeVisible();
   await contrast(page, ".trajectory-v2-passport-panel > header button", ".trajectory-v2-passport-panel");
 });
