@@ -397,7 +397,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <section className="trajectory-v2-grade-panel">
           <header><h3>Уровень Impulse</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
-            <div className="trajectory-v2-grade-ring" style={{background:`conic-gradient(#0de5d6 0 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}%, #204a68 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}% 100%)`}}>
+            <div className="trajectory-v2-grade-ring" style={{background:`conic-gradient(var(--trj-teal, #0de5d6) 0 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}%, var(--trj-grade-track, #204a68) ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}% 100%)`}}>
               <strong data-testid="trajectory-impulse-level">{roleLevel ? `L${String(roleLevel.level)}` : learningLevel.isPending ? "…" : "—"}</strong>
               <small>{roleLevel ? `Цикл ${String(roleLevel.cycle_number)}` : "Загрузка"}</small>
             </div>
