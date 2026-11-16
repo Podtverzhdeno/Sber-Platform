@@ -54,7 +54,7 @@ const overview: DevelopmentOverviewView = {
   },
 };
 
-async function showTrajectory(page: Page, mode: "light" | "dark") {
+async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false) {
   await page.addInitScript((theme: string) => {
     localStorage.setItem("impulse-theme", theme);
     localStorage.setItem("impulse-visual-mode", theme === "light" ? "light" : "midnight");
@@ -77,6 +77,15 @@ async function showTrajectory(page: Page, mode: "light" | "dark") {
     { track_key: "product", policy_version: 1, replacement_reason: null, milestones, next_step: milestones[3] },
   ] }));
   await page.route("**/api/v1/me/talent-passport", route => route.fulfill({ json: { verified_courses: [], skills: [], cases: [] } }));
+  if (readyToAdvance) {
+    await page.route("**/api/v1/me/bootcamp/impulse-level?*", route => route.fulfill({ json: {
+      track_key: "product", level: 1, cycle_number: 2, curriculum_state: "published",
+      completed_courses: 2, required_courses: 2,
+      approved_practices: 1, credited_practices: 1, required_practices: 1,
+      advance_ready: true, history: [], policy_version: 1,
+      max_level: 3, required_course_keys: ["course-a", "course-b"],
+    } }));
+  }
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/1?role=product", { waitUntil: "domcontentloaded" });
@@ -175,6 +184,8 @@ test("mobile light role details and grade dialogs remain bright", async ({ page 
   await lightSurface(page, ".trajectory-v2-role-dialog");
   await lightSurface(page, ".trajectory-v2-role-intro-grid > section");
   await contrast(page, ".trajectory-v2-role-dialog h2", ".trajectory-v2-role-dialog");
+  await contrast(page, ".trajectory-v2-role-intro-hero h3", ".trajectory-v2-role-intro-hero");
+  await contrast(page, ".trajectory-v2-role-intro-card h3", ".trajectory-v2-role-intro-card");
   const roleTabs = roleDialog.getByRole("tab");
   await expect(roleTabs).toHaveCount(6);
   await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='true']", ".trajectory-v2-role-dialog");
@@ -233,4 +244,27 @@ test("light expanded statistics and populated stage drawer have readable text", 
   await contrast(page, ".trajectory-v2-drawer-metrics strong", ".trajectory-v2-drawer-metrics > div");
   await drawer.getByRole("button", { name: "Закрыть" }).first().click();
   await expect(drawer).toBeHidden();
+});
+
+
+test("light next-step subtitle and sidebar entry points meet AA contrast", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  const next = page.locator(".trajectory-v2-next-task-description");
+  await expect(next.locator("small")).toBeVisible();
+  await contrast(page, ".trajectory-v2-next-task-description small", ".trajectory-v2-next-task");
+  await expect(page.locator(".trajectory-v2-all-grades-link")).toBeVisible();
+  await contrast(page, ".trajectory-v2-all-grades-link", ".trajectory-v2-reference-sidebar > section");
+  await expect(page.locator(".trajectory-v2-passport-panel > header button")).toBeVisible();
+  await contrast(page, ".trajectory-v2-passport-panel > header button", ".trajectory-v2-passport-panel");
+});
+
+test("light ready-to-advance learning cycle uses readable status ink", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light", true);
+  const ready = page.locator(".trajectory-v2-cycle-ready");
+  await expect(ready).toBeVisible();
+  await expect(ready).toContainText("Следующий этап");
+  await lightSurface(page, ".trajectory-v2-cycle-path");
+  await contrast(page, ".trajectory-v2-cycle-ready", ".trajectory-v2-cycle-path");
 });
