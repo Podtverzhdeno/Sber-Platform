@@ -2,7 +2,7 @@
 
 - task_id: FIX-TASK-TERMS-CONSENT-MOBILE-20261116
 - session_id: gpt6-terms-consent-alignment-20261116
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T12:08:00+03:00
 - heartbeat_at: 2026-11-16T12:08:00+03:00
 - base_revision: be6e9b285f3f1cefdeaa02bc42e56208907a2907
@@ -18,3 +18,13 @@
 - verification: JSX a11y, mobile Chromium at 320/390, desktop at 1440, scoped ESLint, TypeScript and build, exact integration SHA
 - progress: identified flex-start alignment plus checkbox margin-top; authorizing new minimal follow-up only
 - blocker: independent reviewer and exact integration/release checks before merge/deploy
+
+
+- final_verification:
+  - Chromium Playwright dedicated 4192 port — 6/6 PASS (light/dark, 320/390/768, checkbox/copy center delta ≤2px, consent toggles, submit disabled/active, no horizontal overflow), job 6301c7ef08d34311992c5b8369282db7.
+  - Scoped ESLint: PASS, zero warnings (conditions-dialog.tsx, consent test, Playwright config), job 4774d00f18ef472abf31a29cde2bb22f.
+  - Frontend TypeScript: PASS, job 88a671eccc5d46dfbe7e21880eca7b0d.
+  - Production Vite build: PASS, 2195 modules, job 08d68c96280846b8897f937facbc1b8a (pre-existing chunk-size warning).
+  - First Playwright attempt blocked by already occupied shared 4173; corrected with isolated 4192 config, not a product failure.
+  - Local unrelated development-overview API proxy returned ECONNREFUSED due to absent :8000 backend; fixture-based UI E2E passed; live production smoke NOT VERIFIED.
+- handoff: exact final diff, independent review, integration checks and Railway release remain separate tasks. No source changes outside the declared consent/QA scope.
