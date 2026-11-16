@@ -21,7 +21,7 @@
   - Previous focused run 7/7 PASS before adding 390px cases
   - Scoped ESLint final revision: PASS, zero warnings
   - git diff --check: PASS, zero errors (local Git only notes future LF/CRLF conversion)
-  - Frontend TypeScript first version: PASS; final post-390 check RUNNING; update result when known
+  - Frontend TypeScript final post-390 check: PASS, exit code 0
 - verification_limits: deterministic server-authorized Playwright fixture, not live Railway login; semantic text/surface contrast checked, not full pixel image equivalence or every nested element
 - integration: main changed independently from 7265b047 to fb412382 (Help mobile picker) while tests ran; no overlap in owned files, exact integration SHA QA and independent reviewer still required
 - next_step: independent reviewer check diff and behavior, then integration lane to merge/test exact revision; no author production deploy
