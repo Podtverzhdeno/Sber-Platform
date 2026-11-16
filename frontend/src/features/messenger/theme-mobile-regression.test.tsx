@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
-const referenceStyles = readFileSync(new URL("./reference.scss", import.meta.url), "utf8");
+const referenceStyles = readFileSync("src/features/messenger/reference.scss", "utf8");
 
 function contrastRatio(foreground: string, background: string): number {
   const luminance = (value: string): number => {
