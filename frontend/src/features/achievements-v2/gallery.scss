@@ -340,3 +340,72 @@
 @media(prefers-reduced-motion:reduce) {
   .ach-gallery *,.ach-gallery *::before,.ach-gallery *::after {animation:none!important;transition:none!important;}
 }
+
+/* Residual artwork gap after shared Results light materials (#243).
+   Keep the HIG-style pale art canvases in the ACTUAL gallery route rather than
+   duplicating tokens/cards/filters/drawers already owned by Results surfaces. */
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art {
+  color:#247b87;
+  background:#edf6f8;
+  background-image:none;
+  border-color:#d1e4ea;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--trophy .ach-gallery-art {
+  color:#986b24;
+  background:#fff6e8;
+  border-color:#ebdbbd;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--certificate .ach-gallery-art {
+  color:#496ba2;
+  background:#eff4fd;
+  border-color:#d2dff0;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--event .ach-gallery-art {
+  color:#7560a4;
+  background:#f5effb;
+  border-color:#e0d4ed;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art :is(.ach-gallery-art-grid,.ach-gallery-art-orb) {
+  opacity:.05;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art>svg {
+  color:inherit;
+  filter:none;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-holo {
+  color:#4c819e;
+  background:#e7f1fa;
+  background-image:none;
+  border-color:#cbddec;
+  box-shadow:none;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art {
+  --drawer-art:#287d87;
+  color:#287d87;
+  background:#eef6f8;
+  background-image:none;
+  border-color:#d6e6ed;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--trophy {
+  --drawer-art:#9c6b28;
+  background:#fff5e9;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--certificate {
+  --drawer-art:#5374a0;
+  background:#eff4fd;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--event {
+  --drawer-art:#7864a6;
+  background:#f5effb;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art .drawer-art-icon {
+  color:var(--drawer-art);
+  filter:none;
+}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-stars {opacity:.05}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-add-icon {
+  color:#286d98;
+  background:#e9f3fa;
+  background-image:none;
+  border-color:#c6dce9;
+}
