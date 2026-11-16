@@ -68,18 +68,17 @@ describe("authorized Practice subsection navigation", () => {
     expect(screen.queryByRole("link", { name: "Мои проекты" })).toBeNull();
   });
 
-  it("retains visible text labels and decorative section symbols", () => {
+  it("keeps text labels and decorative icons for every authorized destination", () => {
     mount({ navigation: sections, activePage: "tasks", initialEntry: "/workspace/3" });
     expect(screen.getByText("Задачи, работа и проекты")).toBeInTheDocument();
-    const labels = ["Задачи", "В работе", "Мои проекты"];
-    for (const label of labels) {
+    for (const label of ["Задачи", "В работе", "Мои проекты"]) {
       const link = screen.getByRole("link", { name: label });
       expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
       expect(link.querySelector("span")?.textContent).toBe(label);
     }
   });
 
-  it("keeps only authorized links with selected state on a one-item menu", () => {
+  it("preserves an accessible selected state with only one permitted destination", () => {
     mount({ navigation: ["Задачи"], activePage: "tasks", initialEntry: "/workspace/0" });
     const links = screen.getAllByRole("link");
     expect(links).toHaveLength(1);
