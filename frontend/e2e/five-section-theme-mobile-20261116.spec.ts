@@ -96,8 +96,11 @@ async function assertThemeTokens(page: Page, mode: VisualMode) {
 }
 
 for (const mode of ["light", "blue", "midnight"] as const) {
-  for (const width of [320, 390, 1440]) {
+  for (const width of [320, 390, 768, 1440]) {
     test(`authorized five-section journey at ${String(width)}px in ${mode} mode`, async ({ page }) => {
+      // Five destinations plus browser Back: cold CI browsers can take >30s.
+      // Do not skip or relax any navigation, RBAC, contrast or overflow assertion.
+      test.slow();
       await page.setViewportSize({ width, height: width <= 390 ? 700 : 900 });
       await installParticipant(page, mode);
       await page.goto("/workspace/0", { waitUntil: "domcontentloaded" });
@@ -115,7 +118,7 @@ for (const mode of ["light", "blue", "midnight"] as const) {
         await expect(menu).toBeHidden();
         await expect(page.locator(".workspace-content")).toBeVisible();
         await assertThemeTokens(page, mode);
-        if (width <= 390) await assertNoDocumentOverflow(page, destination.label);
+        if (width <= 768) await assertNoDocumentOverflow(page, destination.label);
         await page.goBack({ waitUntil: "domcontentloaded" });
         await expect(page).toHaveURL(/\/workspace\/0(?:[?]|$)/);
       }
@@ -125,7 +128,7 @@ for (const mode of ["light", "blue", "midnight"] as const) {
         .toHaveAttribute("href", "/workspace/0");
       await page.keyboard.press("Escape");
       await expect(menu).toBeHidden();
-      if (width <= 390) await assertNoDocumentOverflow(page, "Главная");
+      if (width <= 768) await assertNoDocumentOverflow(page, "Главная");
     });
   }
 }
