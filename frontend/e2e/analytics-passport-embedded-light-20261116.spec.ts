@@ -107,7 +107,7 @@ async function checkTextContrast(page: Page, foreground: string, surface: string
 
 async function checkSvgContrast(page: Page, selector: string, property: "fill" | "stroke", minimum: number) {
   const paint = await page.locator(selector).first()
-    .evaluate((node, key) => getComputedStyle(node)[key], property);
+    .evaluate((node, key) => getComputedStyle(node).getPropertyValue(key), property);
   const onWhite = luminosity("rgb(255, 255, 255)");
   const dataInk = luminosity(paint);
   const contrast = (Math.max(dataInk, onWhite) + .05) / (Math.min(dataInk, onWhite) + .05);
