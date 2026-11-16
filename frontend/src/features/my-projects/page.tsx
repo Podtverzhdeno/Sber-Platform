@@ -11,6 +11,7 @@ import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { PracticeNavigation } from "../participant-practice-navigation/PracticeNavigation";
+import { practiceDestinations } from "../participant-practice-navigation/model";
 import { ProjectDashboard } from "./project-dashboard";
 import { RewardsJourney } from "./rewards-journey";
 import { ProjectReferenceTasks, ProjectReferenceProgress, ProjectReferenceTeam, ProjectReferenceRewards } from "./project-detail-reference";
@@ -411,6 +412,14 @@ export function ParticipantProjectsV2() {
     panel.scrollIntoView({block:"nearest",behavior:"auto"});
     panel.focus({preventScroll:true});
   },[showHelp]);
+  const actorNavigation=useQuery({
+    queryKey:["me"],
+    queryFn:()=>apiRequest<{active_role:string;navigation:string[]}>("/api/v1/me"),
+    retry:false,
+  });
+  const tasksHref=actorNavigation.data?.active_role==="participant"
+    ? practiceDestinations(actorNavigation.data.navigation).find(destination=>destination.id==="tasks")?.href
+    : undefined;
   const work=useQuery({queryKey:["my-work"],queryFn:()=>apiRequest<WorkItem[]>("/api/v1/me/work"),refetchOnMount:"always"});
   const details=useQueries({queries:(work.data??[]).slice(0,30).map(item=>({
     queryKey:["workspace-task-detail",item.task.id],
@@ -492,7 +501,7 @@ export function ParticipantProjectsV2() {
       <div className="mp-layout" role="group" aria-label="Режим проектов"><button type="button" onClick={()=>{ setLayout("cards"); }} aria-pressed={layout==="cards"} className={layout==="cards"?"is-active":""}><LayoutGrid size={15}/> Карточки</button><button type="button" onClick={()=>{ setLayout("list"); }} aria-pressed={layout==="list"} className={layout==="list"?"is-active":""}><List size={16}/> Список</button></div>
     </section>
     {showHelp&&<div ref={helpPanelRef} tabIndex={-1} id="mp-help-panel" className="mp-help-banner" role="region" aria-label="Как работают мои проекты"><span><strong>1.</strong> Проекты появляются после принятия назначения</span><span><strong>2.</strong> Работайте с командой и отправляйте личный вклад</span><span><strong>3.</strong> Заказчик проверяет результат, а возможности и награды зависят от условий программы</span></div>}
-    {work.data.length===0?<div className="mp-empty mp-surface"><FolderKanban size={34}/><h2>Пока нет принятых проектов</h2><p>После принятия назначения проект появится здесь. Откликнуться на новые задачи можно в каталоге.</p><button className="mp-primary" onClick={()=>{ void navigate("/workspace/3"); }}>Перейти к задачам <ArrowRight size={16}/></button></div>:
+    {work.data.length===0?<div className="mp-empty mp-surface"><FolderKanban size={34}/><h2>Пока нет принятых проектов</h2><p>{tasksHref ? "После принятия назначения проект появится здесь. Откликнуться на новые задачи можно в каталоге." : "После принятия назначения проект появится здесь."}</p>{tasksHref && <button type="button" className="mp-primary" onClick={()=>{ void navigate(tasksHref); }}>Перейти к задачам <ArrowRight size={16}/></button>}</div>:
       <>
       {layout==="cards"?<div className="mp-card-layout" data-reference="my-projects-approved-cards">
         <div className="mp-card-list">
