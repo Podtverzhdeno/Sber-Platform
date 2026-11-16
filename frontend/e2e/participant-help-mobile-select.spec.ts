@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 const participantId = "ea5738ef-196d-4bfa-a58d-04488a219951";
 const navigation = ["Главная", "Задачи", "Мои проекты", "Bootcamp", "Моя траектория", "Аналитика", "Портфолио", "Сообщения"];
 
-async function openHelp(page: Page, mode: "blue" | "light") {
+async function openHelp(page: Page, mode: "blue" | "light" | "midnight") {
   await page.addInitScript((visualMode) => {
     localStorage.setItem("impulse-visual-mode", visualMode);
     localStorage.setItem("impulse-theme", visualMode === "light" ? "light" : "dark");
@@ -28,7 +28,9 @@ async function openHelp(page: Page, mode: "blue" | "light") {
 for (const { width, mode } of [
   { width: 320, mode: "blue" as const },
   { width: 390, mode: "light" as const },
+  { width: 570, mode: "midnight" as const },
   { width: 768, mode: "blue" as const },
+  { width: 1440, mode: "light" as const },
 ]) {
   test(`help center keeps categories reachable without clipping at ${String(width)}px (${mode})`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -38,6 +40,7 @@ for (const { width, mode } of [
     expect(bounds).not.toBeNull();
     expect(bounds?.x).toBeGreaterThanOrEqual(0);
     expect((bounds?.x ?? 0) + (bounds?.width ?? 0)).toBeLessThanOrEqual(width + 1);
+    expect(await dialog.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     const picker = dialog.getByRole("combobox", { name: "Раздел помощи" });
     if (width <= 600) {
       await expect(picker).toBeVisible();

@@ -13,7 +13,7 @@ On small screens the help library shows many category buttons in a horizontally 
 - Reduced motion and forced-colors environments SHALL remain usable.
 
 ## Acceptance
-Vitest help-center category-switch regression; Chromium 320/390/768 with dark/light visual modes, visible vs hidden category controls, help search, close, bounding boxes and touch-target assertions.
+Vitest help-center category-switch regression; Chromium 320/390/570/768/1440 with blue/midnight/light modes, visible vs hidden category controls, help search, close, bounding boxes, no internal horizontal overflow and touch-target assertions.
 
 ## Scope
 Only participant help-center TSX, scoped mobile rules in participant-guide.scss, its tests and new isolated E2E. No shared shell, APIs, route table or data changes.
