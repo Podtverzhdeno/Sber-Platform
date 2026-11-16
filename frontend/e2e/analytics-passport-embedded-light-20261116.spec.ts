@@ -51,6 +51,16 @@ async function openPassport(page: Page, mode: "light" | "midnight" | "blue") {
   await page.route(/\/api\/v1\/me(?:\?.*)?$/, route => route.fulfill({ json: actor }));
   await page.route("**/api/v1/me/agentic-coding/profile**", route =>
     route.fulfill({ json: profile }));
+  await page.route("**/api/v1/me/competency-evidence", route =>
+    route.fulfill({ json: [{
+      competency_key: "prompting",
+      source_kind: "project",
+      source_ref: "accepted-qa-case",
+      level: "базовый",
+      observed_at: "2026-11-15T12:00:00Z",
+      reason: "Зарегистрированный источник",
+      counted: true,
+    }] }));
   await page.route("**/api/v1/me/growth/snapshot", route => route.fulfill({ json: {
     snapshot_id: "passport-surface-qa",
     generated_at: "2026-11-16T10:00:00Z",
@@ -165,6 +175,20 @@ for (const width of [320, 390, 1440]) {
     await checkSvgContrast(page, root + ' .ref-radar svg line[stroke="#ffae2b"]', "stroke", 3);
     await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#31eaba"]', "fill", 3);
     await checkSvgContrast(page, root + ' .ref-radar-skill circle[fill="#ffb844"]', "fill", 3);
+    const activityMark = passport.locator(".ref-radar-activity-mark").first();
+    await expect(activityMark).toBeVisible();
+    const focusableSkill = passport.locator(".ref-radar-skill")
+      .filter({ has: activityMark }).first();
+    await focusableSkill.focus();
+    await expect(focusableSkill).toBeFocused();
+    const activityForeground = await activityMark.locator("text")
+      .evaluate(node => getComputedStyle(node).fill);
+    const activityBackground = await activityMark.locator("circle")
+      .evaluate(node => getComputedStyle(node).fill);
+    const current = luminosity(activityForeground), background = luminosity(activityBackground);
+    const activityContrast = (Math.max(current, background) + .05) / (Math.min(current, background) + .05);
+    expect(activityContrast, "Focused activity count " + activityForeground +
+      " on " + activityBackground).toBeGreaterThanOrEqual(4.5);
     for (const selector of [
       ".ref-legend .ref-dot:not(.amber):not(.activity)",
       ".ref-legend .ref-dot.amber",
