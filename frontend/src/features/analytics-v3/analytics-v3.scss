@@ -399,6 +399,11 @@
   .ref-personal-facts > strong {
     font-size: 12px;
   }
+  /* Computed browser QA caught 4.29:1 on the nested fact captions.
+     Use an explicit ink token; small text must clear 4.5:1 in practice. */
+  .ref-personal-facts small {
+    color: #344c60;
+  }
   :is(.ref-switch, .ref-pages, .ref-filters select, .ref-fresh) {
     color: var(--ref-txt);
     background: #f2f6fa;
