@@ -2,7 +2,7 @@
 
 - task_id: OWNER-MESSENGER-MOBILE-LIGHT-20261116
 - session_id: gpt6-20261116-messenger-light-mobile-owner
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T10:32:00+03:00
 - heartbeat_at: 2026-11-16T10:32:00+03:00
 - base_revision: 5816e9dedeb9303b0454876f094acb0938164134
@@ -21,5 +21,13 @@
   - other feature files, shared E2E baselines, backend, API, roles and Railway
 - verification: targeted frontend unit tests, TypeScript, ESLint, build; browser 320/390 light/dark (only if available)
 - integration: no direct main merge or Railway release before independent review and exact revision acceptance
-- progress: owner follow-up isolated; root cause confirmed in hardcoded R-MSG-01 dark palette
-- blockers: shared light theme fixes across other sections owned by UI-ALL-APPLE and UI-APPLE-INTEGRATE, require integration handoff
+- progress: CSS override and isolated tests committed in PR #214; implementation complete and ready for independent reviewer
+- verification_evidence:
+  - Vitest theme-mobile-regression.test.tsx: 4/4 PASS
+  - Scoped ESLint (unit, browser spec, isolated config): PASS
+  - TypeScript and Vite production build: PASS (2192 modules)
+  - Existing mobile Messages Chromium E2E: 1/1 PASS
+  - New 320/390px light and dark Chromium E2E: 2/2 PASS
+  - Browser covers actual light backgrounds, text, composer, mobile context/back and no horizontal overflow
+- integration_note: PR #214 is mergeable but currently 1 commit behind main; independent reviewer must accept exact integration SHA and check visual references
+- blockers: shared light theme fixes across other sections owned by UI-ALL-APPLE and UI-APPLE-INTEGRATE, require integration handoff; Railway live acceptance not yet done
