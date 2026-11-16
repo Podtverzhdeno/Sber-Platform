@@ -114,6 +114,8 @@ for (const width of [320, 390, 1440]) {
         await expectContrast(page, ".mp-overview-next > header h2", ".mp-overview-next");
         await expect(dialog.locator(".mp-key-facts > span")).toHaveCount(4);
         await expectContrast(page, ".mp-key-facts > span", ".mp-detail-panel");
+        await expect(dialog.locator(".mp-compact-progress > header > strong")).toBeVisible();
+        await expectContrast(page, ".mp-compact-progress > header > strong", ".mp-compact-progress");
         await expect(dialog.locator(".mp-team-member small").first()).toBeVisible();
         await expectContrast(page, ".mp-team-member small", ".mp-detail-panel");
         await expectContrast(page, ".mp-outcome-band > span", ".mp-outcome-band");
