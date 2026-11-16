@@ -554,6 +554,19 @@
   .ref-trend svg line[stroke="#183a4e"] {
     stroke: #b9d0de;
   }
+  /* Tiny chart legends and completion bar are data, not decoration. */
+  .ref-dot {
+    background: #0b7169;
+  }
+  .ref-dot.amber {
+    background: #a16316;
+  }
+  .ref-dot.activity {
+    background: #11677b;
+  }
+  .ref-progress > i {
+    background: linear-gradient(90deg, #0b7169, #1b6ba2);
+  }
   .ref-bar-pair i {
     background: linear-gradient(0deg, #0e716f, #177f80);
   }
