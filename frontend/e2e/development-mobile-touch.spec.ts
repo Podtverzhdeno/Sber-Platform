@@ -53,6 +53,7 @@ for (const mode of ["blue", "midnight", "light"] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await openDevelopment(page, mode);
 
+    const obscuredHeadings: string[] = [];
     for (const width of [320, 390, 768]) {
       await page.setViewportSize({ width, height: 844 });
       const requirements = page.getByTestId("development-level-requirements");
@@ -68,10 +69,10 @@ for (const mode of ["blue", "midnight", "light"] as const) {
       const search = await page.locator(".topbar .global-search").boundingBox();
       const heading = await page.locator(".development-hub__header .development-hub__eyebrow").boundingBox();
       if (search === null || heading === null) throw new Error("Mobile header geometry unavailable");
-      expect(
-        heading.y - (search.y + search.height),
-        `Development heading clears global search at ${String(width)}px`,
-      ).toBeGreaterThanOrEqual(8);
+      const clearance = heading.y - (search.y + search.height);
+      if (clearance < 8) {
+        obscuredHeadings.push(`${String(width)}px: ${String(clearance)}px clearance`);
+      }
 
       const levelLabel = page.locator(".development-hub__header-progress small");
       await expect(levelLabel).toBeVisible();
@@ -101,6 +102,8 @@ for (const mode of ["blue", "midnight", "light"] as const) {
         fullPage: true,
       });
     }
+    expect(obscuredHeadings, "Development headings must clear mobile search at all widths")
+      .toEqual([]);
   });
 }
 
