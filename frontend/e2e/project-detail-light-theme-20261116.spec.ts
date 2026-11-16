@@ -68,15 +68,16 @@ function brightness(color: string): number {
   const rgb = color.match(/^rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
   const srgb = color.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
   if (!rgb && !srgb) throw new Error("Unsupported computed color: " + color);
-  const values = (rgb ? rgb.slice(1, 4).map(x => Number(x) / 255)
-    : srgb!.slice(1, 4).map(Number));
+  const values = rgb?.slice(1, 4).map(x => Number(x) / 255) ?? srgb?.slice(1, 4).map(Number);
+  if (!values) throw new Error("Invalid computed color: " + color);
   return values[0] * 0.2126 + values[1] * 0.7152 + values[2] * 0.0722;
 }
 function linearLuminance(color: string): number {
   const rgb = color.match(/^rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/);
   const srgb = color.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
   if (!rgb && !srgb) throw new Error("Unsupported computed color: " + color);
-  const values = rgb ? rgb.slice(1, 4).map(x => Number(x) / 255) : srgb!.slice(1, 4).map(Number);
+  const values = rgb?.slice(1, 4).map(x => Number(x) / 255) ?? srgb?.slice(1, 4).map(Number);
+  if (!values) throw new Error("Invalid computed color: " + color);
   const channels = values.map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 }
