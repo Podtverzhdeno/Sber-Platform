@@ -1,0 +1,71 @@
+name: Practice Apple UI acceptance
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/participant-practice-navigation/**"
+      - "frontend/e2e/participant-practice-apple-20261116.spec.ts"
+      - ".github/workflows/practice-apple-ui-20261116.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/participant-practice-navigation/**"
+      - "frontend/e2e/participant-practice-apple-20261116.spec.ts"
+      - ".github/workflows/practice-apple-ui-20261116.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  practice-apple:
+    name: Practice Apple — responsive, auth, filters, back
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: ESLint — changed React and E2E
+        run: npx eslint src/features/participant-practice-navigation/PracticeNavigation.tsx src/features/participant-practice-navigation/PracticeNavigation.test.tsx e2e/participant-practice-apple-20261116.spec.ts --max-warnings 0
+      - name: Unit tests
+        run: npm test -- src/features/participant-practice-navigation/PracticeNavigation.test.tsx
+      - name: Production build
+        run: npm run build
+      - name: Chromium browser and system libraries
+        run: npx playwright install --with-deps chromium
+      - name: Practice navigation and real catalog
+        run: npx playwright test e2e/participant-practice-navigation.spec.ts e2e/participant-practice-apple-20261116.spec.ts --project=chromium --workers=1 --trace=off
+      # Playwright clears its default test-results directory at the start of
+      # each invocation. Upload visual evidence BEFORE the catalog-only rerun.
+      - name: Preserve practice screenshots before next Playwright run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-apple-visual-evidence
+          path: frontend/test-results/practice-apple-*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Original task catalog consent and filter regression
+        run: npx playwright test e2e/task-catalog-v2.spec.ts --project=chromium --workers=1 --trace=off --grep "catalog filters, view parity and one idempotent apply|stale terms require a new version and fresh consent"
+      - name: Upload practice screenshots and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-apple-screenshots
+          path: |
+            frontend/test-results/practice-apple-*.png
+            frontend/test-results/**/error-context.md
+          if-no-files-found: ignore
+          retention-days: 14
