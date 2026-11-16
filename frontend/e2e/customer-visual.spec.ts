@@ -24,7 +24,7 @@ async function navigateCustomer(page: Page, section: string): Promise<void> {
     "Настройки": "Дополнительно",
     "AI-помощник": "Дополнительно",
   };
-  await page.getByRole("button", { name: "Impulse — открыть разделы" }).click();
+  await page.getByRole("button", { name: "Показать навигацию" }).click();
   const menu = page.getByRole("dialog", { name: "Главное меню" });
   await expect(menu).toBeVisible();
   const groupName = groups[section];
