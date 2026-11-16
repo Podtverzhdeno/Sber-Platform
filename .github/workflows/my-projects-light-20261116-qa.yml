@@ -7,12 +7,14 @@ on:
       - "frontend/e2e/my-projects-light-surfaces-20261116.spec.ts"
       - "frontend/playwright.projects-light-20261116.config.mjs"
       - ".github/workflows/my-projects-light-20261116-qa.yml"
+      - ".agents/coordination/claims/FIX-PROJECTS-LIGHT-LIST-CARD-20261116.lock/status.md"
   push:
     branches: [main]
     paths:
       - "frontend/src/features/my-projects/my-projects.scss"
       - "frontend/e2e/my-projects-light-surfaces-20261116.spec.ts"
       - ".github/workflows/my-projects-light-20261116-qa.yml"
+      - ".agents/coordination/claims/FIX-PROJECTS-LIGHT-LIST-CARD-20261116.lock/status.md"
 
 permissions:
   contents: read
