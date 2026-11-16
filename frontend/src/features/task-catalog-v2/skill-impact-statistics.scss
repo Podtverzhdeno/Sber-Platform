@@ -1,34 +1,91 @@
+/* The same skill evidence layout serves all three Impulse themes. Colors are
+   scoped here so light mode never inherits midnight card surfaces. */
+.catalog-skill-stats {
+  --skill-overview-bg: #092b3c;
+  --skill-overview-border: #246078;
+  --skill-number: #35e6d1;
+  --skill-overview-caption: #a5c4d5;
+  --skill-track: #16384a;
+  --skill-track-fill: linear-gradient(90deg, #169ac0, #22dfbb);
+  --skill-card-bg: #0a2033;
+  --skill-card-border: #1d5067;
+  --skill-heading: #e9f7ff;
+  --skill-pill-bg: transparent;
+  --skill-pill-border: #32556a;
+  --skill-pill-text: #a7c2d2;
+  --skill-confirmed-bg: #094439;
+  --skill-confirmed-border: #148a7c;
+  --skill-confirmed-text: #58f8c3;
+  --skill-fact-bg: #09263b;
+  --skill-fact-border: #23465d;
+  --skill-fact-label: #95b6c9;
+  --skill-fact-value: #e1f6fa;
+  --skill-note: #92b7ca;
+  --skill-date: #7ea6c4;
+  --skill-measured-track: #234151;
+  --skill-measured-fill: #22e8cb;
+  --skill-empty: #a6c3d3;
+}
+/* Apple-style light canvas: white cards, subtle neutral separators,
+   readable ink and restrained green only for a verified evidence status. */
+html[data-theme="light"] .catalog-v2 .catalog-skill-stats {
+  --skill-overview-bg: #f5f8fc;
+  --skill-overview-border: #dfe6ee;
+  --skill-number: #0b628d;
+  --skill-overview-caption: #516174;
+  --skill-track: #e5ecf3;
+  --skill-track-fill: linear-gradient(90deg, #2678c4, #20a995);
+  --skill-card-bg: #ffffff;
+  --skill-card-border: #dce4ec;
+  --skill-heading: #17283f;
+  --skill-pill-bg: #f7f9fc;
+  --skill-pill-border: #d5dee8;
+  --skill-pill-text: #536477;
+  --skill-confirmed-bg: #e9f7f1;
+  --skill-confirmed-border: #addbc8;
+  --skill-confirmed-text: #116449;
+  --skill-fact-bg: #f6f8fb;
+  --skill-fact-border: #e1e7ef;
+  --skill-fact-label: #536174;
+  --skill-fact-value: #1b2d42;
+  --skill-note: #4d5d6d;
+  --skill-date: #526376;
+  --skill-measured-track: #e5ecf3;
+  --skill-measured-fill: #159d8a;
+  --skill-empty: #526373;
+}
+
 .catalog-v2-detail .catalog-skill-stats { min-width:0; }
 .catalog-skill-stats .catalog-v2-section-heading h3 { display:flex;align-items:center;gap:8px; }
 .catalog-skill-stats .catalog-v2-section-heading h3 svg { color:var(--catalog-highlight,#12e0cf); }
 .catalog-skill-stats .catalog-v2-section-heading button { display:inline-flex;align-items:center;gap:6px; }
 .catalog-skill-stats__overview { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0; }
-.catalog-skill-stats__overview > div { min-width:0;display:grid;align-content:center;gap:5px;padding:11px;background:#092b3c;border:1px solid #246078;border-radius:10px; }
-.catalog-skill-stats__overview strong { font-size:20px;color:#35e6d1;font-variant-numeric:tabular-nums; }
-.catalog-skill-stats__overview span { font-size:10px;line-height:1.45;color:#a5c4d5; }
-.catalog-skill-stats__coverage { height:7px;overflow:hidden;border-radius:20px;background:#16384a;margin:8px 0; }
-.catalog-skill-stats__coverage span { display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#169ac0,#22dfbb); }
+.catalog-skill-stats__overview > div { min-width:0;display:grid;align-content:center;gap:5px;padding:11px;background:var(--skill-overview-bg);border:1px solid var(--skill-overview-border);border-radius:10px; }
+.catalog-skill-stats__overview strong { font-size:20px;color:var(--skill-number);font-variant-numeric:tabular-nums; }
+.catalog-skill-stats__overview span { font-size:11px;line-height:1.45;color:var(--skill-overview-caption); }
+.catalog-skill-stats__coverage { height:7px;overflow:hidden;border-radius:20px;background:var(--skill-track);margin:8px 0; }
+.catalog-skill-stats__coverage span { display:block;height:100%;border-radius:20px;background:var(--skill-track-fill); }
 .catalog-skill-stats__meaning { font-size:11px!important;line-height:1.55!important;color:var(--catalog-muted);margin-bottom:12px!important; }
 .catalog-v2-detail-grid .catalog-skill-stats__list { padding:0;margin:10px 0;display:grid;gap:10px;list-style:none; }
-.catalog-skill-stats__list > li { min-width:0;padding:12px 14px;border-radius:10px;border:1px solid #1d5067;background:#0a2033;display:grid;gap:9px; }
-.catalog-skill-stats__name { display:flex;align-items:center;flex-wrap:wrap;gap:7px;color:#e9f7ff;font-size:12px; }
+.catalog-skill-stats__list > li { min-width:0;padding:12px 14px;border-radius:10px;border:1px solid var(--skill-card-border);background:var(--skill-card-bg);display:grid;gap:9px; }
+.catalog-skill-stats__name { display:flex;align-items:center;flex-wrap:wrap;gap:7px;color:var(--skill-heading);font-size:13px; }
 .catalog-skill-stats__name > strong { margin-right:auto; }
-.catalog-skill-stats__tag { display:inline-flex;align-items:center;gap:4px;border:1px solid #32556a;border-radius:99px;padding:5px 7px;color:#a7c2d2;font-size:9px; }
-.catalog-skill-stats__tag--confirmed { border-color:#148a7c;background:#094439;color:#58f8c3; }
+.catalog-skill-stats__tag { display:inline-flex;align-items:center;gap:4px;border:1px solid var(--skill-pill-border);border-radius:99px;padding:5px 8px;background:var(--skill-pill-bg);color:var(--skill-pill-text);font-size:11px; }
+.catalog-skill-stats__tag--confirmed { border-color:var(--skill-confirmed-border);background:var(--skill-confirmed-bg);color:var(--skill-confirmed-text); }
 .catalog-skill-stats__facts { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px; }
-.catalog-skill-stats__facts > div { display:grid;align-content:start;gap:5px;min-width:0;padding:8px;background:#09263b;border:1px solid #23465d;border-radius:8px; }
-.catalog-skill-stats__facts small { font-size:9px;line-height:1.35;color:#95b6c9; }
-/* Light-theme generic small-text rule must not darken captions on the dark facts tiles. */
-html[data-theme="light"] .catalog-v2 .catalog-skill-stats__facts small { color:#b5d5e7; }
+.catalog-skill-stats__facts > div { display:grid;align-content:start;gap:5px;min-width:0;padding:8px;background:var(--skill-fact-bg);border:1px solid var(--skill-fact-border);border-radius:8px; }
+.catalog-skill-stats__facts small { font-size:11px;line-height:1.35;color:var(--skill-fact-label); }
+/* Keep fact labels readable even when shared light-theme small-text rules apply. */
+html[data-theme="light"] .catalog-v2 .catalog-skill-stats__facts small { color:var(--skill-fact-label); }
 
-.catalog-skill-stats__facts b { font-size:12px;line-height:1.35;color:#e1f6fa;overflow-wrap:anywhere; }
-.catalog-skill-stats__list > li p { color:#92b7ca;line-height:1.5;font-size:10px; }
-.catalog-skill-stats__date { color:#7ea6c4;font-size:9px; }
-.catalog-skill-stats__measured { height:5px;border-radius:6px;overflow:hidden;background:#234151; }
-.catalog-skill-stats__measured i { display:block;height:100%;background:#22e8cb; }
+.catalog-skill-stats__facts b { font-size:13px;line-height:1.35;color:var(--skill-fact-value);overflow-wrap:anywhere; }
+.catalog-skill-stats__list > li p { color:var(--skill-note);line-height:1.5;font-size:12px; }
+.catalog-skill-stats__date { color:var(--skill-date);font-size:11px; }
+.catalog-skill-stats__measured { height:5px;border-radius:6px;overflow:hidden;background:var(--skill-measured-track); }
+.catalog-skill-stats__measured i { display:block;height:100%;background:var(--skill-measured-fill); }
 .catalog-skill-stats .catalog-v2-growth-explanations { margin-top:8px; }
 .catalog-skill-stats .catalog-v2-growth-explanations p { margin:7px 0;line-height:1.5; }
 .catalog-skill-stats .catalog-v2-growth-explanations p svg { display:inline;vertical-align:middle; }
-.catalog-skill-stats__empty { font-size:11px;color:#a6c3d3; }
+.catalog-skill-stats__empty { font-size:12px;color:var(--skill-empty); }
 @media(max-width:900px){.catalog-skill-stats__facts { grid-template-columns:repeat(2,minmax(0,1fr)); }}
 @media(max-width:500px){.catalog-skill-stats__overview { grid-template-columns:1fr 1fr; }.catalog-skill-stats__overview > div:last-child { grid-column:1/-1; }.catalog-skill-stats__list > li { padding:9px; }}
