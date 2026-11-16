@@ -1,0 +1,61 @@
+name: My Projects detail light theme QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/my-projects/my-projects.scss"
+      - "frontend/e2e/project-detail-light-theme-20261116.spec.ts"
+      - "frontend/playwright.project-detail-light-20261116.config.mjs"
+      - ".github/workflows/project-detail-light-20261116-qa.yml"
+      - ".agents/coordination/claims/FIX-PROJECT-DETAIL-LIGHT-SURFACES-20261116.lock/status.md"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/my-projects/my-projects.scss"
+      - "frontend/e2e/project-detail-light-theme-20261116.spec.ts"
+      - ".github/workflows/project-detail-light-20261116-qa.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-detail-light-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  project-detail-light:
+    name: Light detail tabs — 320/390/1440 and dark isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact PR commit
+        uses: actions/checkout@v4
+      - name: Install Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check lint and TypeScript
+        run: |
+          npx eslint e2e/project-detail-light-theme-20261116.spec.ts playwright.project-detail-light-20261116.config.mjs --max-warnings 0
+          npm run typecheck
+      - name: Production build
+        run: npm run build
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Verify six project tabs and mobile light palette
+        run: npx playwright test --config=playwright.project-detail-light-20261116.config.mjs --project=chromium
+      - name: Upload failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-detail-light-qa
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
