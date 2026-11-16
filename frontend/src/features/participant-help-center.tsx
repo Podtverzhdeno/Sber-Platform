@@ -27,7 +27,7 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
     <section className="pg-help-shell" ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="pg-help-title"
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
-        const nodes = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        const nodes = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])');
         if (!nodes?.length) return;
         const first = nodes[0], last = nodes[nodes.length - 1];
         if (!first || !last) return;
@@ -40,6 +40,22 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
         <button type="button" className="pg-help-close" aria-label="Закрыть центр помощи" onClick={onClose}><X size={20}/></button>
       </header>
       <div className="pg-help-body">
+        {!selected && <div className="pg-help-mobile-filter">
+          <label htmlFor="pg-help-mobile-category">Раздел помощи</label>
+          <select
+            id="pg-help-mobile-category"
+            value={category}
+            onChange={(event) => { setCategory(event.target.value as typeof category); setTopicId(null); setQuery(""); }}
+          >
+            <option value="related">Этот раздел · {relatedCount}</option>
+            <option value="all">Все инструкции · {HELP_TOPICS.length}</option>
+            {HELP_CATEGORIES.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title} · {HELP_TOPICS.filter((topic) => topic.category === item.id).length}
+              </option>
+            ))}
+          </select>
+        </div>}
         <aside className="pg-help-sidebar" aria-label="Темы помощи">
           <p>НАЙТИ ПО ТЕМЕ</p>
           <button type="button" className={category === "related" ? "is-active" : ""} onClick={() => { setCategory("related"); setTopicId(null); setQuery(""); }}><Compass size={16}/> Этот раздел <small>{relatedCount}</small></button>
@@ -48,7 +64,7 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
           {HELP_CATEGORIES.map((item) => <button key={item.id} type="button" className={category === item.id ? "is-active" : ""} onClick={() => { setCategory(item.id); setTopicId(null); setQuery(""); }}>{item.title}<small>{HELP_TOPICS.filter((topic) => topic.category === item.id).length}</small></button>)}
           <div className="pg-help-trust"><ShieldCheck size={17}/><span>Помощь не изменяет задачи, оценки и результаты</span></div>
         </aside>
-        <main className="pg-help-main">
+        <main id="pg-help-articles" className="pg-help-main">
           {selected ? <>
             <button type="button" className="pg-help-back" onClick={() => { setTopicId(null); }}><ArrowLeft size={15}/> Все инструкции</button>
             <span className="pg-help-article-tag">{HELP_CATEGORIES.find((item) => item.id === selected.category)?.title}</span>

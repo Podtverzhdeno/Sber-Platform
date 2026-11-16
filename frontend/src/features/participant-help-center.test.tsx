@@ -72,6 +72,26 @@ describe("Impulse help center content", () => {
     expect(screen.queryByRole("button", { name: /К разделу «Мои проекты»/ })).not.toBeInTheDocument();
   });
 
+  it("keeps every help category one selection away without losing search context", () => {
+    setup();
+    const picker = screen.getByRole("combobox", { name: "Раздел помощи" });
+    expect(picker).toHaveValue("related");
+    fireEvent.change(picker, { target: { value: "all" } });
+    expect(picker).toHaveValue("all");
+    const search = screen.getByRole("textbox", { name: "Поиск по инструкциям" });
+    fireEvent.change(search, { target: { value: "Skill Passport" } });
+    expect(screen.getByRole("button", { name: /Что такое Skill Passport/ })).toBeInTheDocument();
+    fireEvent.change(picker, { target: { value: "related" } });
+    expect(search).toHaveValue("");
+    expect(screen.getByRole("heading", { name: "Помощь: Задачи" })).toBeInTheDocument();
+    const firstCategory = HELP_CATEGORIES[0];
+    expect(firstCategory).toBeDefined();
+    if (!firstCategory) return;
+    fireEvent.change(picker, { target: { value: firstCategory.id } });
+    expect(picker).toHaveValue(firstCategory.id);
+    expect(screen.getByRole("heading", { name: "Найди нужную инструкцию" })).toBeInTheDocument();
+  });
+
   it("traps keyboard focus within the dialog", () => {
     setup();
     const closeButton = screen.getByRole("button", { name: "Закрыть центр помощи" });
