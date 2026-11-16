@@ -11,8 +11,11 @@
 - write_scope:
   - frontend/src/features/owner-live-pixel/approved-home-20261115.scss (append only isolated button treatment)
   - frontend/e2e/owner-home-action-styles.spec.ts (new focused visual/interaction assertions)
+  - frontend/e2e/owner-live-pixel.spec.ts (only stale button styling / hidden Home heading assertions from the exact 2 red cases)
   - .agents/coordination/claims/OWNER-HOME-ACTIONS-20261116.lock/status.md
 - excluded: App.tsx, pixel-reference component behavior, navigation, API, shared design tokens, parent claims, backend, database, Railway configuration
 - verification: frontend typecheck/lint/build, Playwright at 1672/390/320, three visual modes, focus, hover, reduced motion, no horizontal overflow, independent review; no full-CI green assertion from baseline
+- owner_followup: user explicitly requests production release and continuation of PR #212; align two now-stale assertions in existing live Home browser regression while leaving its app/route behavior unchanged
+- red_witness: Approved home pixel QA run 43805537893 failed 2/13 only: expected obsolete visible «Главная» and transparent secondary button; actual owner-authorized hidden h1 and new CSS material
 - progress: isolated branch created; selectors and existing CSS contracts inspected
 - blockers: independent pixel comparison to newly attached image needs browser/image evidence; current main CI has unrelated Apple UI kit Ruff blockers
