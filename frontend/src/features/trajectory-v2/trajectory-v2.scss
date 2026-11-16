@@ -2310,3 +2310,282 @@
 .workspace--apple .workspace-content .trajectory-v2 .trajectory-v2-heading {
   margin-bottom: 12px;
 }
+
+
+/* Light companion to the approved TRJ-SCREEN-01/06 reference composition.
+ * Keep the exact card/stage layout and primary-gold / learning-blue / progress-teal
+ * semantics while removing legacy midnight surfaces and pale ink in light mode.
+ * Scoped to this trajectory alone; the original dark reference stays untouched. */
+:root[data-theme="light"] .workspace-content .trajectory-v2 {
+  --trj-bg: #f6f9fd;
+  --trj-panel: #fff;
+  --trj-panel-raised: #f7faff;
+  --trj-line: #d9e4ef;
+  --trj-text: #1b3048;
+  --trj-muted: #52677d;
+  --trj-teal: #087e78;
+  --trj-blue: #1767bb;
+
+  .trajectory-v2-role-card {
+    color: var(--trj-text);
+    background: #fff;
+    border-color: var(--trj-line);
+    opacity: 1;
+    box-shadow: none;
+  }
+  .trajectory-v2-role-card strong,
+  .trajectory-v2-role-card .trajectory-v2-role-state { color: var(--trj-text); }
+  .trajectory-v2-role-card small { color: var(--trj-muted); }
+  .trajectory-v2-role-card[aria-pressed="true"] {
+    background: #edf5ff;
+    border-color: #5d98d8;
+    box-shadow: 0 0 0 2px #bdd5f2;
+  }
+  .trajectory-v2-role-card[data-tone="primary"],
+  .trajectory-v2-role-card[data-tone="primary"][aria-pressed="true"] {
+    background: #fff8e9;
+    border: 2px solid #d3a13f;
+    box-shadow: 0 0 0 1px #f0d49d;
+    opacity: 1;
+  }
+  .trajectory-v2-role-card[data-tone="learning"],
+  .trajectory-v2-role-card[data-tone="learning"][aria-pressed="true"] {
+    background: #eff6ff;
+    border-color: #7eafd9;
+    box-shadow: none;
+  }
+  .trajectory-v2-role-card[data-tone="learning"][aria-pressed="true"] {
+    border: 2px solid #2477c4;
+    box-shadow: 0 0 0 1px #b7d8f4;
+  }
+  .trajectory-v2-role-card[data-tone="unselected"],
+  .trajectory-v2-role-card[data-tone="unselected"][aria-pressed="true"],
+  .trajectory-v2-role-card[data-role-state="unselected"] {
+    background: #f7f9fc;
+    border-color: #ced9e5;
+    box-shadow: none;
+    opacity: 1;
+  }
+  .trajectory-v2-role-card[data-tone="unselected"] strong { color: #40566f; }
+  .trajectory-v2-role-card[data-tone="unselected"] small { color: #52677d; }
+  .trajectory-v2-role-card[data-tone="unselected"] .trajectory-v2-role-icon,
+  .trajectory-v2-role-card[data-tone="unselected"] .trajectory-v2-role-icon[data-glyph] {
+    background: #e5ebf2;
+    color: #496278;
+  }
+  .trajectory-v2-role-card[data-tone="learning"] .trajectory-v2-role-icon,
+  .trajectory-v2-role-card[data-tone="learning"] .trajectory-v2-role-icon[data-glyph] {
+    background: #dcecff;
+    color: #175eaa;
+  }
+  .trajectory-v2-role-card[data-tone="primary"] .trajectory-v2-role-icon,
+  .trajectory-v2-role-card[data-tone="primary"] .trajectory-v2-role-icon[data-glyph] {
+    background: #f8e8bf;
+    color: #8d5a00;
+  }
+  .trajectory-v2-role-card progress::-webkit-progress-bar { background: #dfe9f4; }
+
+  .trajectory-v2-role-detail,
+  .trajectory-v2-stage-detail,
+  .trajectory-v2-reference-sidebar > section,
+  .trajectory-v2-cycle-path {
+    color: var(--trj-text);
+    background: #fff;
+    border-color: var(--trj-line);
+    box-shadow: 0 4px 18px #1b395a0a;
+  }
+  .trajectory-v2-role-detail[data-tone="primary"] { border-left-color: #cd9830; }
+  .trajectory-v2-role-detail[data-tone="learning"] { border-left-color: #3e8bda; }
+  .trajectory-v2-detail-title h3,
+  .trajectory-v2-role-detail h3,
+  .trajectory-v2-stage-block h4,
+  .trajectory-v2-stage-header h3,
+  .trajectory-v2-reference-sidebar h3 { color: var(--trj-text); }
+  .trajectory-v2-detail-identity p,
+  .trajectory-v2-stage-header p,
+  .trajectory-v2-stage-header small,
+  .trajectory-v2-study-caption,
+  .trajectory-v2-study-caption span { color: var(--trj-muted); }
+  .trajectory-v2-role-detail[data-tone="primary"] .trajectory-v2-role-badge {
+    color: #805000;
+    background: #fff2d1;
+    border-color: #dbb76c;
+  }
+  .trajectory-v2-role-detail[data-tone="primary"] .trajectory-v2-detail-icon {
+    color: #8d5a00;
+    background: #f8e8bf;
+  }
+  .trajectory-v2-role-detail[data-tone="learning"] .trajectory-v2-detail-icon {
+    color: #175eaa;
+    background: #dcecff;
+  }
+
+  .trajectory-v2-detail-controls .trajectory-v2-role-info-button {
+    color: #095ba6 !important;
+    background: #eef6ff !important;
+    border-color: #99bde1 !important;
+  }
+  .trajectory-v2-detail-controls .trajectory-v2-actions > button:first-child,
+  .trajectory-v2-actions > button:first-child {
+    color: #234762;
+    background: #f5f8fc;
+    border-color: #c8d9e9;
+  }
+  .trajectory-v2-actions > ul {
+    color: var(--trj-text);
+    background: #fff;
+    border-color: var(--trj-line);
+    box-shadow: 0 16px 30px #1b395a22;
+  }
+  .trajectory-v2-actions button[role="menuitem"] { color: var(--trj-text); }
+  .trajectory-v2-actions button[role="menuitem"]:hover,
+  .trajectory-v2-actions button[role="menuitem"]:focus-visible {
+    color: #095ba6;
+    background: #eef6ff;
+  }
+
+  .trajectory-v2-stage .trajectory-v2-milestone-position,
+  .trajectory-v2-stage .trajectory-v2-milestone-title,
+  .trajectory-v2-stage[data-stage-state="current"] .trajectory-v2-milestone-title {
+    color: #344d66;
+  }
+  .trajectory-v2-stage[data-stage-state="locked"] .trajectory-v2-milestone-title,
+  .trajectory-v2-stage[data-stage-state="unpublished"] .trajectory-v2-milestone-title {
+    color: #64778b;
+  }
+  .trajectory-v2-milestone-node {
+    color: #41617b;
+    background: #eaf0f7;
+    border-color: #afc2d5;
+  }
+  .trajectory-v2-stage[data-stage-state="current"] .trajectory-v2-milestone-node {
+    background: #ddecff;
+    color: #115aa6;
+    border-color: #298be3;
+    box-shadow: 0 0 0 3px #c8e0fc;
+  }
+  .trajectory-v2-stage[data-stage-state="available"] .trajectory-v2-milestone-node {
+    color: #1264b2;
+    border-color: #80b3de;
+  }
+  .trajectory-v2-stage-path > li:not(:last-child)::after { border-color: #a8bed5; }
+
+  .trajectory-v2-stage-state { color: #875500; background: #fff2d4; border-color: #e5c37b; }
+  .trajectory-v2-stage-state[data-state="completed"] { color: #076b5f; background: #e1f8f2; border-color: #9edbc9; }
+  .trajectory-v2-stage-state[data-state="locked"] { color: #596e82; background: #edf2f7; border-color: #c8d8e6; }
+  .trajectory-v2-task-row,
+  .trajectory-v2-task-row[data-state="completed"],
+  .trajectory-v2-next-task,
+  .trajectory-v2-activities,
+  .trajectory-v2-stage-meta dl > div {
+    background: #f5f8fc;
+    border-color: #d9e4ef;
+    color: var(--trj-text);
+  }
+  .trajectory-v2-task-copy strong,
+  .trajectory-v2-task-copy p,
+  .trajectory-v2-task-status,
+  .trajectory-v2-stage-meta dd,
+  .trajectory-v2-task-row small { color: var(--trj-text); }
+  .trajectory-v2-task-check { color: #275a72; border-color: #9bb6c7; }
+  .trajectory-v2-task-action:not(.is-primary) { color: #125eac; background: #edf5ff; border-color: #a9c9e8; }
+
+  .trajectory-v2-study-summary {
+    background: #f0f8fc;
+    border-color: #b8dce7;
+  }
+  .trajectory-v2-study-summary strong { color: var(--trj-text); }
+  .trajectory-v2-study-summary small { color: var(--trj-muted); }
+  .trajectory-v2-study-summary progress,
+  .trajectory-v2-study-summary progress::-webkit-progress-bar { background: #d9e8f0; }
+  .trajectory-v2-stage-study-tag { color: #08786c; }
+  .trajectory-v2-stage-meta dt { color: var(--trj-muted); }
+  .trajectory-v2-stage-meta dd { color: var(--trj-text); }
+
+  .trajectory-v2-cycle-path > header h3,
+  .trajectory-v2-cycle-practice strong { color: var(--trj-text); }
+  .trajectory-v2-cycle-path > header small,
+  .trajectory-v2-cycle-path > header > span,
+  .trajectory-v2-cycle-path > p,
+  .trajectory-v2-cycle-course small,
+  .trajectory-v2-cycle-practice p { color: var(--trj-muted); }
+  .trajectory-v2-cycle-course,
+  .trajectory-v2-cycle-practice,
+  .trajectory-v2-learning-material,
+  .trajectory-v2-learning-content {
+    background: #f5f8fc;
+    border-color: var(--trj-line);
+    color: var(--trj-text);
+  }
+  .trajectory-v2-cycle-course:hover { background: #eaf3ff; border-color: #88b3db; }
+  .trajectory-v2-cycle-course strong,
+  .trajectory-v2-learning-content header h3,
+  .trajectory-v2-learning-material h4,
+  .trajectory-v2-learning-content h4 { color: var(--trj-text); }
+  .trajectory-v2-cycle-course > span:last-child,
+  .trajectory-v2-cycle-practice span,
+  .trajectory-v2-learning-material > summary,
+  .trajectory-v2-reading-resources a { color: #096d7d; }
+  .trajectory-v2-learning-material > summary span,
+  .trajectory-v2-learning-material p,
+  .trajectory-v2-learning-content p,
+  .trajectory-v2-learning-material ul,
+  .trajectory-v2-learning-content ul,
+  .trajectory-v2-learning-content > small { color: var(--trj-muted); }
+  .trajectory-v2-learning-material[open] > summary { background: #e7f1fc; border-color: #c6d8ea; }
+
+  .trajectory-v2-optional-actions {
+    background: #f3f7fc;
+    border-color: var(--trj-line);
+  }
+  .trajectory-v2-optional-actions small { color: var(--trj-muted); }
+  .trajectory-v2-optional-actions button.trajectory-v2-optional-archive {
+    color: #125eac;
+    background: #eaf3ff;
+    border-color: #9bbfe4;
+  }
+
+  .trajectory-v2-grade-ring { background: #f6f9fd; }
+  .trajectory-v2-grade-ring small,
+  .trajectory-v2-reference-sidebar p,
+  .trajectory-v2-passport-disclaimer,
+  .trajectory-v2-skill-list small { color: var(--trj-muted); }
+
+  .trajectory-v2-role-dialog,
+  .trajectory-v2-grades-dialog,
+  .trajectory-v2-drawer {
+    color: var(--trj-text);
+    background: #fff;
+    border-color: var(--trj-line);
+    box-shadow: 0 18px 52px #1b395a30;
+  }
+  .trajectory-v2-role-dialog h2,
+  .trajectory-v2-grades-dialog h2,
+  .trajectory-v2-drawer h2 { color: var(--trj-text); }
+  .trajectory-v2-role-modal-heading p,
+  .trajectory-v2-grades-dialog > p { color: var(--trj-muted); }
+  .trajectory-v2-role-intro-grid > section,
+  .trajectory-v2-role-intro-card,
+  .trajectory-v2-grade-option,
+  .trajectory-v2-grades-list li,
+  .trajectory-v2-grade-explanation {
+    background: #f5f8fc;
+    color: var(--trj-text);
+    border-color: #d6e3ef;
+  }
+  .trajectory-v2-role-intro-grid p,
+  .trajectory-v2-role-intro-grid li,
+  .trajectory-v2-grade-option small,
+  .trajectory-v2-grade-explanation p,
+  .trajectory-v2-grades-list span { color: var(--trj-muted); }
+  .trajectory-v2-grade-option[aria-pressed="true"],
+  .trajectory-v2-grades-list li[data-current="true"] {
+    background: #eaf5ff;
+    border-color: #7db1dd;
+  }
+  .trajectory-v2-grade-explanation-head span,
+  .trajectory-v2-grade-dot { color: #096d7d; background: #def5f0; border-color: #b1d7d0; }
+  .trajectory-v2-role-skill-chips span { color: #215a83; background: #eaf3ff; border-color: #c3d7eb; }
+  .trajectory-v2-role-dialog .trajectory-v2-role-tabs button { color: #52677d; }
+  .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[aria-selected="true"] { color: #096d7d; border-color: #0b8b83; }
+}
