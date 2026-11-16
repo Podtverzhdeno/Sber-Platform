@@ -1,0 +1,22 @@
+# Claim OWNER-MESSENGER-MOBILE-LIGHT-20261116
+
+- task_id: OWNER-MESSENGER-MOBILE-LIGHT-20261116
+- session_id: gpt6-20261116-messenger-light-mobile-owner
+- status: IN_PROGRESS
+- started_at: 2026-11-16T10:32:00+03:00
+- heartbeat_at: 2026-11-16T10:32:00+03:00
+- base_revision: 5816e9dedeb9303b0454876f094acb0938164134
+- depends_on: [25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7]
+- owner_instruction: repair Messages light theme and 320/390 mobile layout; investigate other section light-mode regressions
+- write_scope:
+  - frontend/src/features/messenger/reference.scss
+  - frontend/src/features/messenger/theme-mobile-regression.test.tsx
+  - .agents/coordination/claims/OWNER-MESSENGER-MOBILE-LIGHT-20261116.lock/status.md
+- excluded:
+  - frontend/src/features/collaboration.tsx (IMPULSE-COMMUNITY-REDESIGN REVIEW)
+  - frontend/src/App.tsx; frontend/src/main.tsx; frontend/src/app/impulse-next.scss (active UI integration owners)
+  - other feature files, shared E2E baselines, backend, API, roles and Railway
+- verification: targeted frontend unit tests, TypeScript, ESLint, build; browser 320/390 light/dark (only if available)
+- integration: no direct main merge or Railway release before independent review and exact revision acceptance
+- progress: owner follow-up isolated; root cause confirmed in hardcoded R-MSG-01 dark palette
+- blockers: shared light theme fixes across other sections owned by UI-ALL-APPLE and UI-APPLE-INTEGRATE, require integration handoff
