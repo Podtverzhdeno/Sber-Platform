@@ -48,6 +48,7 @@ export type DialogListProps = {
   viewerId: string | null;
   viewerName?: string | null;
   selectedId: string | null;
+  preserveSearchOnSelection?: boolean;
   createSignal?: number;
   findSignal?: number;
   onSelect: (channelId: string) => void;
@@ -65,6 +66,7 @@ export function DialogList({
   viewerId,
   viewerName = null,
   selectedId,
+  preserveSearchOnSelection = false,
   createSignal = 0,
   findSignal = 0,
   onSelect,
@@ -149,13 +151,13 @@ export function DialogList({
   useEffect(() => {
     // A newly created/selected dialog should be visible immediately instead
     // of leaving its new card hidden behind the Contacts tab.
-    if (selectedId !== null && previousSelectedId.current !== selectedId) {
+    if (!preserveSearchOnSelection && selectedId !== null && previousSelectedId.current !== selectedId) {
       setTab("Все");
       setQuery("");
       setMenuOpen(false);
     }
     previousSelectedId.current = selectedId;
-  }, [selectedId]);
+  }, [selectedId, preserveSearchOnSelection]);
 
   const onScroll = () => {
     if (scrollRef.current) writeDialogScroll(storage, scrollRef.current.scrollTop);
