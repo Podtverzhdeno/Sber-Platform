@@ -199,3 +199,184 @@
   .participant-settings.additional-page .settings-panel { min-height: 0; }
   .participant-settings.additional-page .settings-section-title { gap: 9px; }
 }
+
+/* R-PAR-12: grouped settings, based on Apple HIG Lists/Tables, Toggles,
+   Materials and the local Apple UI kit/06-cases/11-identity-and-settings.
+   Presentational only: all consent/profile mutations and role gates unchanged.
+   Opaque content surfaces avoid accidental night cards in light appearance. */
+.participant-settings.additional-page {
+  --settings-surface: var(--color-surface);
+  --settings-row: var(--color-surface-2);
+  --settings-line: var(--color-border);
+  --settings-ink: var(--color-text);
+  --settings-muted: var(--color-muted);
+  color: var(--settings-ink);
+}
+.participant-settings.additional-page .settings-panel {
+  background: var(--settings-surface);
+  border-color: var(--settings-line);
+  box-shadow: none;
+}
+.participant-settings.additional-page .settings-nav {
+  background: var(--settings-row);
+  border-color: var(--settings-line);
+  box-shadow: none;
+}
+.participant-settings.additional-page .settings-nav button {
+  gap: 0;
+  min-height: 44px;
+  color: var(--settings-muted);
+}
+.participant-settings.additional-page .settings-nav button span {
+  display: none;
+}
+.participant-settings.additional-page .settings-nav button.active {
+  color: var(--settings-ink);
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--settings-surface));
+  border: 1px solid var(--settings-line);
+  box-shadow: none;
+}
+.participant-settings.additional-page .participant-page-heading > button {
+  min-height: 44px;
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 11px;
+  font-weight: 700;
+  box-shadow: none;
+}
+.participant-settings.additional-page .settings-section-title h2,
+.participant-settings.additional-page .skills-editor h3,
+.participant-settings.additional-page .notification-group h3 {
+  color: var(--settings-ink);
+}
+.participant-settings.additional-page .settings-section-title p,
+.participant-settings.additional-page .settings-cards small,
+.participant-settings.additional-page .danger-zone small {
+  color: var(--settings-muted);
+}
+.participant-settings.additional-page :is(.form-grid label, .settings-select) {
+  color: var(--settings-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.participant-settings.additional-page :is(.form-grid input, .form-grid select, .form-grid textarea, .settings-select input, .settings-select select, .skills-editor input) {
+  box-sizing: border-box;
+  min-height: 44px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 10px 12px;
+  color: var(--settings-ink);
+  background: var(--settings-row);
+  border: 1px solid var(--settings-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.participant-settings.additional-page :is(.form-grid input, .form-grid textarea, .settings-select input, .skills-editor input)::placeholder {
+  color: var(--settings-muted);
+  opacity: 1;
+}
+.participant-settings.additional-page :is(.form-grid input, .form-grid select, .form-grid textarea, .settings-select input, .settings-select select, .skills-editor input):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
+}
+.participant-settings.additional-page .profile-avatar {
+  color: var(--color-primary);
+  background: var(--settings-row);
+  background-image: none;
+  border-color: var(--settings-line);
+  box-shadow: none;
+}
+.participant-settings.additional-page :is(.settings-cards article, .danger-zone, .notification-group, .required-notification-list li, .settings-toggle, .hr-preview) {
+  color: var(--settings-ink);
+  background: var(--settings-row);
+  background-image: none;
+  border: 1px solid var(--settings-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.participant-settings.additional-page .settings-toggle {
+  min-height: 52px;
+  box-sizing: border-box;
+}
+.participant-settings.additional-page .settings-toggle strong {
+  font-weight: 590;
+  color: var(--settings-ink);
+}
+.participant-settings.additional-page .settings-toggle i {
+  flex: 0 0 39px;
+  background: var(--color-border-strong);
+}
+.participant-settings.additional-page .settings-toggle i::after {
+  background: var(--settings-surface);
+  box-shadow: 0 1px 3px #0002;
+}
+.participant-settings.additional-page .settings-toggle input:checked + i {
+  background: var(--color-primary);
+}
+.participant-settings.additional-page .settings-toggle input:checked + i::after {
+  background: var(--on-brand-ink);
+  box-shadow: 0 1px 3px #0002;
+}
+.participant-settings.additional-page .settings-toggle input:focus-visible + i {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.participant-settings.additional-page :is(.skills-editor button, .settings-cards button, .danger-zone button, .profile-avatar button) {
+  min-height: 38px;
+  color: var(--settings-ink);
+  background: var(--settings-surface);
+  background-image: none;
+  border: 1px solid var(--settings-line);
+  border-radius: 9px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.participant-settings.additional-page .skills-editor .skill-add {
+  color: var(--color-primary);
+  background: var(--settings-row);
+  border-color: var(--color-primary);
+  border-style: solid;
+}
+.participant-settings.additional-page .danger-zone {
+  border-color: var(--color-border);
+}
+.participant-settings.additional-page .danger-zone button {
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--settings-line));
+}
+.participant-settings.additional-page .required-notification-list li,
+.participant-settings.additional-page .settings-cards article {
+  min-height: 52px;
+  box-sizing: border-box;
+}
+.participant-settings.additional-page :is(.required-notification-list strong, .settings-cards strong, .hr-preview strong) {
+  color: var(--settings-ink);
+}
+.participant-settings.additional-page .hr-preview .profile-avatar {
+  background: var(--settings-surface);
+}
+.participant-settings.additional-page :is(.settings-panel button, .settings-nav button):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .participant-settings.additional-page .settings-panel {
+    padding: 15px 12px;
+  }
+  .participant-settings.additional-page .settings-nav button {
+    min-height: 44px;
+  }
+  .participant-settings.additional-page .settings-cards article,
+  .participant-settings.additional-page .danger-zone {
+    gap: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .participant-settings.additional-page .settings-toggle i,
+  .participant-settings.additional-page .settings-toggle i::after {
+    transition: none;
+  }
+}

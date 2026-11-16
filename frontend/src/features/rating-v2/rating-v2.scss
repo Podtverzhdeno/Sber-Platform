@@ -300,3 +300,126 @@
   .ir-page .ir-benefit > .ir-art,
   .ir-page .ir-top-card > .ir-art { transition: none; }
 }
+
+/* Rating / Apple HIG (local kit 06-data-and-dashboards, 07-mobile-adaptive):
+   opaque grouped rows, measured semantic emphasis and legible controls.
+   Restrict appearance changes to light mode; source-backed rank logic stays. */
+:root[data-theme="light"] .ir-page {
+  --ir-bg:#f7fafc;
+  --ir-panel:#fff;
+  --ir-line:#dbe6ed;
+  --ir-text:#233e53;
+  --ir-muted:#506a7c;
+  --ir-cyan:#147a8a;
+  color:var(--ir-text);
+}
+:root[data-theme="light"] .ir-page :is(.ir-breadcrumb,.ir-breadcrumb strong,.ir-eyebrow) {color:#176f82}
+:root[data-theme="light"] .ir-page .ir-breadcrumb button {color:#34566e}
+:root[data-theme="light"] .ir-page :is(.ir-hero,.ir-benefit,.ir-season,.ir-leader-row,.ir-my-rank,.ir-top-card,.ir-profile-hero,.ir-profile-panel,.ir-unlocks,.ir-unlock,.ir-skill-passport,.ir-profile-stats>span,.ir-why article,.ir-micro-stats span,.ir-modal) {
+  color:var(--ir-text);
+  background:#fff;
+  background-image:none;
+  border-color:var(--ir-line);
+  box-shadow:none;
+}
+:root[data-theme="light"] .ir-page :is(.ir-leader-row--me,.ir-top-card--teal) {
+  background:#f0f8fa;
+  border-color:#b7dae1;
+}
+:root[data-theme="light"] .ir-page :is(.ir-leader-row--1,.ir-top-card--gold) {
+  background:#fffbf2;
+  border-color:#ead9ad;
+}
+:root[data-theme="light"] .ir-page :is(.ir-leader-row--2,.ir-top-card--silver) {
+  background:#f5f8fd;
+  border-color:#d1e0ef;
+}
+:root[data-theme="light"] .ir-page .ir-leader-row:hover {border-color:#92b9cb;box-shadow:0 2px 10px #1e45600c}
+:root[data-theme="light"] .ir-page :is(.ir-hero-copy>p:last-child,.ir-benefit li,.ir-season strong,.ir-season span,.ir-person small,.ir-list-head,.ir-list-bar p,.ir-small-note,.ir-disclaimer,.ir-activity,.ir-top-user small,.ir-why p,.ir-profile-identity p,.ir-proof-row small,.ir-project-line small,.ir-eval-row,.ir-modal p,.ir-modal .ir-benefit-note) {
+  color:#50697b;
+}
+:root[data-theme="light"] .ir-page :is(.ir-rank,.ir-points,.ir-points small,.ir-count,.ir-person button,.ir-status,.ir-top-user strong,.ir-why strong,.ir-my-rank p,.ir-profile-panel strong,.ir-proof-row strong,.ir-project-line strong,.ir-season b,.ir-modal-list li) {
+  color:#243f53;
+}
+:root[data-theme="light"] .ir-page :is(.ir-benefit-title,.ir-top-card-head span,.ir-top-card-head b,.ir-my-rank strong,.ir-list-bar strong) {color:#126b83}
+:root[data-theme="light"] .ir-page :is(.ir-top-card--gold .ir-top-card-head span,.ir-top-card--gold .ir-top-card-head b,.ir-benefit--top1 .ir-benefit-title,.ir-my-rank small) {color:#93641f}
+:root[data-theme="light"] .ir-page .ir-top-card--silver .ir-top-card-head :is(span,b) {color:#396b9c}
+:root[data-theme="light"] .ir-page :is(.ir-benefit-arr,.ir-status,.ir-profile-tags span,.ir-profile-stats>span,.ir-achievements svg,.ir-proof-row>span:first-child,.ir-project-line>span:first-child) {
+  color:#305e7d;
+  background:#f1f6f9;
+  background-image:none;
+  border-color:#d4e2eb;
+  box-shadow:none;
+}
+:root[data-theme="light"] .ir-page .ir-status--1 {
+  color:#795315;background:#fff4dc;border-color:#e8d5a7;
+}
+:root[data-theme="light"] .ir-page .ir-status--2 {
+  color:#35658f;background:#eef5fd;border-color:#c9dcef;
+}
+:root[data-theme="light"] .ir-page .ir-status--3 {
+  color:#0f6d63;background:#e8f6f0;border-color:#b9ddd0;
+}
+:root[data-theme="light"] .ir-page .ir-rank {font-variant-numeric:tabular-nums}
+:root[data-theme="light"] .ir-page .ir-leader-row--1 .ir-rank,
+:root[data-theme="light"] .ir-page .ir-leader-row--1 .ir-points {color:#93641f}
+:root[data-theme="light"] .ir-page .ir-leader-row--2 .ir-rank,
+:root[data-theme="light"] .ir-page .ir-leader-row--2 .ir-points {color:#396b9c}
+:root[data-theme="light"] .ir-page .ir-leader-row--me .ir-rank,
+:root[data-theme="light"] .ir-page .ir-leader-row--me .ir-points {color:#146b71}
+:root[data-theme="light"] .ir-page :is(.ir-ranking-filters,.ir-control,.ir-outline-button,.ir-btn,.ir-back-button,.ir-empty button) {
+  color:#2c4b60;
+  background:#fff;
+  background-image:none;
+  border-color:#cddce6;
+  box-shadow:none;
+}
+:root[data-theme="light"] .ir-page .ir-ranking-filters {background:#f4f8fb}
+:root[data-theme="light"] .ir-page .ir-ranking-filters button {
+  color:#476174;
+  border-right-color:#d9e4ec;
+}
+:root[data-theme="light"] .ir-page .ir-ranking-filters button[aria-pressed="true"] {
+  color:#145f79;
+  background:#fff;
+  background-image:none;
+  border-color:#c4d9e5;
+  box-shadow:0 1px 5px #1e3d5810;
+}
+:root[data-theme="light"] .ir-page .ir-control :is(input,select) {color:#234357;background:transparent}
+:root[data-theme="light"] .ir-page .ir-control input::placeholder {color:#667d8b;opacity:1}
+:root[data-theme="light"] .ir-page .ir-control--sort option {color:#234357;background:#fff}
+:root[data-theme="light"] .ir-page .ir-btn--solid {
+  color:#fff;
+  background:#176f97;
+  border-color:#176f97;
+}
+:root[data-theme="light"] .ir-page :is(.ir-benefit-arr,.ir-outline-button,.ir-back-button):hover {background:#eaf4f8;box-shadow:none}
+:root[data-theme="light"] .ir-page :is(.ir-why article svg,.ir-count svg,.ir-leaders-header .ir-micro-stats svg,.ir-profile-panel h2 svg,.ir-unlock svg) {color:#287e96}
+:root[data-theme="light"] .ir-page :is(.ir-eval-row i,.ir-profile-tabs) {background:#e0e9f0;border-color:#d6e2ea}
+:root[data-theme="light"] .ir-page .ir-profile-tabs {background:transparent}
+:root[data-theme="light"] .ir-page .ir-profile-tabs button {color:#4c6477}
+:root[data-theme="light"] .ir-page .ir-profile-tabs button[aria-selected="true"] {color:#146c88;background:#edf6fa;border-bottom-color:#17799b}
+:root[data-theme="light"] .ir-page .ir-feedback {
+  color:#1f6b51;background:#eff9f2;border-color:#bcdcc9;
+}
+:root[data-theme="light"] .ir-page .ir-unlocks>p,
+:root[data-theme="light"] .ir-page .ir-skill-passport span {color:#536c7e}
+:root[data-theme="light"] .ir-page .ir-unlock :is(strong,span) {color:#28536a}
+:root[data-theme="light"] .ir-page .ir-modal {
+  border-color:#d6e4ed;
+  box-shadow:0 24px 65px #1d3b562e;
+}
+:root[data-theme="light"] .ir-page .ir-modal h2 {color:#203b50}
+:root[data-theme="light"] .ir-page .ir-modal :is(.ir-modal-icon,.ir-close) {
+  color:#246d8d;background:#eef6f9;border-color:#cddfe9;
+}
+:root[data-theme="light"] .ir-page .ir-close {min-width:44px;min-height:44px}
+:root[data-theme="light"] .ir-page :is(button,input,select):focus-visible {outline-color:#1878a5}
+:root[data-theme="light"] .ir-page .ir-art {opacity:.10;filter:saturate(.2)}
+@media(max-width:560px) {
+  :root[data-theme="light"] .ir-page .ir-ranking-filters button {min-height:44px;padding-inline:7px}
+  :root[data-theme="light"] .ir-page .ir-control {min-height:44px}
+  :root[data-theme="light"] .ir-page .ir-leader-row>.ir-outline-button {min-height:39px}
+  :root[data-theme="light"] .ir-page .ir-profile-buttons {flex-wrap:wrap}
+}
