@@ -2,7 +2,7 @@
 
 - task_id: FIX-PROJECT-DETAIL-LIGHT-SURFACES-20261116
 - session_id: gpt6-project-detail-light-20261116
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-16T16:44:00+03:00
 - heartbeat_at: 2026-11-16T16:44:00+03:00
 - base_revision: main at claim creation
@@ -19,3 +19,13 @@
 - acceptance: light surface for modal/hero/tab strip, panels across 6 tabs, readable text AA, 320/390/1440 without viewport overflow, keyboard close and navigation preserved; dark mode unchanged
 - test_strategy: synthetic authenticated fixture and Chromium Playwright across six tabs; scoped lint, TS, build, Linux exact PR SHA workflow
 - next_step: implement scoped CSS, run QA, move claim REVIEW
+
+- completion_evidence:
+  - GitHub Actions My Projects detail light theme QA run 43880033864 on head 006a1ff70c371dd17be066405c64cb65e7b5111f — SUCCESS, 4/4 Chromium E2E (light 320/390/1440; dark 390), all six project tabs, contrast, horizontal overflow, Escape.
+  - Same CI: Linux Node 24 npm ci, scoped ESLint, TypeScript, Vite production build — SUCCESS.
+  - Existing My Projects light catalogue QA 43880033833 — SUCCESS, no list/card regression.
+  - Architecture audit 43880033642 — SUCCESS.
+  - Other global CI and real API workspace workflow were queued/in progress when status prepared, not claimed green.
+  - Exact CSS/test/config file content unchanged since passing run; status-only follow-up will retrigger QA workflow on final SHA.
+- verification_limits: deterministic role/fixture Playwright in GitHub Actions, not live production login or pixel screenshot acceptance. UI and semantic routes tested; no production deployment yet.
+- handoff: independent reviewer inspect scoped light modal and pseudo-layer/backdrop, verify contrast and mobile tabs; integration owner to merge only after exact-head checks and Railway release verification.
