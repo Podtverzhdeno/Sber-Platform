@@ -175,6 +175,10 @@ test("mobile light role details and grade dialogs remain bright", async ({ page 
   await lightSurface(page, ".trajectory-v2-role-dialog");
   await lightSurface(page, ".trajectory-v2-role-intro-grid > section");
   await contrast(page, ".trajectory-v2-role-dialog h2", ".trajectory-v2-role-dialog");
+  const roleTabs = roleDialog.getByRole("tab");
+  await expect(roleTabs).toHaveCount(6);
+  await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='true']", ".trajectory-v2-role-dialog");
+  await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='false']", ".trajectory-v2-role-dialog");
   await roleDialog.getByRole("button", { name: "Закрыть" }).click();
 
   await page.getByRole("button", { name: /Все уровни/ }).click();
@@ -203,4 +207,30 @@ test("light milestone activity plan uses readable foreground for actual list ite
   await lightSurface(page, ".trajectory-v2-activities");
   await contrast(page, ".trajectory-v2-activities li > span:last-child", ".trajectory-v2-activities");
   await contrast(page, ".trajectory-v2-deliverable strong", ".trajectory-v2-activities");
+});
+
+
+test("light expanded statistics and populated stage drawer have readable text", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await showTrajectory(page, "light");
+  const stats = page.getByTestId("trajectory-user-statistics");
+  await stats.locator("summary").click();
+  await expect(stats).toHaveAttribute("open", "");
+  await expect(stats.locator(".trajectory-v2-statistics-grid dt")).toHaveCount(6);
+  await lightSurface(page, ".trajectory-v2-statistics-grid > div");
+  await contrast(page, ".trajectory-v2-statistics-grid dt", ".trajectory-v2-statistics-grid > div");
+  await contrast(page, ".trajectory-v2-statistics-grid dd", ".trajectory-v2-statistics-grid > div");
+
+  await page.locator(".trajectory-v2-stage").nth(3).click();
+  await page.locator(".trajectory-v2-task-action").first().click();
+  const drawer = page.locator(".trajectory-v2-drawer");
+  await expect(drawer).toBeVisible();
+  await lightSurface(page, ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-section h3", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-section p", ".trajectory-v2-drawer");
+  await expect(drawer.locator(".trajectory-v2-drawer-activities li")).toHaveCount(2);
+  await contrast(page, ".trajectory-v2-drawer-activities li", ".trajectory-v2-drawer");
+  await contrast(page, ".trajectory-v2-drawer-metrics strong", ".trajectory-v2-drawer-metrics > div");
+  await drawer.getByRole("button", { name: "Закрыть" }).first().click();
+  await expect(drawer).toBeHidden();
 });
