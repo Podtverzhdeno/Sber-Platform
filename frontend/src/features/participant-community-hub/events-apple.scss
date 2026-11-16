@@ -356,3 +356,16 @@
     color: Highlight;
   }
 }
+
+
+/* 651–1100px: the narrow filter control used to right-anchor a 346px popup
+ * inside a smaller row, giving it negative viewport X (confirmed 820px E2E).
+ * Anchor from the left of its actual trigger row instead. */
+@media (min-width: 651px) and (max-width: 1100px) {
+  .participant-events--apple .ev-v3-popover {
+    left: 0;
+    right: auto;
+    width: min(346px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+  }
+}
