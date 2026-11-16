@@ -341,172 +341,71 @@
   .ach-gallery *,.ach-gallery *::before,.ach-gallery *::after {animation:none!important;transition:none!important;}
 }
 
-/* Impulse results / actual achievements gallery. Apple HIG Lists, Materials,
-   local 06-data-and-dashboards and 07-mobile-adaptive references.
-   Shared styles target the legacy .achv-page; this route uses .ach-gallery.
-   Light-only, source-backed statuses and actions unchanged. */
-:root[data-theme="light"] .ach-gallery {
-  --ag-cyan:#177a86;
-  --ag-bg:#f7fafc;
-  --ag-line:#dae6ed;
-  --ag-ink:#243e53;
-  --ag-muted:#536b7c;
-  --ag-surface:#fff;
-  color:var(--ag-ink);
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-hero {
-  color:#243e53;
-  background:#fff;
-  background-image:none;
-  border-color:#dce6ed;
-  box-shadow:none;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-hero::before {opacity:0}
-:root[data-theme="light"] .ach-gallery .ach-gallery-scene {
-  opacity:.25;
-  filter:saturate(.5);
-}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-eyebrow,.ach-gallery-copy h1 span) {color:#14748a}
-:root[data-theme="light"] .ach-gallery .ach-gallery-copy h1 {color:#223c52}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-copy p,.ach-gallery-demo) {color:#556d7e}
-:root[data-theme="light"] .ach-gallery .ach-gallery-create {
-  color:#fff;
-  background:#176f97;
-  background-image:none;
-  border-color:#176f97;
-  box-shadow:none;
-  min-height:44px;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-create:hover {color:#fff;background:#145f84;box-shadow:none}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-stat,.ach-gallery-card,.ach-gallery-empty) {
-  color:var(--ag-ink);
-  background:#fff;
-  background-image:none;
-  border-color:#dce6ed;
-  box-shadow:none;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat strong {color:#263f54}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat small,
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat em {color:#536c7d}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat .stat-icon {
-  background:#eaf5f7;
-  background-image:none;
-  border-color:#cee2e9;
-  color:#166f83;
-  box-shadow:none;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat .stat-icon-project {color:#2867a2;background:#edf3fd}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat .stat-icon-cert {color:#6652a6;background:#f0ecfa}
-:root[data-theme="light"] .ach-gallery .ach-gallery-stat .stat-icon-award {color:#986c22;background:#fdf4e4}
-:root[data-theme="light"] .ach-gallery .ach-gallery-alert {
-  color:#74501c;
-  background:#fff8e9;
-  border-color:#ebd8b0;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-alert button {
-  color:#75501b;background:#fff;border-color:#d9c499;
-}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-tabs button,.ach-gallery-search,.ach-gallery-select) {
-  color:#3c586c;
-  background:#fff;
-  background-image:none;
-  border-color:#d0dfe8;
-  box-shadow:none;
-  min-height:40px;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-tabs button span {color:#536c7c}
-:root[data-theme="light"] .ach-gallery .ach-gallery-tabs button.active {
-  color:#146e84;
-  background:#eaf5f8;
-  background-image:none;
-  border-color:#bcd6e2;
-  box-shadow:none;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-tabs button.active span {color:#176a80}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-search input,.ach-gallery-select select) {
-  color:#243f54;
-  background:transparent;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-search input::placeholder {color:#667e8e;opacity:1}
-:root[data-theme="light"] .ach-gallery .ach-gallery-select :is(span,svg) {color:#50697a}
-:root[data-theme="light"] .ach-gallery .ach-gallery-select select option {color:#243f54;background:#fff}
-:root[data-theme="light"] .ach-gallery .ach-gallery-reset {color:#166e88}
-:root[data-theme="light"] .ach-gallery .ach-gallery-card:hover {
-  border-color:#aac7d6;
-  box-shadow:0 3px 12px #23405a10;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-art {
-  color:#237b86;
+/* Residual artwork gap after shared Results light materials (#243).
+   Keep the HIG-style pale art canvases in the ACTUAL gallery route rather than
+   duplicating tokens/cards/filters/drawers already owned by Results surfaces. */
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art {
+  color:#247b87;
   background:#edf6f8;
   background-image:none;
   border-color:#d1e4ea;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-card--trophy .ach-gallery-art {
-  color:#a16b1b;background:#fff6e8;border-color:#ebdbbd;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--trophy .ach-gallery-art {
+  color:#986b24;
+  background:#fff6e8;
+  border-color:#ebdbbd;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-card--certificate .ach-gallery-art {
-  color:#496ba2;background:#eff4fd;border-color:#d2dff0;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--certificate .ach-gallery-art {
+  color:#496ba2;
+  background:#eff4fd;
+  border-color:#d2dff0;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-card--event .ach-gallery-art {
-  color:#7560a4;background:#f5effb;border-color:#e0d4ed;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-card--event .ach-gallery-art {
+  color:#7560a4;
+  background:#f5effb;
+  border-color:#e0d4ed;
 }
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-art-orb,.ach-gallery-art-grid) {opacity:.07}
-:root[data-theme="light"] .ach-gallery .ach-gallery-art>svg {filter:none}
-:root[data-theme="light"] .ach-gallery .ach-gallery-card-body h3 {color:#203b52}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-issuer,.ach-gallery-date) {color:#536b7d}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-issuer svg,.ach-gallery-date svg) {color:#287d96}
-:root[data-theme="light"] .ach-gallery .ach-gallery-chips span {
-  color:#3f5b70;background:#f0f5f9;border-color:#dbe7ee;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art :is(.ach-gallery-art-grid,.ach-gallery-art-orb) {
+  opacity:.05;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-empty p {color:#566d7f}
-:root[data-theme="light"] .ach-gallery .ach-gallery-empty-actions button {
-  color:#315367;background:#f5f8fb;border-color:#dbe6ed;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-art>svg {
+  color:inherit;
+  filter:none;
 }
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-drawer,.ach-gallery-add) {
-  color:#243f53;
-  background:#fff;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-holo {
+  color:#4c819e;
+  background:#e7f1fa;
   background-image:none;
-  border-color:#d8e5ee;
-  box-shadow:0 22px 65px #1a34512e;
+  border-color:#cbddec;
+  box-shadow:none;
 }
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-back,.ach-gallery-drawer-buttons button,.ach-gallery-add-close) {
-  color:#32576f;background:#f3f7fa;border-color:#d7e5ed;
-}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-drawer-art,.ach-gallery-add-preview) {
-  background:#eef5f8;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art {
+  --drawer-art:#287d87;
+  color:#287d87;
+  background:#eef6f8;
   background-image:none;
-  border-color:#d4e5ec;
+  border-color:#d6e6ed;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-art--trophy {background:#fff4ec}
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-art--certificate {background:#eff3fd}
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-art--event {background:#f4effb}
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-stars {opacity:.1}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-drawer-content h2,.ach-gallery-drawer-panel h3,.ach-gallery-detail-highlights strong,.ach-gallery-add h2,.ach-gallery-add-preview h3) {color:#243f55}
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-detail-meta,.ach-gallery-intro,.ach-gallery-drawer-panel p,.ach-gallery-detail-highlights small,.ach-gallery-add>p,.ach-gallery-add-preview p) {
-  color:#546c7d;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--trophy {
+  --drawer-art:#9c6b28;
+  background:#fff5e9;
 }
-:root[data-theme="light"] .ach-gallery :is(.ach-gallery-detail-chips span,.ach-gallery-evidence,.ach-gallery-detail-highlights>div) {
-  color:#344f65;background:#f5f9fb;border-color:#d9e7ed;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--certificate {
+  --drawer-art:#5374a0;
+  background:#eff4fd;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-tabs {border-color:#d9e6ee}
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-tabs button {color:#546b7e}
-:root[data-theme="light"] .ach-gallery .ach-gallery-drawer-tabs button.active {color:#176d8a;border-bottom-color:#177e9b}
-:root[data-theme="light"] .ach-gallery .ach-gallery-source-link {
-  color:#176b85;background:#eaf4f8;border-color:#cbdfe8;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art--event {
+  --drawer-art:#7864a6;
+  background:#f5effb;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-add nav button {
-  color:#39576c;background:#f4f8fa;border-color:#dce6ed;
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-art .drawer-art-icon {
+  color:var(--drawer-art);
+  filter:none;
 }
-:root[data-theme="light"] .ach-gallery .ach-gallery-add nav button.active {
-  color:#166e86;background:#e8f5f8;border-color:#acd4df;
-}
-:root[data-theme="light"] .ach-gallery .ach-gallery-add-icon {
-  color:#28729a;background:#e9f3fa;background-image:none;border-color:#c6dce9;
-}
-:root[data-theme="light"] .ach-gallery :is(button,input,select,a):focus-visible {outline-color:#207cb2}
-@media(max-width:520px) {
-  :root[data-theme="light"] .ach-gallery .ach-gallery-tabs button {min-height:44px}
-  :root[data-theme="light"] .ach-gallery :is(.ach-gallery-search,.ach-gallery-select) {min-height:44px;height:44px}
-  :root[data-theme="light"] .ach-gallery .ach-gallery-drawer-buttons button,
-  :root[data-theme="light"] .ach-gallery .ach-gallery-add-close {min-width:44px;min-height:44px}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-drawer-stars {opacity:.05}
+:root[data-theme="light"] .ach-gallery--results .ach-gallery-add-icon {
+  color:#286d98;
+  background:#e9f3fa;
+  background-image:none;
+  border-color:#c6dce9;
 }
