@@ -1,0 +1,54 @@
+name: Customer demo chat safety and mobile QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/customer-premium.tsx"
+      - "frontend/e2e/customer-demo-message-route.spec.ts"
+      - ".github/workflows/customer-demo-message-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/customer-premium.tsx"
+      - "frontend/e2e/customer-demo-message-route.spec.ts"
+      - ".github/workflows/customer-demo-message-qa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  customer-demo-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Frontend lint and TypeScript
+        run: |
+          npm run lint
+          npm run typecheck
+      - name: Build frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test authorized navigation and mobile messaging fallback
+        run: npx playwright test e2e/customer-demo-message-route.spec.ts --project=chromium --workers=1
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-demo-chat-failure
+          path: frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
