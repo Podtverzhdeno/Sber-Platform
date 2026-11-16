@@ -54,7 +54,7 @@ const overview: DevelopmentOverviewView = {
   },
 };
 
-async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false) {
+async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance = false, demoPortfolio = false) {
   await page.addInitScript((theme: string) => {
     localStorage.setItem("impulse-theme", theme);
     localStorage.setItem("impulse-visual-mode", theme === "light" ? "light" : "midnight");
@@ -77,6 +77,11 @@ async function showTrajectory(page: Page, mode: "light" | "dark", readyToAdvance
     { track_key: "product", policy_version: 1, replacement_reason: null, milestones, next_step: milestones[3] },
   ] }));
   await page.route("**/api/v1/me/talent-passport", route => route.fulfill({ json: { verified_courses: [], skills: [], cases: [] } }));
+  if (demoPortfolio) {
+    await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
+      demo_data: true, courses: [], contributions: [],
+    } }));
+  }
   if (readyToAdvance) {
     await page.route("**/api/v1/me/bootcamp/impulse-level?*", route => route.fulfill({ json: {
       track_key: "product", level: 1, cycle_number: 2, curriculum_state: "published",
@@ -190,6 +195,11 @@ test("mobile light role details and grade dialogs remain bright", async ({ page 
   await expect(roleTabs).toHaveCount(6);
   await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='true']", ".trajectory-v2-role-dialog");
   await contrast(page, ".trajectory-v2-role-tabs > button[aria-selected='false']", ".trajectory-v2-role-dialog");
+  const purposeTab = roleTabs.nth(1);
+  await purposeTab.click();
+  await expect(purposeTab).toHaveAttribute("aria-selected", "true");
+  await expect(roleDialog.locator(".trajectory-v2-role-panel")).not.toBeEmpty();
+  await contrast(page, ".trajectory-v2-role-panel", ".trajectory-v2-role-dialog");
   await roleDialog.getByRole("button", { name: "Закрыть" }).click();
 
   await page.getByRole("button", { name: /Все уровни/ }).click();
@@ -199,6 +209,7 @@ test("mobile light role details and grade dialogs remain bright", async ({ page 
   await lightSurface(page, ".trajectory-v2-grade-option");
   await lightSurface(page, ".trajectory-v2-grade-explanation");
   await contrast(page, ".trajectory-v2-grades-dialog h2", ".trajectory-v2-grades-dialog");
+  await contrast(page, ".trajectory-v2-grades-heading p", ".trajectory-v2-grades-dialog");
   const box = await grades.boundingBox();
   expect(box).not.toBeNull();
   if (box) {
@@ -223,10 +234,12 @@ test("light milestone activity plan uses readable foreground for actual list ite
 
 test("light expanded statistics and populated stage drawer have readable text", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await showTrajectory(page, "light");
+  await showTrajectory(page, "light", false, true);
   const stats = page.getByTestId("trajectory-user-statistics");
   await stats.locator("summary").click();
   await expect(stats).toHaveAttribute("open", "");
+  await expect(stats.locator(".trajectory-v2-stats-origin")).toBeVisible();
+  await contrast(page, ".trajectory-v2-stats-origin", ".trajectory-v2-reference-sidebar > section");
   await expect(stats.locator(".trajectory-v2-statistics-grid dt")).toHaveCount(6);
   await lightSurface(page, ".trajectory-v2-statistics-grid > div");
   await contrast(page, ".trajectory-v2-statistics-grid dt", ".trajectory-v2-statistics-grid > div");
