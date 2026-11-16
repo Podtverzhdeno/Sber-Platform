@@ -19,6 +19,7 @@ def safe_svg_root(path: Path) -> ET.Element:
         raise ET.ParseError("Unsafe SVG source")
     return ET.fromstring(data)  # noqa: S314 -- local size-bounded SVG with DTD/entities refused
 
+
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_GROUPS = [
     "01-liquid-glass-materials",
